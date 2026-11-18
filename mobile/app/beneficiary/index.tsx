@@ -4,9 +4,10 @@ import { Alert, Linking, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 import { BLOOD_TYPES, type BloodType, supabase } from "../../lib/supabase";
 import { getCoords } from "../../lib/location";
+import { openDirections } from "../../lib/maps";
 import { Button, Card, Chips, Field, s } from "../../lib/ui";
 
-type Stock = { facility_id: string; facility_name: string; phone: string | null; blood_type: string; units: number; distance_km: number };
+type Stock = { facility_id: string; facility_name: string; phone: string | null; blood_type: string; units: number; distance_km: number; f_lat: number; f_lng: number };
 type MyReq = { id: string; blood_type: string; units_needed: number; units_secured: number; status: string };
 const STATUS: Record<string, string> = { open: "مفتوح", matching: "جاري البحث", partially_fulfilled: "تم جزئيًا", fulfilled: "مكتمل ✅", cancelled: "ملغي", expired: "منتهي" };
 
@@ -60,11 +61,13 @@ export default function Beneficiary() {
             <Text style={s.p}>{x.units} وحدة متاحة · {x.distance_km} كم</Text>
             <View style={{ flexDirection: "row-reverse", gap: 8 }}>
               <View style={{ flex: 1 }}><Button title="اطلب الآن" onPress={() => request(x)} /></View>
+              <View style={{ flex: 1 }}><Button title="📍 الاتجاهات" kind="ghost" onPress={() => openDirections({ lat: x.f_lat, lng: x.f_lng })} /></View>
               {x.phone && <View style={{ flex: 1 }}><Button title="اتصال" kind="ghost" onPress={() => Linking.openURL(`tel:${x.phone}`)} /></View>}
             </View>
           </Card>
         )))}
 
+      <Button title="🗺️ عرض المخزون على الخريطة" kind="ghost" onPress={() => router.push({ pathname: "/map", params: bt ? { bt } : {} })} />
       <Button title="اسأل المساعد الذكي" kind="ghost" onPress={() => router.push("/agent")} />
 
       <Text style={s.h2}>طلباتي</Text>

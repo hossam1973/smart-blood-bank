@@ -93,6 +93,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .composer input { flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
 .suggest { display: flex; flex-wrap: wrap; gap: 6px; }
 .toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; direction: rtl; }
+.mapbox { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg); }
+.mapbox svg { display: block; width: 100%; height: auto; }
+.gm { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; padding: 5px 10px; border-radius: 8px; background: var(--accent-soft); }
+.gm:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.acts-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .note { font-size: 12.5px; color: var(--mute); border-inline-start: 2px solid var(--line); padding-inline-start: 8px; }
 </style>
 
@@ -106,6 +111,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
     <button class="tab" role="tab" data-view="donor">بوابة المتبرع</button>
     <button class="tab" role="tab" data-view="beneficiary">بوابة المستفيد</button>
     <button class="tab" role="tab" data-view="facility">بوابة المنشأة</button>
+    <button class="tab" role="tab" data-view="map">🗺️ الخريطة</button>
     <button class="tab" role="tab" data-view="forecast">📈 تنبؤ المخزون</button>
     <button class="tab" role="tab" data-view="agent">🤖 المساعد رفيق</button>
   </div>
@@ -146,6 +152,13 @@ let REQUESTS = [
   { id: "r3", fac: "f3", bt: "B+", units: 1, secured: 0, urgency: "routine", verified: true, mine: false },
 ];
 const RESPONSES = new Set();
+const HOURS = { f1: "يوميًا 9 ص – 9 م", f2: "24 ساعة", f3: "السبت–الخميس 10 ص – 6 م", f4: "يوميًا 8 ص – 8 م" };
+let APPT = null; // موعد التبرع المحجوز
+const gmDir = (p) => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
+const gmLink = (p, label = "📍 الاتجاهات في خرائط جوجل") => `<a class="gm" href="${gmDir(p)}" target="_blank" rel="noopener">${label}</a>`;
+function sites() { return FAC.map((f) => ({ ...f, km: km(ME, f), hours: HOURS[f.id] })).sort((a, b) => a.km - b.km); }
+function density() { const cells = new Map(); for (const d of DONORS) { if (!d.eligible || km(d, fac("f1")) > 20) continue; const k = (Math.round(d.lat*100)/100) + "," + (Math.round(d.lng*100)/100); cells.set(k, (cells.get(k) || 0) + 1); }
+  return [...cells].filter(([, n]) => n >= 3).map(([k, n]) => { const [lat, lng] = k.split(",").map(Number); return { lat, lng, n }; }); }
 let seq = 4;
 
 // ============ أدوات ============
@@ -211,9 +224,11 @@ function render() {
   else if (view === "beneficiary") el.innerHTML = benView();
   else if (view === "facility") el.innerHTML = facView();
   else if (view === "forecast") el.innerHTML = fcView();
+  else if (view === "map") el.innerHTML = mapView();
   else el.innerHTML = agentView();
   bind();
   if (view === "forecast") drawChart();
+  if (view === "map") drawMap();
   if (view === "agent") { paintChat(); setupAgent(); }
 }
 
@@ -230,7 +245,8 @@ function donorView() {
     <div class="card">
       <h2>كيف يعمل؟</h2>
       <p class="mute small">تصلك الطلبات القريبة التي تحتاج فصيلتك أو تقبلها. لا يرى المستشفى رقمك أو موقعك حتى تضغط "سأتبرع".</p>
-      <button class="btn ghost" data-go="agent">اسأل المساعد: هل أستطيع التبرع؟</button>
+      <div class="acts-row"><button class="btn" data-go="map">🗺️ أقرب أماكن التبرع</button><button class="btn ghost" data-go="agent">اسأل المساعد</button></div>
+      ${APPT ? `<p class="small" style="color:var(--ok);font-weight:600">موعدك: ${esc(APPT.name)} — ${esc(APPT.when)}</p>` : ""}
     </div>
   </div>
   <div class="card">
@@ -239,7 +255,7 @@ function donorView() {
       <div class="item ${r.urgency === "critical" ? "crit" : ""}">
         <div class="row"><h3>${esc(fac(r.fac).name)}</h3><span class="pill info bt">${r.bt}</span></div>
         <p class="small mute">${URG[r.urgency]} · <span class="num">${r.units - r.secured}</span> وحدة متبقية · <span class="num">${r.km}</span> كم</p>
-        <div><button class="btn sm" data-respond="${r.id}" ${next || !DONOR.available || RESPONSES.has(r.id) ? "disabled" : ""}>${RESPONSES.has(r.id) ? "تم ✓ بانتظارك" : "سأتبرع"}</button></div>
+        <div class="acts-row"><button class="btn sm" data-respond="${r.id}" ${next || !DONOR.available || RESPONSES.has(r.id) ? "disabled" : ""}>${RESPONSES.has(r.id) ? "تم ✓ بانتظارك" : "سأتبرع"}</button>${gmLink(fac(r.fac), "📍 الاتجاهات")}</div>
       </div>`).join("") : `<p class="mute">لا توجد طلبات متوافقة قريبة الآن. سنرسل لك إشعارًا عند الحاجة.</p>`}</div>
   </div>`;
 }
@@ -262,7 +278,7 @@ function benView() {
     <div class="list">${benResults.length ? benResults.map((x) => `
       <div class="item"><div class="row"><h3>${esc(x.name)}</h3><span class="pill ${x.exact ? "ok" : "info"} bt">${x.bt}</span></div>
       <p class="small mute">${x.kind} · <span class="num">${x.units}</span> وحدة · <span class="num">${x.km}</span> كم${x.exact ? "" : " · فصيلة بديلة متوافقة"} · هاتف: <span class="num">${x.phone}</span></p>
-      <div><button class="btn sm" data-req="${x.fid}">اطلب من هنا</button></div></div>`).join("") : `<p class="mute">لا يوجد مخزون متوافق ضمن 30 كم. أنشئ طلبًا لدى أقرب مستشفى وسنطلق نداءً للمتبرعين.</p>`}</div></div>` : ""}
+      <div class="acts-row"><button class="btn sm" data-req="${x.fid}">اطلب من هنا</button>${gmLink(fac(x.fid), "📍 الاتجاهات")}</div></div>`).join("") : `<p class="mute">لا يوجد مخزون متوافق ضمن 30 كم. أنشئ طلبًا لدى أقرب مستشفى وسنطلق نداءً للمتبرعين.</p>`}</div></div>` : ""}
   <div class="card"><h2>طلباتي</h2>
     <div class="list">${mine.length ? mine.map((r) => `<div class="item"><div class="row"><h3>${esc(fac(r.fac).name)}</h3><span class="pill info bt">${r.bt}</span></div>
       <p class="small mute">${r.verified ? "موثّق — جاري نداء المتبرعين" : "بانتظار توثيق المستشفى"} · تم تأمين <span class="num">${r.secured}</span> من <span class="num">${r.units}</span></p></div>`).join("") : `<p class="mute small">لا توجد طلبات بعد.</p>`}</div>
@@ -288,6 +304,57 @@ function facView() {
       <button class="btn ghost sm" data-fulfil="${r.id}" ${INV.f1[r.bt] ? "" : "disabled"}>صرف وحدة من المخزون</button></div></div>`).join("") : `<p class="mute small">لا توجد طلبات مفتوحة.</p>`}</div>
     <p class="note">المستشفى يرى أعداد المتبرعين فقط، دون أسمائهم أو أرقامهم أو مواقعهم.</p>
   </div>`;
+}
+
+let mapRole = "donor";
+function mapView() {
+  const roleChips = [["donor","متبرع"],["beneficiary","مستفيد"],["facility","منشأة"]].map(([k, l]) => `<button class="chip" data-mrole="${k}" aria-pressed="${mapRole === k}">${l}</button>`).join("");
+  let list = "", hint = "";
+  if (mapRole === "donor") {
+    hint = "أقرب أماكن التبرع إليك. الأحمر يحتاج فصيلتك الآن.";
+    const urgent = new Set(openForDonor().map((r) => r.fac));
+    list = sites().map((f) => `<div class="item ${urgent.has(f.id) ? "crit" : ""}"><div class="row"><h3>${esc(f.name)}</h3>${urgent.has(f.id) ? `<span class="pill critical">يحتاج <span class="bt">${DONOR.bt}</span></span>` : `<span class="pill info">${f.kind}</span>`}</div>
+      <p class="small mute"><span class="num">${f.km}</span> كم · ${esc(f.hours)}</p>
+      <div class="acts-row">${gmLink(f)}<button class="btn sm" data-book="${f.id}" ${nextEligible() || APPT ? "disabled" : ""}>${APPT && APPT.fid === f.id ? "محجوز ✓" : "احجز موعد تبرع"}</button></div></div>`).join("");
+  } else if (mapRole === "beneficiary") {
+    hint = benBt ? `أقرب مخزون متوافق مع ${benBt}.` : "اختر فصيلة المريض من بوابة المستفيد أولًا (افتراضيًا O-).";
+    const bt = benBt || "O-"; const byF = new Map();
+    for (const x of inventoryNear(bt, 50)) { const p = byF.get(x.fid); byF.set(x.fid, p ? { ...p, parts: p.parts + ` · <span class="bt">${x.bt}</span>: ${x.units}` } : { ...x, parts: `<span class="bt">${x.bt}</span>: ${x.units}` }); }
+    list = [...byF.values()].map((x) => `<div class="item"><div class="row"><h3>${esc(x.name)}</h3><span class="pill info">${x.kind}</span></div><p class="small mute"><span class="num">${x.km}</span> كم · ${x.parts}</p><div class="acts-row">${gmLink(fac(x.fid))}</div></div>`).join("") || `<p class="mute">لا يوجد مخزون متوافق.</p>`;
+  } else {
+    const cells = density(), total = cells.reduce((a, c) => a + c.n, 0);
+    hint = `كثافة المتبرعين المؤهلين حول ${fac("f1").name}: ${total} متبرعًا في ${cells.length} منطقة ضمن 20 كم. لا يظهر موقع أي متبرع بعينه، والمنطقة التي فيها أقل من 3 متبرعين لا تُعرض.`;
+    list = `<button class="btn" data-go="forecast">🚨 النداء الفوري من لوحة التنبؤ</button>`;
+  }
+  return `<div class="card"><div class="row"><h2>الخريطة</h2><div class="chips" aria-label="أعرض بصفتي">${roleChips}</div></div>
+    <div class="mapbox" id="mapbox"></div>
+    <p class="small mute">${hint}</p>
+    <p class="note">في التطبيق تظهر خريطة جوجل الحقيقية. في هذه التجربة خريطة توضيحية لمواقع وسط القاهرة، وكل زر "الاتجاهات" يفتح خرائط جوجل فعليًا.</p></div>
+  <div class="list">${list}</div>`;
+}
+function drawMap() {
+  const css = getComputedStyle(document.documentElement), c = (n) => css.getPropertyValue(n).trim();
+  const W = 640, H = 380, box = { minLat: 29.93, maxLat: 30.12, minLng: 31.13, maxLng: 31.36 };
+  const X = (lng) => ((lng - box.minLng) / (box.maxLng - box.minLng)) * W, Y = (lat) => H - ((lat - box.minLat) / (box.maxLat - box.minLat)) * H;
+  let g = `<rect width="${W}" height="${H}" fill="${c("--bg")}"/>`;
+  for (let i = 1; i < 8; i++) g += `<line x1="${i*W/8}" y1="0" x2="${i*W/8}" y2="${H}" stroke="${c("--line")}"/><line x1="0" y1="${i*H/8}" x2="${W}" y2="${i*H/8}" stroke="${c("--line")}"/>`;
+  // النيل (مسار تقريبي للتوضيح)
+  const nile = [[29.93,31.245],[29.97,31.235],[30.01,31.228],[30.04,31.226],[30.065,31.222],[30.09,31.228],[30.12,31.235]];
+  g += `<path d="${nile.map(([la, ln], i) => `${i ? "L" : "M"}${X(ln).toFixed(1)},${Y(la).toFixed(1)}`).join(" ")}" stroke="#4A90C8" stroke-opacity=".55" stroke-width="9" fill="none" stroke-linecap="round"/>`;
+  g += `<text x="${X(31.222)+10}" y="${Y(30.105)}" font-size="12" fill="#4A90C8">النيل</text>`;
+  if (mapRole === "facility") {
+    const cells = density(), mx = Math.max(1, ...cells.map((x) => x.n));
+    for (const cl of cells) g += `<circle cx="${X(cl.lng)}" cy="${Y(cl.lat)}" r="${10 + 16*cl.n/mx}" fill="${c("--accent")}" fill-opacity="${.15 + .45*cl.n/mx}"/><text x="${X(cl.lng)}" y="${Y(cl.lat)+4}" font-size="11" text-anchor="middle" fill="${c("--ink")}" font-family="IBM Plex Mono, monospace">${cl.n}</text>`;
+    const f = fac("f1"); g += `<circle cx="${X(f.lng)}" cy="${Y(f.lat)}" r="9" fill="${c("--ink")}" stroke="${c("--surface")}" stroke-width="3"/><text x="${X(f.lng)}" y="${Y(f.lat)-14}" font-size="12" text-anchor="middle" fill="${c("--ink")}" font-weight="700">${esc(f.name)}</text>`;
+  } else {
+    const urgent = mapRole === "donor" ? new Set(openForDonor().map((r) => r.fac)) : new Set();
+    const shown = mapRole === "beneficiary" ? new Set(inventoryNear(benBt || "O-", 50).map((x) => x.fid)) : new Set(FAC.map((f) => f.id));
+    for (const f of FAC) { if (!shown.has(f.id)) continue; const col = urgent.has(f.id) ? c("--crit") : "#1565C0";
+      g += `<a href="${gmDir(f)}" target="_blank" rel="noopener"><path d="M${X(f.lng)},${Y(f.lat)} c-9,-14 -12,-20 -12,-26 a12,12 0 1 1 24,0 c0,6 -3,12 -12,26z" fill="${col}"/><circle cx="${X(f.lng)}" cy="${Y(f.lat)-26}" r="4.5" fill="#fff"/>
+      <text x="${X(f.lng)}" y="${Y(f.lat)+16}" font-size="12" text-anchor="middle" fill="${c("--ink")}" font-weight="600" paint-order="stroke" stroke="${c("--bg")}" stroke-width="4">${esc(f.name)}</text></a>`; }
+    g += `<circle cx="${X(ME.lng)}" cy="${Y(ME.lat)}" r="8" fill="#1A73E8" stroke="#fff" stroke-width="3"/><text x="${X(ME.lng)}" y="${Y(ME.lat)+26}" font-size="12" text-anchor="middle" fill="#1A73E8" font-weight="700" paint-order="stroke" stroke="${c("--bg")}" stroke-width="4">أنت</text>`;
+  }
+  $("#mapbox").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة توضيحية للأماكن القريبة">${g}</svg>`;
 }
 
 function fcView() {
@@ -422,6 +489,10 @@ function bind() {
   document.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => { const [t, d] = b.dataset.mv.split(":"); INV.f1[t] = Math.max(0, INV.f1[t] + +d); if (+d < 0) RATES[t].burn = r1(RATES[t].burn + 1/14); else RATES[t].inflow = r1(RATES[t].inflow + 1/14); render(); });
   document.querySelectorAll("[data-verify]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.verify); r.verified = true; toast(`تم التوثيق. يوجد ${donorsFor(r).length} متبرع مؤهل ضمن 15 كم وتم إشعارهم (محاكاة).`); render(); });
   document.querySelectorAll("[data-fulfil]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.fulfil); if (INV.f1[r.bt] > 0) { INV.f1[r.bt]--; r.secured++; RATES[r.bt].burn = r1(RATES[r.bt].burn + 1/14); toast(`تم صرف وحدة ${r.bt} للطلب.`); render(); } });
+  document.querySelectorAll("[data-mrole]").forEach((b) => b.onclick = () => { mapRole = b.dataset.mrole; render(); });
+  document.querySelectorAll("[data-book]").forEach((b) => b.onclick = () => { const f = fac(b.dataset.book); const d = new Date(Date.now() + 864e5);
+    APPT = { fid: f.id, name: f.name, when: d.toLocaleDateString("ar-EG", { weekday: "long", day: "numeric", month: "long" }) + " الساعة 11:00" };
+    toast(`تم الحجز ❤️ ${f.name} — ${APPT.when}. اشرب 500 مل ماء قبل الموعد.`); render(); });
   document.querySelectorAll("[data-season]").forEach((b) => b.onclick = () => { FC.season = b.dataset.season; render(); });
   document.querySelectorAll("[data-surge]").forEach((b) => b.onclick = () => { FC.surge = b.dataset.surge; render(); });
   const hz = $("#hz"); if (hz) { hz.oninput = () => { FC.horizon = +hz.value; $("#hzv").textContent = hz.value; }; hz.onchange = render; }
@@ -432,8 +503,8 @@ function bind() {
   const cf = $("#composer"); if (cf) cf.onsubmit = (e) => { e.preventDefault(); const q = $("#q"); const v = q.value; q.value = ""; ask(v); };
   const sp = $("#stop"); if (sp) sp.onclick = () => agentCtl?.abort();
 }
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => view === "forecast" && drawChart());
-new MutationObserver(() => view === "forecast" && drawChart()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (view === "forecast") drawChart(); if (view === "map") drawMap(); });
+new MutationObserver(() => { if (view === "forecast") drawChart(); if (view === "map") drawMap(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 setView("donor");
 })();
 </script>

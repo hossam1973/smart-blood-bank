@@ -234,14 +234,24 @@ footer { padding-top: 28px; border-top: 1px solid var(--line); font-size: 13px; 
     </tbody>
   </table></div>
 
-  <h3>تقدير شهري توضيحي</h3>
-  <div class="bars" role="img" aria-label="تقدير الإيراد الشهري: اشتراكات 180 ألف، نقل 100 ألف، حملات 60 ألف، الإجمالي 340 ألف جنيه">
-    <div class="bar"><span>60 منشأة × 3,000 ج.م (Pro)</span><span class="track"><span class="fill" style="width:52.9%;display:block"></span></span><span class="num">180,000</span></div>
-    <div class="bar"><span>400 عملية نقل × 250 ج.م</span><span class="track"><span class="fill" style="width:29.4%;display:block"></span></span><span class="num">100,000</span></div>
-    <div class="bar"><span>4 حملات شركات × 15,000 ج.م</span><span class="track"><span class="fill" style="width:17.6%;display:block"></span></span><span class="num">60,000</span></div>
-    <div class="bar total"><span><strong>الإجمالي الشهري</strong></span><span class="track"><span class="fill" style="width:100%;display:block"></span></span><span class="num"><strong>340,000</strong></span></div>
+  <h3>باقات المنشآت</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>الباقة</th><th>لمن</th><th>السعر الاسترشادي</th><th>ما تتضمنه</th></tr></thead>
+    <tbody>
+      <tr><td><strong>أساسي</strong></td><td>أي منشأة موثّقة</td><td><span class="num">0</span></td><td>عرض المخزون، واستقبال الطلبات، والظهور على الخريطة. هذه الباقة تبني الشبكة</td></tr>
+      <tr><td><strong>Pro</strong></td><td>مستشفى أو بنك دم</td><td><span class="num">~4,500</span> ج.م/شهر</td><td>التنبؤ بالنقص، والوكيل الذكي، والنداء الفوري، وخريطة كثافة المتبرعين، والتقارير</td></tr>
+      <tr><td><strong>Network</strong></td><td>سلاسل وبنوك إقليمية</td><td>من <span class="num">25,000</span> ج.م/شهر</td><td>تعدد الفروع، والتكامل مع أنظمة المستشفى، وAPI، واتفاقية مستوى خدمة</td></tr>
+    </tbody>
+  </table></div>
+  <p class="col mute">إلى جانبها: رسوم تنسيق النقل (~300 ج.م للعملية)، و20% من التوفير المُثبت في الهدر، وعقود حكومية وخليجية، وحملات الشركات.</p>
+
+  <h3>سيناريو 3 سنوات (توضيحي)</h3>
+  <div class="bars" role="img" aria-label="الإيراد السنوي التقريبي: السنة الأولى 3.2 مليون، الثانية 15 مليون، الثالثة 52 مليون جنيه">
+    <div class="bar"><span>السنة 1 · <span class="num">40</span> منشأة</span><span class="track"><span class="fill" style="width:6.2%;display:block"></span></span><span class="num">3.2M</span></div>
+    <div class="bar"><span>السنة 2 · <span class="num">150</span> منشأة + محافظة</span><span class="track"><span class="fill" style="width:28.8%;display:block"></span></span><span class="num">15M</span></div>
+    <div class="bar total"><span><strong>السنة 3 · <span class="num">400</span> + الخليج</strong></span><span class="track"><span class="fill" style="width:100%;display:block"></span></span><span class="num"><strong>52M</strong></span></div>
   </div>
-  <p class="note">أرقام افتراضية للتوضيح فقط، قبل أي عقد حكومي (≈ 4 ملايين ج.م سنويًا). تحتاج دراسة سوق فعلية.</p>
+  <p class="note">بالجنيه المصري. استرداد تكلفة اكتساب المستشفى في 3–4 أشهر، وهامش إجمالي للبرمجيات حوالي 80%. الأرقام افتراضية للتخطيط وتحتاج دراسة سوق فعلية.</p>
 </section>
 
 <section>
@@ -272,6 +282,7 @@ footer { padding-top: 28px; border-top: 1px solid var(--line); font-size: 13px; 
     <div><h3>تطبيق واحد لكل المنصات</h3><p>Expo لأندرويد وiOS والويب، بأربع بوابات، وواجهة عربية من اليمين لليسار مع الإنجليزية.</p></div>
     <div><h3>مطابقة حسب الموقع</h3><p>PostGIS لأقرب مخزون ومتبرع متوافق، دون كشف الموقع الدقيق لأي متبرع.</p></div>
     <div><h3>الوكيل الذكي "رفيق"</h3><p>يبحث في المخزون، ويتحقق من الأهلية، وينشئ الطلبات بعد تأكيد المستخدم، بصلاحياته فقط.</p></div>
+    <div><h3>خرائط جوجل</h3><p>أقرب أماكن التبرع والمخزون مع الاتجاهات، وخريطة كثافة متبرعين مجمّعة لا تكشف أي شخص.</p></div>
     <div><h3>تنبؤ لا ينقطع</h3><p>الأرقام تُحسب على الجهاز والخادم بنفس الكود، وخطة التدخل لها بديل فوري إذا تعذّر الذكاء الاصطناعي.</p></div>
   </div>
 </section>

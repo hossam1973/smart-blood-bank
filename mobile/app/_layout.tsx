@@ -33,6 +33,8 @@ export default function RootLayout() {
       <Stack.Screen name="facility/index" options={{ title: "بوابة المنشأة", headerRight: () => <ForecastHeaderButton /> }} />
       <Stack.Screen name="forecast" options={{ title: "AI Inventory", presentation: "modal" }} />
       <Stack.Screen name="agent" options={{ title: "المساعد الذكي" }} />
+      <Stack.Screen name="map" options={{ title: "الخريطة" }} />
+      <Stack.Screen name="book" options={{ title: "حجز موعد تبرع" }} />
     </Stack>
   );
 }

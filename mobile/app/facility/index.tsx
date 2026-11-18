@@ -93,6 +93,7 @@ export default function Facility() {
         </Card>
       ))}
 
+      <Button title="🗺️ خريطة كثافة المتبرعين حولنا" kind="ghost" onPress={() => router.push("/map")} />
       <Button title="المساعد الذكي (تحليل المخزون)" kind="ghost" onPress={() => router.push("/agent")} />
     </ScrollView>
   );

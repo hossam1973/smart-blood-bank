@@ -4,10 +4,12 @@ import { Alert, FlatList, RefreshControl, Switch, Text, View } from "react-nativ
 import { router } from "expo-router";
 import { getMyProfile, type Profile, supabase, toPoint } from "../../lib/supabase";
 import { getCoords } from "../../lib/location";
+import { registerPushToken } from "../../lib/push";
+import { openDirections } from "../../lib/maps";
 import { Button, C, Card, s } from "../../lib/ui";
 
 type Req = { request_id: string; facility_name: string; blood_type: string; units_left: number;
-             urgency: "routine" | "urgent" | "critical"; distance_km: number };
+             urgency: "routine" | "urgent" | "critical"; distance_km: number; f_lat: number; f_lng: number };
 const URG = { routine: "عادي", urgent: "عاجل", critical: "حرج 🚨" };
 
 function nextEligible(p: Profile) {
@@ -27,6 +29,7 @@ export default function Donor() {
     const c = await getCoords();
     const p = await getMyProfile();
     if (c && p) await supabase.from("profiles").update({ location: toPoint(c.lat, c.lng) }).eq("id", p.id);
+    if (p) registerPushToken(p.id); // حتى يصله النداء الفوري
     const { data } = await supabase.rpc("open_requests_for_donor", { radius_km: 25 });
     setMe(p); setReqs((data ?? []) as Req[]); setLoading(false);
   }, []);
@@ -65,6 +68,7 @@ export default function Donor() {
               <Switch value={me?.available ?? false} onValueChange={toggle} trackColor={{ true: C.red }} />
             </View>
           </Card>
+          <Button title="🗺️ أقرب أماكن التبرع على الخريطة" onPress={() => router.push("/map")} />
           <Button title="اسأل المساعد الذكي" kind="ghost" onPress={() => router.push("/agent")} />
           <Text style={s.h2}>طلبات قريبة تحتاج فصيلتك ({reqs.length})</Text>
         </View>
@@ -78,7 +82,10 @@ export default function Donor() {
             <Text style={s.badge}>{item.blood_type}</Text>
           </View>
           <Text style={s.p}>{URG[item.urgency]} · {item.units_left} وحدة متبقية · {item.distance_km} كم</Text>
-          <Button title="سأتبرع" onPress={() => respond(item)} disabled={!!next} />
+          <View style={{ flexDirection: "row-reverse", gap: 8 }}>
+            <View style={{ flex: 1 }}><Button title="سأتبرع" onPress={() => respond(item)} disabled={!!next} /></View>
+            <View style={{ flex: 1 }}><Button title="📍 الاتجاهات" kind="ghost" onPress={() => openDirections({ lat: item.f_lat, lng: item.f_lng })} /></View>
+          </View>
         </Card>
       )}
     />

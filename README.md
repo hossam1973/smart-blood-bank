@@ -14,6 +14,8 @@ mobile/                    تطبيق Expo (React Native) — Android + iOS + We
   app/facility/            بوابة المنشأة: المخزون، والطلبات، والتوثيق، ومحرك التنبؤ (مدمج أسفل المخزون)
   app/forecast.tsx         نافذة "تنبؤ المخزون / AI Inventory" (تُفتح من زر الهيدر)
   app/agent.tsx            محادثة الوكيل الذكي "رفيق"
+  app/map.tsx              خريطة جوجل حسب الدور: أماكن التبرع، المخزون المتوافق، كثافة المتبرعين المجمّعة
+  app/book.tsx             حجز موعد تبرع (التحقق من الأهلية والسعة في قاعدة البيانات)
   components/ShortageForecast.tsx  مصفوفة الرصد، ومنحنى الاستنزاف، وخطة التدخل، ونداء المتبرعين
 supabase/
   migrations/001_schema.sql   الجداول، وPostGIS، والتوافق، والأهلية، والمطابقة الجغرافية، وRLS
@@ -38,6 +40,12 @@ supabase/
 - الترحيلات 001–003 مطبّقة، والدوال `blood-agent` و`predict-shortages` و`donor-recall` منشورة.
 - المتبقي: إضافة `ANTHROPIC_API_KEY` من لوحة Supabase ← Edge Functions ← Secrets. بدونه يعمل التنبؤ بالخطة الاحتياطية ويعتذر المساعد الذكي.
 - `mobile/.env` غير مرفوع (في .gitignore): ضع فيه رابط المشروع والمفتاح العام `sb_publishable_...` من لوحة Supabase.
+
+## خرائط جوجل
+- أندرويد: Google Maps عبر react-native-maps. iOS: خرائط آبل افتراضيًا، أو Google بإضافة المفتاح.
+- أنشئ مفتاحًا في Google Cloud Console وفعّل "Maps SDK for Android" و"Maps SDK for iOS"، ثم ضعه في `GOOGLE_MAPS_API_KEY` عند البناء (يقرؤه `app.config.ts`).
+- أزرار "الاتجاهات" تفتح خرائط جوجل مباشرة ولا تحتاج مفتاحًا.
+- الخصوصية: لا يظهر موقع أي متبرع. المنشأة ترى مناطق مجمّعة (~1.1 كم) فيها 3 متبرعين على الأقل.
 
 ## التشغيل
 ```bash
