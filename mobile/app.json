@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "بنك الدم الذكي",
+    "slug": "smart-blood-bank",
+    "scheme": "smartbloodbank",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "extra": {
+      "supportsRTL": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.smartbloodbank.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "نستخدم موقعك لإيجاد أقرب بنك دم ومتبرعين متوافقين."
+      }
+    },
+    "android": {
+      "package": "com.smartbloodbank.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-notifications",
+      "expo-asset"
+    ]
+  }
+}
