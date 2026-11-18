@@ -37,9 +37,29 @@ supabase/
 
 ## البيئة المنشورة
 - مشروع Supabase: `smart-blood-bank` (فرانكفورت eu-central-1) — `https://pgcgtzlvjabrlvjfdpbh.supabase.co`
-- الترحيلات 001–003 مطبّقة، والدوال `blood-agent` و`predict-shortages` و`donor-recall` منشورة.
+- الترحيلات 001–007 مطبّقة، والدوال `blood-agent` و`predict-shortages` و`donor-recall` و`daily-report` و`whatsapp-webhook` منشورة.
 - المتبقي: إضافة `ANTHROPIC_API_KEY` من لوحة Supabase ← Edge Functions ← Secrets. بدونه يعمل التنبؤ بالخطة الاحتياطية ويعتذر المساعد الذكي.
 - `mobile/.env` غير مرفوع (في .gitignore): ضع فيه رابط المشروع والمفتاح العام `sb_publishable_...` من لوحة Supabase.
+
+## الميزات الجديدة (الإصدار 3)
+- **6 لغات:** العربية، والإنجليزية، والفرنسية، والأوردو، والهندية، والتركية (`mobile/locales/`). الواجهة تصبح من اليمين لليسار تلقائيًا للعربية والأوردو، واللغة تُحفظ في الحساب.
+- **مدير المنصة** (`app/admin`): الإحصاءات والإيراد الشهري، والمستخدمون والأدوار والإيقاف، وتوثيق المنشآت وتغيير باقاتها، والحملات ورسومها، وسجل التدقيق.
+- **المتبرع:** بطاقة QR، ورحلة الكيس من السحب حتى إنقاذ حياة، والأوسمة والتحديات وبطل الأسبوع (بالاختيار)، وحملات الشركات برمز انضمام.
+- **المنشأة:** مسح بطاقة المتبرع وتسجيل التبرع، وتحديث مراحل الكيس، وفرز الطلبات حسب الأولوية مع الأسباب، والتقرير اليومي.
+- **الوكيل الذكي:** يرد بلغة المستخدم، وأدوات جديدة: الفرز، والتنبؤ، والأوسمة، والحملات.
+- **واتساب:** `functions/whatsapp-webhook` عبر Twilio، مع التحقق من التوقيع وأدوات قراءة فقط.
+
+### تفعيل واتساب
+1. حساب Twilio مع WhatsApp Sender أو Sandbox.
+2. في Supabase ← Edge Functions ← Secrets أضف `TWILIO_AUTH_TOKEN`، و`APP_LINK` اختياريًا.
+3. في Twilio اجعل رابط الرسائل الواردة `https://pgcgtzlvjabrlvjfdpbh.supabase.co/functions/v1/whatsapp-webhook` (POST).
+4. رقم المستخدم في الملف الشخصي يجب أن يطابق رقم واتساب بصيغة دولية (+20…).
+
+### أول مدير للمنصة
+لا يستطيع أي مستخدم ترقية نفسه. عيّن المدير الأول مرة واحدة من SQL Editor في Supabase:
+```sql
+update profiles set role = 'admin' where phone = '+20XXXXXXXXXX';
+```
 
 ## خرائط جوجل
 - أندرويد: Google Maps عبر react-native-maps. iOS: خرائط آبل افتراضيًا، أو Google بإضافة المفتاح.

@@ -1,0 +1,500 @@
+<title>تجربة بنك الدم الذكي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* Layout: app shell — sticky bar (brand, language, portal tabs) over one working column (max 980px) */
+:root {
+  --bg: #FBF9F9; --surface: #FFFFFF; --ink: #1C1416; --mute: #6E6265; --line: #EADFE0;
+  --accent: #A3122A; --accent-soft: #F8E6E9; --on-accent: #FFFFFF; --plasma: #C9A227; --sea: #4A90C8; --pin: #1565C0;
+  --ok: #2F7D4F; --ok-soft: #E4F2E9; --warn: #B86E00; --warn-soft: #FBF0DD; --crit: #C21F3A; --crit-soft: #FBE3E7;
+  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Noto Sans Devanagari", "Segoe UI", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Noto Sans Devanagari", "Segoe UI", Tahoma, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52; --sea: #5FA3D9; --pin: #64A8F0;
+  --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52; --sea: #5FA3D9; --pin: #64A8F0;
+  --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; }
+body.ur { font-family: "Noto Nastaliq Urdu", var(--f-body); line-height: 2.1; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; line-height: 1.35; text-wrap: balance; }
+body.ur h1, body.ur h2, body.ur h3 { font-family: "Noto Nastaliq Urdu", var(--f-display); line-height: 1.9; }
+h2 { font-size: 19px; font-weight: 600; } h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; }
+.mute { color: var(--mute); } .small { font-size: 13px; }
+.num, .bt, .code { font-family: var(--f-data); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+.bt { font-weight: 500; }
+header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: grid; gap: 8px; padding-block: 10px; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.brand h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.drop { width: 14px; height: 18px; background: var(--accent); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; display: inline-block; }
+.brand-r { display: flex; align-items: center; gap: 8px; }
+.demo-tag { font-size: 12px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 10px; border-radius: 999px; }
+select { font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.tabs, .subtabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.tab { font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { padding-block: 18px 60px; display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.btn { font: inherit; font-weight: 600; font-size: 14px; padding: 9px 16px; border-radius: 10px; border: 0; background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.sm { padding: 5px 10px; font-size: 13px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 13.5px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+.pill.critical { background: var(--crit-soft); color: var(--crit); } .pill.warning { background: var(--warn-soft); color: var(--warn); }
+.pill.stable, .pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.info { background: var(--accent-soft); color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .pill.critical.blink { animation: pulse 1s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .4; } }
+.list { display: grid; gap: 8px; }
+.item { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; background: var(--bg); }
+.item.crit { border-color: var(--crit); } .item.warnb { border-color: var(--warn); }
+label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--mute); }
+input[type=number], input[type=text] { font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); min-width: 0; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.switch { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent); }
+.matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.cell { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: grid; gap: 3px; background: var(--bg); }
+.cell.critical { border: 2px solid var(--crit); } .cell.warning { border: 2px solid var(--warn); }
+.cell .days { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.cell .meta { font-size: 12px; color: var(--mute); }
+.cell .acts { display: flex; gap: 6px; margin-top: 4px; } .cell .acts button { flex: 1; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); display: grid; gap: 2px; }
+.stat b { font-family: var(--f-display); font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
+.subtabs { padding-bottom: 2px; } .subtabs .chip { white-space: nowrap; flex: none; }
+.chart, .mapbox { overflow-x: auto; direction: ltr; }
+.mapbox { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.mapbox svg, .chart svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--mute); }
+.legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-inline-end: 6px; border-radius: 2px; }
+.gm { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; padding: 5px 10px; border-radius: 8px; background: var(--accent-soft); }
+.acts-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.timeline { display: grid; gap: 0; }
+.step { display: grid; grid-template-columns: 18px 1fr; gap: 10px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--line); margin-top: 6px; }
+.dot.on { background: var(--accent); } .dot.life { background: var(--ok); }
+.vline { width: 2px; height: 18px; background: var(--line); margin-inline-start: 6px; } .vline.on { background: var(--accent); }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.badge { text-align: center; display: grid; gap: 2px; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+.badge .ic { font-size: 30px; } .badge.off { opacity: .32; }
+.qr { background: #fff; padding: 12px; border-radius: 12px; justify-self: center; }
+.qr img, .qr canvas { display: block; }
+.chat { display: grid; grid-template-rows: 1fr auto; min-height: 420px; max-height: 70vh; padding: 0; overflow: hidden; }
+.msgs { overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 85%; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.bot { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); }
+.msg.me { align-self: flex-end; background: var(--accent); color: var(--on-accent); }
+.msg.tool { align-self: flex-start; font-size: 12.5px; color: var(--mute); background: transparent; padding: 0 4px; }
+.composer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); background: var(--surface); }
+.composer input { flex: 1; }
+.report { white-space: pre-wrap; line-height: 1.9; }
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
+.note { font-size: 12.5px; color: var(--mute); border-inline-start: 2px solid var(--line); padding-inline-start: 8px; }
+.audit { font-family: var(--f-data); font-size: 12px; direction: ltr; text-align: start; unicode-bidi: plaintext; color: var(--mute); }
+</style>
+
+<div class="app" id="app">
+<header class="bar"><div class="wrap">
+  <div class="brand">
+    <h1><span class="drop" aria-hidden="true"></span><span id="appName"></span></h1>
+    <div class="brand-r"><span class="demo-tag" id="demoTag"></span>
+      <label><span class="small mute" id="langLbl" style="margin-inline-end:4px"></span><select id="lang" aria-labelledby="langLbl"></select></label></div>
+  </div>
+  <div class="tabs" role="tablist" id="tabs"></div>
+</div></header>
+<main class="wrap" id="view" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script type="application/json" id="i18n">__I18N__</script>
+
+<script>
+(() => {
+const D = JSON.parse(document.getElementById("i18n").textContent);
+const LANGS = [["ar","العربية",1],["en","English",0],["fr","Français",0],["ur","اردو",1],["hi","हिन्दी",0],["tr","Türkçe",0]];
+let lang = "ar"; try { const s = localStorage.getItem("sbb.demo.lang"); if (D[s]) lang = s; } catch {}
+const t = (k) => (D[lang] && D[lang][k]) ?? D.en[k] ?? k;
+const f = (k, v) => t(k).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? "");
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const loc = () => ({ ar: "ar-EG", en: "en-GB", fr: "fr-FR", ur: "ur-PK", hi: "hi-IN", tr: "tr-TR" }[lang]);
+const dt = (d, o = { day: "numeric", month: "short" }) => o.timeStyle ? new Date(d).toLocaleString(loc(), o) : new Date(d).toLocaleDateString(loc(), o);
+
+// ================= بيانات تجريبية =================
+const ME = { lat: 30.0444, lng: 31.2357 };
+const TYPES = ["O-","O+","A-","A+","B-","B+","AB-","AB+"];
+const COMPAT = { "O-":["O-"], "O+":["O+","O-"], "A-":["A-","O-"], "A+":["A+","A-","O+","O-"], "B-":["B-","O-"], "B+":["B+","B-","O+","O-"], "AB-":["AB-","A-","B-","O-"], "AB+":TYPES.slice() };
+const FAC = [
+  { id: "f1", ar: "مستشفى النيل التجريبي", en: "Nile Demo Hospital", kind: "hospital", lat: 30.0480, lng: 31.2290, phone: "0100 000 0001", hours: "9–21", verified: true, plan: "pro", suspended: false },
+  { id: "f2", ar: "بنك دم الزمالك التجريبي", en: "Zamalek Demo Blood Bank", kind: "blood_bank", lat: 30.0626, lng: 31.2197, phone: "0100 000 0002", hours: "24h", verified: true, plan: "enterprise", suspended: false },
+  { id: "f3", ar: "مركز المعادي الطبي (تجريبي)", en: "Maadi Demo Medical Center", kind: "medical_center", lat: 29.9602, lng: 31.2569, phone: "0100 000 0003", hours: "10–18", verified: true, plan: "free", suspended: false },
+  { id: "f4", ar: "مستشفى الجيزة التجريبي", en: "Giza Demo Hospital", kind: "hospital", lat: 30.0131, lng: 31.2089, phone: "0100 000 0004", hours: "8–20", verified: true, plan: "pro", suspended: false },
+  { id: "f5", ar: "مركز الدقي الطبي (تجريبي)", en: "Dokki Demo Clinic", kind: "medical_center", lat: 30.0385, lng: 31.2110, phone: "0100 000 0005", hours: "9–17", verified: false, plan: "free", suspended: false },
+];
+const PRICE = { free: 0, pro: 4500, enterprise: 25000 };
+const fname = (x) => (lang === "ar" ? x.ar : x.en);
+const fac = (id) => FAC.find((x) => x.id === id);
+const STOCK = { f1: { "O-":[12,10,4,1], "O+":[30,15,6,7], "A-":[9,6,1.2,0.6], "A+":[40,15,5,4], "B-":[6,5,1,0.2], "B+":[22,10,3,2.6], "AB-":[4,3,0.3,0.2], "AB+":[11,5,1,1] },
+  f2: { "O-":[25], "O+":[60], "A-":[8], "A+":[45], "B-":[3], "B+":[30], "AB-":[2], "AB+":[9] }, f3: { "O-":[0], "O+":[14], "A-":[2], "A+":[18], "B-":[0], "B+":[7], "AB-":[0], "AB+":[4] },
+  f4: { "O-":[5], "O+":[20], "A-":[3], "A+":[16], "B-":[1], "B+":[12], "AB-":[1], "AB+":[6] }, f5: {} };
+const INV = {}; for (const x in STOCK) { INV[x] = {}; for (const b of TYPES) INV[x][b] = (STOCK[x][b] || [0])[0]; }
+const RATES = {}; for (const b of TYPES) RATES[b] = { safety: STOCK.f1[b][1], burn: STOCK.f1[b][2], inflow: STOCK.f1[b][3] };
+const DONORS = []; (function(){ let s = 7; const r = () => (s = (s * 9301 + 49297) % 233280) / 233280; const dist = ["O+","O+","O+","A+","A+","B+","B+","O-","A-","AB+","B-","AB-"];
+  for (let i = 0; i < 180; i++) DONORS.push({ bt: dist[Math.floor(r()*dist.length)], lat: 30.0444 + (r()-.5)*0.25, lng: 31.2357 + (r()-.5)*0.25, eligible: r() > .3 }); })();
+const DONOR = { id: "u1", ar: "أحمد", en: "Ahmed", bt: "O-", sex: "male", last: "2026-07-10", available: true, board: true };
+const USERS = [
+  { id: "u1", ar: "أحمد (متبرع)", en: "Ahmed (donor)", role: "donor", phone: "+20 100 000 1001", suspended: false },
+  { id: "u2", ar: "منى (مستفيدة)", en: "Mona (patient's family)", role: "beneficiary", phone: "+20 100 000 1002", suspended: false },
+  { id: "u3", ar: "د. كريم (موظف)", en: "Dr. Karim (staff)", role: "facility_staff", phone: "+20 100 000 1003", suspended: false, fac: "f1" },
+  { id: "u4", ar: "سارة (متبرعة)", en: "Sara (donor)", role: "donor", phone: "+20 100 000 1004", suspended: false },
+  { id: "u5", ar: "حساب مشبوه", en: "Suspicious account", role: "beneficiary", phone: "+20 100 000 1005", suspended: false },
+];
+const H = 3600e3;
+let REQUESTS = [
+  { id: "r1", fac: "f1", bt: "O-", units: 3, secured: 1, urgency: "critical", verified: true, mine: false, at: Date.now() - 5*H },
+  { id: "r2", fac: "f4", bt: "A-", units: 2, secured: 0, urgency: "urgent", verified: true, mine: false, at: Date.now() - 30*H },
+  { id: "r3", fac: "f3", bt: "B+", units: 1, secured: 0, urgency: "routine", verified: true, mine: false, at: Date.now() - 2*H },
+  { id: "r4", fac: "f1", bt: "A+", units: 2, secured: 0, urgency: "urgent", verified: false, mine: false, at: Date.now() - 26*H },
+];
+const STEPS = ["collected","testing","ready","issued","transfused"];
+const DONATIONS = [{ code: "7F3A91C2DE", donor: "u1", bt: "O-", status: "transfused",
+  events: STEPS.map((s, i) => ({ s, at: new Date("2026-07-10T10:00:00").getTime() + i * 26 * H })) }];
+const CAMPAIGNS = [{ id: "c1", title: { ar: "حملة شركة النيل للتقنية", en: "Nile Tech Co. blood drive" }, org: "Nile Tech", fac: "f2", code: "NILE24", start: Date.now() + 2*24*H, end: Date.now() + 4*24*H, target: 80, fee: 30000, signups: 34 }];
+const JOINED = new Set();
+const HEROES = [{ ar: "سارة", en: "Sara", pts: 150 }, { ar: "يوسف", en: "Youssef", pts: 100 }];
+const AUDIT = [];
+const RESPONSES = new Set();
+let seq = 5, APPT = null;
+let pending = null; // تأكيد بخطوتين داخل الصفحة (confirm() لا يظهر في صفحات Claude)
+function twoStep(key, fn) { if (pending === key) { pending = null; fn(); } else { pending = key; render(); } }
+const cbtn = (key, label) => pending === key ? "⚠️ " + t("confirm") + "?" : label;
+const audit = (action, target, details) => AUDIT.unshift({ at: Date.now(), action, target, details });
+
+// ================= أدوات =================
+const km = (a, b) => { const R = 6371, r = Math.PI/180, dLa = (b.lat-a.lat)*r, dLn = (b.lng-a.lng)*r;
+  const x = Math.sin(dLa/2)**2 + Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLn/2)**2; return Math.round(2*R*Math.asin(Math.sqrt(x))*10)/10; };
+const live = () => FAC.filter((x) => x.verified && !x.suspended);
+function toast(m) { const e = $("#toast"); e.textContent = m; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => e.hidden = true, 3400); }
+function nextEligible() { const gap = DONOR.sex === "female" ? 112 : 84; const d = new Date(new Date(DONOR.last).getTime() + gap*864e5); return d > new Date() ? d : null; }
+function inventoryNear(bt, radius = 30) { const out = []; for (const x of live()) for (const b of COMPAT[bt]) if (INV[x.id][b] > 0) { const d = km(ME, x); if (d <= radius) out.push({ fid: x.id, b, units: INV[x.id][b], km: d, exact: b === bt }); }
+  return out.sort((a, c) => (c.exact - a.exact) || a.km - c.km); }
+function donorsFor(r, radius = 15) { const x = fac(r.fac); return DONORS.filter((d) => d.eligible && COMPAT[r.bt].includes(d.bt) && km(d, x) <= radius); }
+function openForDonor() { return REQUESTS.filter((r) => r.verified && r.secured < r.units && COMPAT[r.bt].includes(DONOR.bt) && !fac(r.fac).suspended).map((r) => ({ ...r, km: km(ME, fac(r.fac)) }))
+  .sort((a, b) => ({critical:0,urgent:1,routine:2}[a.urgency] - {critical:0,urgent:1,routine:2}[b.urgency]) || a.km - b.km); }
+const gmDir = (p) => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
+const gm = (p, label = t("openInMaps")) => `<a class="gm" href="${gmDir(p)}" target="_blank" rel="noopener">${esc(label)}</a>`;
+function triage() { return REQUESTS.filter((r) => r.fac === "f1" && r.secured < r.units).map((r) => { const left = r.units - r.secured, wait = (Date.now() - r.at) / H, stock = INV.f1[r.bt];
+  const reasons = [r.urgency === "critical" && "critical", wait >= 24 && "waiting_24h", stock < left && "insufficient_stock", !r.verified && "unverified"].filter(Boolean);
+  return { ...r, left, stock, reasons, score: ({ critical: 60, urgent: 35, routine: 10 }[r.urgency]) + Math.floor(Math.min(wait, 48) / 2) + (stock < left ? 15 : 0) }; }).sort((a, b) => b.score - a.score); }
+function achievements() { const n = DONATIONS.filter((d) => d.donor === "u1" && d.status !== "discarded").length, resp = RESPONSES.size;
+  const badges = [n >= 1 && "first_donation", n >= 5 && "hero_5", n >= 10 && "super_10", n >= 15 && "legend_15", n >= 1 && ["O-","A-","B-","AB-"].includes(DONOR.bt) && "rare_blood", resp >= 1 && "emergency_responder"].filter(Boolean);
+  return { n, lives: n * 3, pts: n * 100 + resp * 50, badges, next: n < 1 ? 1 : n < 5 ? 5 : n < 10 ? 10 : n < 15 ? 15 : null,
+    ch: [["weekly_response", resp >= 1, 50], ["quarter_donation", DONATIONS.some((d) => d.donor === "u1" && Date.now() - d.events[0].at < 90*24*H), 100], ["rare_standby", DONOR.available, 30]] }; }
+
+// ================= محرك التنبؤ =================
+const SEA = { none:[1,1], ramadan:[0.92,0.62], hajj:[1.2,0.9,{"O-":1.35,"A-":1.25,"B-":1.25,"AB-":1.2}], summer:[1,0.7], flu:[1,0.8], holidays:[1.25,0.75,{"O-":1.2,"O+":1.15}] };
+const SUR = { moderate: 1, high: 1.25, code_red: 1.6 };
+const FC = { season: "none", surge: "moderate", horizon: 14 };
+const r1 = (n) => Math.round(n*10)/10;
+function forecast() { const [sb, si, tb] = SEA[FC.season], sf = SUR[FC.surge];
+  return TYPES.map((b) => { const u = INV.f1[b], R = RATES[b], burn = R.burn*sb*((tb && tb[b]) || 1)*sf, inflow = R.inflow*si, net = inflow - burn, days = net >= 0 ? null : u / -net;
+    let risk = days !== null && days < 4 ? "critical" : days !== null && days <= 8 ? "warning" : u < R.safety ? "warning" : "stable"; if (u === 0 && burn > 0) risk = "critical";
+    return { b, u, safety: R.safety, burn: r1(burn), inflow: r1(inflow), net, days: days === null ? null : r1(days), date: days === null ? null : new Date(Date.now() + Math.floor(days)*864e5).toISOString().slice(0,10), risk, need: Math.max(0, Math.ceil(R.safety - (u + net*FC.horizon))) }; })
+    .sort((a, c) => ({critical:0,warning:1,stable:2}[a.risk] - {critical:0,warning:1,stable:2}[c.risk]) || (a.days ?? 1e9) - (c.days ?? 1e9)); }
+function rulePlan(fc) { const crit = fc.filter((x) => x.risk === "critical"), warn = fc.filter((x) => x.risk === "warning"), ar = lang === "ar", out = [];
+  if (crit.length) { out.push({ p: "now", title: ar ? "نداء فوري للمتبرعين" : "Immediate donor recall", detail: crit.map((x) => `${x.b}: ${x.need}`).join(" · ") });
+    out.push({ p: "now", title: ar ? "تفعيل الاستعارة بين المستشفيات" : "Activate inter-hospital borrowing", detail: ar ? "من منشآت قريبة لديها فائض أو وحدات قريبة الانتهاء." : "From nearby facilities with surplus or near-expiry units." });
+    out.push({ p: "24h", title: ar ? "ترشيد الاستهلاك (PBM)" : "Conserve usage (PBM)", detail: ar ? "مراجعة العمليات الاختيارية مع لجنة نقل الدم." : "Review elective surgery with the transfusion committee." }); }
+  if (warn.length) out.push({ p: "this_week", title: ar ? "جدولة حملة تبرع متنقلة" : "Schedule a mobile drive", detail: warn.map((x) => x.b).join(" · ") });
+  if (!out.length) out.push({ p: "this_week", title: t("risk_stable"), detail: "" }); return out; }
+let aiPlan = null, aiKey = "";
+const planKey = () => `${lang}|${FC.season}|${FC.surge}|${FC.horizon}|${TYPES.map((b) => INV.f1[b]).join(",")}`;
+
+// ================= الذكاء الاصطناعي =================
+let samplePromise = null;
+const getSample = () => (samplePromise ||= (window.claude?.use ? window.claude.use("sample").catch(() => null) : Promise.resolve(null)));
+const sampleErr = (e) => ({ not_granted: t("needsClaude"), rate_limited: "⏳" }[e?.code] || t("agentErr"));
+const LANG_NAME = { ar: "Arabic", en: "English", fr: "French", ur: "Urdu", hi: "Hindi", tr: "Turkish" };
+
+// ================= العرض =================
+const TABS = [["donor","tDonor"],["beneficiary","tBeneficiary"],["facility","tFacility"],["map","tMap"],["forecast","tForecast"],["agent","tAgent"],["admin","tAdmin"]];
+let view = "donor", donorSub = "requests", facSub = "ops", adminSub = "overview", mapRole = "donor", benBt = null, benUnits = 1, benResults = null, scanned = null, report = null;
+function chrome() {
+  document.documentElement.lang = lang; document.documentElement.dir = LANGS.find((x) => x[0] === lang)[2] ? "rtl" : "ltr";
+  document.body.classList.toggle("ur", lang === "ur");
+  $("#appName").textContent = t("appName"); $("#demoTag").textContent = t("demoTag"); $("#langLbl").textContent = "🌐";
+  $("#lang").innerHTML = LANGS.map(([c, n]) => `<option value="${c}" ${c === lang ? "selected" : ""}>${n}</option>`).join("");
+  $("#tabs").innerHTML = TABS.map(([k, l]) => `<button class="tab" role="tab" data-view="${k}" aria-selected="${view === k}">${esc(t(l))}</button>`).join("");
+}
+function render() { chrome(); const v = { donor: donorView, beneficiary: benView, facility: facView, map: mapView, forecast: fcView, agent: agentView, admin: adminView }[view];
+  $("#view").innerHTML = v(); bind(); if (view === "forecast") drawChart(); if (view === "map") drawMap(); if (view === "agent") { paintChat(); setupAgent(); }
+  if (view === "donor" && donorSub === "card") drawQR(); if (view === "forecast" || (view === "facility" && facSub === "report")) getSample().then((s) => { const b = $("#aiBtn"); if (s && b) b.hidden = false; }); }
+const sub = (key, cur, items) => `<div class="subtabs">${items.map(([k, l]) => `<button class="chip" data-${key}="${k}" aria-pressed="${cur === k}">${esc(l)}</button>`).join("")}</div>`;
+
+function donorView() {
+  const next = nextEligible();
+  const head = `<div class="card"><div class="row"><h2>${esc(fname(DONOR))}</h2><span class="pill info bt" style="font-size:16px">${DONOR.bt}</span></div>
+    <p style="${next ? "" : "color:var(--ok);font-weight:600"}" class="${next ? "mute" : ""}">${next ? esc(f("eligibleAfter", { date: dt(next) })) : esc(t("eligibleNow"))}</p>
+    <label class="switch"><input type="checkbox" id="avail" ${DONOR.available ? "checked" : ""}> ${esc(t("availableToggle"))}</label>
+    ${APPT ? `<p class="small" style="color:var(--ok);font-weight:600">✓ ${esc(APPT)}</p>` : ""}</div>
+    ${sub("dsub", donorSub, [["requests", t("nearbyRequests").replace(/\s*\(\{n\}\)/, "")], ["card", t("myCard")], ["journey", t("myJourney")], ["badges", t("myAchievements")], ["campaigns", t("campaigns")]])}`;
+  let body = "";
+  if (donorSub === "requests") { const reqs = openForDonor();
+    body = `<div class="card"><div class="row"><h2>${esc(f("nearbyRequests", { n: reqs.length }))}</h2><button class="btn ghost sm" data-go="map">${esc(t("nearestSites"))}</button></div>
+    <p class="small mute">${esc(t("howBody"))}</p><div class="list">${reqs.length ? reqs.map((r) => `<div class="item ${r.urgency === "critical" ? "crit" : ""}">
+      <div class="row"><h3>${esc(fname(fac(r.fac)))}</h3><span class="pill info bt">${r.bt}</span></div>
+      <p class="small mute">${esc(t("urg_" + r.urgency))} · ${esc(f("unitsLeftKm", { u: r.units - r.secured, km: r.km }))}</p>
+      <div class="acts-row"><button class="btn sm" data-respond="${r.id}" ${next || !DONOR.available || RESPONSES.has(r.id) ? "disabled" : ""}>${RESPONSES.has(r.id) ? "✓" : esc(t("willDonate"))}</button>${gm(fac(r.fac), t("directions"))}</div></div>`).join("") : `<p class="mute">${esc(t("noRequests"))}</p>`}</div></div>`; }
+  if (donorSub === "card") body = `<div class="card" style="justify-items:center;border:2px solid var(--accent)"><h3>${esc(t("appName"))}</h3><h2>${esc(fname(DONOR))}</h2>
+    <span class="pill info bt" style="font-size:22px;padding:4px 16px">${DONOR.bt}</span><div class="qr" id="qr" role="img" aria-label="QR"></div>
+    <p style="${next ? "" : "color:var(--ok);font-weight:600"}">${next ? esc(f("eligibleAfter", { date: dt(next) })) : esc(t("eligibleNow"))}</p>
+    <p class="small mute">${esc(t("lastDonation"))}: <span class="num">${DONOR.last}</span></p></div><p class="note">${esc(t("cardHint"))}</p>`;
+  if (donorSub === "journey") body = DONATIONS.filter((d) => d.donor === "u1").map((d) => { const reached = new Map(d.events.map((e) => [e.s, e.at])); const steps = d.status === "discarded" ? ["collected","testing","discarded"] : STEPS;
+    return `<div class="card"><div class="row"><h3>${dt(d.events[0].at, { dateStyle: "medium" })}</h3><span class="pill info bt">${d.bt}</span></div><p class="small mute">${esc(t("bagCode"))}: <span class="code">${d.code}</span></p>
+      <div class="timeline">${steps.map((s, i) => { const at = reached.get(s); return `<div class="step"><div><div class="dot ${at ? (s === "transfused" ? "life" : "on") : ""}"></div>${i < steps.length - 1 ? `<div class="vline ${at ? "on" : ""}"></div>` : ""}</div>
+        <div><b style="${at ? "" : "color:var(--mute)"}">${esc(t("j_" + s))}</b>${at ? `<div class="small mute">${dt(at, { dateStyle: "medium", timeStyle: "short" })}</div>` : ""}</div></div>`; }).join("")}</div></div>`; }).join("") + `<p class="note">${esc(t("journeyHint"))}</p>`;
+  if (donorSub === "badges") { const a = achievements(), icon = { first_donation: "🩸", hero_5: "🦸", super_10: "⚡", legend_15: "👑", rare_blood: "💎", emergency_responder: "🚑" };
+    body = `<div class="stats"><div class="stat"><b>${a.n}</b><span class="small mute">${esc(t("donationsTotal"))}</span></div><div class="stat"><b style="color:var(--accent)">${a.lives}</b><span class="small mute">${esc(t("livesSaved"))}</span></div><div class="stat"><b>${a.pts}</b><span class="small mute">${esc(t("points"))}</span></div></div>
+    <div class="card"><div class="badges">${Object.keys(icon).map((b) => `<div class="badge ${a.badges.includes(b) ? "" : "off"}"><span class="ic">${icon[b]}</span><span class="small">${esc(t("b_" + b))}</span></div>`).join("")}</div>
+    ${a.next ? `<p class="small mute">${esc(f("nextBadge", { n: a.next }))}</p>` : ""}</div>
+    <div class="card"><h3>${esc(t("challenges"))}</h3><div class="list">${a.ch.map(([id, done, p]) => `<div class="row"><span style="${done ? "color:var(--ok)" : ""}">${done ? "✅" : "⬜"} ${esc(t("ch_" + id))}</span><span class="pill info">+${p}</span></div>`).join("")}</div></div>
+    <div class="card"><h3>${esc(t("heroOfWeek"))}</h3>${HEROES.concat(DONOR.board && a.pts ? [{ ar: fname(DONOR), en: fname(DONOR), pts: a.pts }] : []).sort((x, y) => y.pts - x.pts).map((h, i) => `<div class="row"><span>${["🥇","🥈","🥉"][i] || "#" + (i + 1)} ${esc(fname(h))}</span><span class="small mute">${esc(f("pointsN", { n: h.pts }))}</span></div>`).join("")}
+    <label class="switch small"><input type="checkbox" id="board" ${DONOR.board ? "checked" : ""}> ${esc(t("showOnBoard"))}</label></div>`; }
+  if (donorSub === "campaigns") body = `<div class="card"><div class="acts-row"><input type="text" id="code" placeholder="NILE24" aria-label="${esc(t("joinCode"))}" style="flex:1"><button class="btn" id="joinBtn">${esc(t("join"))}</button></div></div>
+    ${CAMPAIGNS.filter((c) => c.end > Date.now()).map((c) => `<div class="card"><h3>${esc(lang === "ar" ? c.title.ar : c.title.en)}</h3><p class="small mute">${esc(c.org)} · ${esc(fname(fac(c.fac)))}</p>
+      <p class="small">${esc(t("starts"))}: ${dt(c.start, { dateStyle: "medium" })} · ${esc(t("ends"))}: ${dt(c.end, { dateStyle: "medium" })}</p>
+      <div class="row"><span class="small mute">${esc(f("campaignTarget", { n: c.target }))} · ${esc(f("signups", { n: c.signups }))}</span>${JOINED.has(c.id) ? `<span class="pill ok">✓ ${esc(t("joined"))}</span>` : `<button class="btn sm" data-join="${c.code}">${esc(t("join"))}</button>`}</div></div>`).join("") || `<p class="mute">${esc(t("noCampaigns"))}</p>`}`;
+  return head + body;
+}
+
+function benView() { const mine = REQUESTS.filter((r) => r.mine);
+  return `<div class="card"><h2>${esc(t("findStock"))}</h2><p class="small mute">${esc(t("patientType"))}</p>
+    <div class="chips">${TYPES.map((b) => `<button class="chip bt" data-bt="${b}" aria-pressed="${benBt === b}">${b}</button>`).join("")}</div>
+    <div class="acts-row"><label class="f">${esc(t("unitsNeeded"))} <input type="number" id="units" min="1" max="20" value="${benUnits}" style="width:90px"></label>
+    <button class="btn" id="search" ${benBt ? "" : "disabled"} style="align-self:end">${esc(t("search"))}</button></div><p class="note">${esc(t("demoLoc"))}</p></div>
+  ${benResults ? `<div class="card"><div class="list">${benResults.length ? benResults.map((x) => `<div class="item"><div class="row"><h3>${esc(fname(fac(x.fid)))}</h3><span class="pill ${x.exact ? "ok" : "info"} bt">${x.b}</span></div>
+    <p class="small mute">${esc(f("unitsAvailableKm", { u: x.units, km: x.km }))} · <span class="num">${fac(x.fid).phone}</span></p>
+    <div class="acts-row"><button class="btn sm" data-req="${x.fid}">${esc(t("requestHere"))}</button>${gm(fac(x.fid), t("directions"))}</div></div>`).join("") : `<p class="mute">${esc(t("noStock"))}</p>`}</div></div>` : ""}
+  <div class="card"><h2>${esc(t("myRequests"))}</h2><div class="list">${mine.length ? mine.map((r) => `<div class="item"><div class="row"><h3>${esc(fname(fac(r.fac)))}</h3><span class="pill info bt">${r.bt}</span></div>
+    <p class="small mute">${esc(t(r.verified ? (r.secured >= r.units ? "st_fulfilled" : "st_matching") : "st_open"))} · ${esc(f("securedOf", { s: r.secured, n: r.units }))}</p></div>`).join("") : `<p class="mute small">—</p>`}</div></div>`; }
+
+function facView() {
+  const head = `<div class="row"><h2>${esc(fname(fac("f1")))}</h2><span class="pill info">${esc(t("plan_pro"))}</span></div>${sub("fsub", facSub, [["ops", t("inventoryTitle")], ["triage", f("incoming", { n: triage().length })], ["scan", t("scanDonor")], ["report", t("dailyReport")]])}`;
+  let body = "";
+  if (facSub === "ops") { const soon = [["O+", 3, 4], ["A+", 2, 6]];
+    body = `<div class="card"><div class="matrix">${TYPES.map((b) => { const u = INV.f1[b], low = u < RATES[b].safety; return `<div class="cell ${low ? "warning" : ""}"><div class="row"><span class="bt">${b}</span>${low ? `<span class="pill warning">${esc(t("low"))}</span>` : ""}</div>
+      <span class="days num">${u}</span><span class="meta">${esc(t("safety"))} <span class="num">${RATES[b].safety}</span></span>
+      <div class="acts"><button class="btn ghost sm" data-mv="${b}:-1" ${u ? "" : "disabled"}>− ${esc(t("issue"))}</button><button class="btn ghost sm" data-mv="${b}:1">+ ${esc(t("deposit"))}</button></div></div>`; }).join("")}</div></div>
+    <div class="card" style="background:var(--warn-soft)"><h3>${esc(t("expiringSoon"))}</h3>${soon.map(([b, u, d]) => `<p class="small"><span class="bt">${b}</span> × <span class="num">${u}</span> — +${d} ${esc(t("days"))}</p>`).join("")}<p class="small">${esc(t("expiringHint"))}</p></div>`; }
+  if (facSub === "triage") body = `<div class="list">${triage().map((r) => `<div class="item ${r.score >= 60 ? "crit" : r.score >= 40 ? "warnb" : ""}">
+      <div class="row"><h3>${esc(f("score", { n: r.score }))} · ${esc(t("urg_" + r.urgency))}</h3><span class="pill info bt">${r.bt}</span></div>
+      <p class="small mute"><span class="num">${r.left}</span> ${esc(t("units"))} · ${esc(f("sameTypeStock", { n: r.stock }))}</p>
+      <div class="chips">${r.reasons.map((x) => `<span class="pill ${x === "critical" ? "critical" : "warning"}">${esc(t("r_" + x))}</span>`).join("")}</div>
+      <div class="acts-row">${r.verified ? `<span class="small mute">${esc(f("verifiedMsg", { n: donorsFor(r).length }))}</span>` : `<button class="btn sm" data-verify="${r.id}">${esc(t("verifyAndCall"))}</button>`}
+      <button class="btn ghost sm" data-fulfil="${r.id}" ${INV.f1[r.bt] ? "" : "disabled"}>− ${esc(t("issue"))}</button></div></div>`).join("") || `<p class="mute">—</p>`}</div>`;
+  if (facSub === "scan") { const bags = DONATIONS.filter((d) => !["transfused","discarded"].includes(d.status));
+    body = `<div class="card">${scanned ? `<div class="row"><h3>${esc(f("donorInfo", { name: fname(DONOR), type: DONOR.bt }))}</h3><span class="pill ${nextEligible() ? "warning" : "ok"}">${esc(t(nextEligible() ? "notEligible" : "eligible"))}</span></div>
+      <p class="small mute">${esc(t("lastDonation"))}: <span class="num">${DONOR.last}</span> · ${esc(f("donationsCount", { n: achievements().n }))}</p>
+      <div class="acts-row"><button class="btn" id="record" ${nextEligible() ? "disabled" : ""}>${esc(t("recordDonation"))}</button><button class="btn ghost" id="unscan">${esc(t("cancel"))}</button></div>`
+      : `<button class="btn" id="scanBtn">${esc(t("simScan"))}</button><p class="small mute">${esc(t("scanHint"))}</p>`}</div>
+    <div class="card"><h3>${esc(t("advanceBag"))}</h3><div class="list">${bags.map((d) => { const nx = STEPS[STEPS.indexOf(d.status) + 1];
+      return `<div class="item"><div class="row"><span class="code">${d.code}</span><span class="pill info">${esc(t("j_" + d.status))}</span></div><div class="acts-row">
+      <button class="btn sm" data-adv="${d.code}">${esc(t("nextStep"))}: ${esc(t("j_" + nx))}</button><button class="btn ghost sm" data-discard="${d.code}">${esc(t("discard"))}</button></div></div>`; }).join("") || `<p class="small mute">—</p>`}</div></div>`; }
+  if (facSub === "report") body = `<div class="card"><div class="row"><h3>${esc(t("tReport"))} · ${dt(Date.now(), { dateStyle: "medium" })}</h3><span class="pill ${report?.ai ? "info" : "stable"}">${esc(t(report?.ai ? "reportAi" : "reportTemplate"))}</span></div>
+    <p class="report">${esc(report?.text ?? templateReport())}</p><div class="acts-row"><button class="btn ghost" id="aiBtn" hidden>✨ ${esc(t("reportDemo"))}</button><span class="small mute" id="aiSt"></span></div></div>`;
+  return head + body;
+}
+function templateReport() { const fc = forecast(), tr = triage(); const L = (k) => t(k);
+  return [`🔴 ${L("risk_critical")}: ${fc.filter((x) => x.risk === "critical").map((x) => `${x.b} (${x.days ?? "–"})`).join(", ") || L("none")}`,
+    `🟠 ${L("risk_warning")}: ${fc.filter((x) => x.risk === "warning").map((x) => `${x.b} (${x.days ?? "–"})`).join(", ") || L("none")}`,
+    `📋 ${f("incoming", { n: tr.length })}: ${tr.slice(0, 3).map((r) => `${r.bt}×${r.left} [${r.score}]`).join(", ") || L("none")}`,
+    `⚠️ ${L("expiringSoon").replace("⚠️ ", "")}: O+×3, A+×2`].join("\n"); }
+
+function mapView() { const roles = [["donor", t("roleDonor")], ["beneficiary", t("roleBeneficiary")], ["facility", t("tFacility")]]; let list = "", hint = "";
+  if (mapRole === "donor") { const urgent = new Set(openForDonor().map((r) => r.fac)); hint = t("nearestSites");
+    list = live().map((x) => ({ ...x, km: km(ME, x) })).sort((a, b) => a.km - b.km).map((x) => `<div class="item ${urgent.has(x.id) ? "crit" : ""}"><div class="row"><h3>${esc(fname(x))}</h3>${urgent.has(x.id) ? `<span class="pill critical">${esc(f("needsNow", { t: DONOR.bt, u: "" }).replace(/\s*\(\s*\S*\s*\)\s*$/, ""))}</span>` : `<span class="pill info">${esc(t("k_" + x.kind))}</span>`}</div>
+      <p class="small mute"><span class="num">${x.km}</span> ${esc(t("km"))} · <span class="num">${x.hours}</span></p><div class="acts-row">${gm(x)}<button class="btn sm" data-book="${x.id}" ${nextEligible() || APPT ? "disabled" : ""}>${esc(t("bookDonation"))}</button></div></div>`).join(""); }
+  else if (mapRole === "beneficiary") { const bt = benBt || "O-"; hint = `${t("patientType")}: ${bt}`; const by = new Map(); for (const x of inventoryNear(bt, 50)) { const p = by.get(x.fid); by.set(x.fid, (p ? p + " · " : "") + `${x.b}: ${x.units}`); }
+    list = [...by].map(([id, parts]) => `<div class="item"><div class="row"><h3>${esc(fname(fac(id)))}</h3><span class="small num">${km(ME, fac(id))} ${esc(t("km"))}</span></div><p class="small mute bt">${parts}</p><div class="acts-row">${gm(fac(id))}</div></div>`).join("") || `<p class="mute">${esc(t("noStock"))}</p>`; }
+  else { const c = density(); hint = f("densityInfo", { n: c.reduce((a, x) => a + x.n, 0), c: c.length }); list = `<button class="btn" data-go="forecast">🚨 ${esc(t("recall"))}</button>`; }
+  return `<div class="card"><div class="row"><h2>${esc(t("tMap"))}</h2><div class="chips">${roles.map(([k, l]) => `<button class="chip" data-mrole="${k}" aria-pressed="${mapRole === k}">${esc(l)}</button>`).join("")}</div></div>
+    <div class="mapbox" id="mapbox"></div><p class="small mute">${esc(hint)}</p><p class="note">${esc(t("mapNote"))}</p></div><div class="list">${list}</div>`; }
+function density() { const cells = new Map(); for (const d of DONORS) { if (!d.eligible || km(d, fac("f1")) > 20) continue; const k = (Math.round(d.lat*100)/100) + "," + (Math.round(d.lng*100)/100); cells.set(k, (cells.get(k) || 0) + 1); }
+  return [...cells].filter(([, n]) => n >= 3).map(([k, n]) => { const [lat, lng] = k.split(",").map(Number); return { lat, lng, n }; }); }
+function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function drawMap() { const W = 640, H = 380, bx = { a: 29.93, b: 30.12, c: 31.13, d: 31.36 }, X = (g) => ((g - bx.c) / (bx.d - bx.c)) * W, Y = (l) => H - ((l - bx.a) / (bx.b - bx.a)) * H;
+  let g = `<rect width="${W}" height="${H}" fill="${css("--bg")}"/>`; for (let i = 1; i < 8; i++) g += `<line x1="${i*W/8}" y1="0" x2="${i*W/8}" y2="${H}" stroke="${css("--line")}"/><line x1="0" y1="${i*H/8}" x2="${W}" y2="${i*H/8}" stroke="${css("--line")}"/>`;
+  const nile = [[29.93,31.245],[29.97,31.235],[30.01,31.228],[30.04,31.226],[30.065,31.222],[30.09,31.228],[30.12,31.235]];
+  g += `<path d="${nile.map(([a, b], i) => `${i ? "L" : "M"}${X(b).toFixed(1)},${Y(a).toFixed(1)}`).join(" ")}" stroke="${css("--sea")}" stroke-opacity=".55" stroke-width="9" fill="none" stroke-linecap="round"/><text x="${X(31.222) + 10}" y="${Y(30.105)}" font-size="12" fill="${css("--sea")}">${esc(t("nile"))}</text>`;
+  const lbl = (x, y, s, c) => `<text x="${x}" y="${y}" font-size="12" text-anchor="middle" fill="${c}" font-weight="600" paint-order="stroke" stroke="${css("--bg")}" stroke-width="4">${esc(s)}</text>`;
+  if (mapRole === "facility") { const c = density(), mx = Math.max(1, ...c.map((x) => x.n)); for (const cl of c) g += `<circle cx="${X(cl.lng)}" cy="${Y(cl.lat)}" r="${10 + 16*cl.n/mx}" fill="${css("--accent")}" fill-opacity="${.15 + .45*cl.n/mx}"/><text x="${X(cl.lng)}" y="${Y(cl.lat)+4}" font-size="11" text-anchor="middle" fill="${css("--ink")}" font-family="IBM Plex Mono, monospace">${cl.n}</text>`;
+    const x = fac("f1"); g += `<circle cx="${X(x.lng)}" cy="${Y(x.lat)}" r="9" fill="${css("--ink")}" stroke="${css("--surface")}" stroke-width="3"/>` + lbl(X(x.lng), Y(x.lat) - 14, fname(x), css("--ink")); }
+  else { const urgent = mapRole === "donor" ? new Set(openForDonor().map((r) => r.fac)) : new Set(); const shown = mapRole === "beneficiary" ? new Set(inventoryNear(benBt || "O-", 50).map((x) => x.fid)) : new Set(live().map((x) => x.id));
+    for (const x of live()) { if (!shown.has(x.id)) continue; const col = urgent.has(x.id) ? css("--crit") : css("--pin");
+      g += `<a href="${gmDir(x)}" target="_blank" rel="noopener"><path d="M${X(x.lng)},${Y(x.lat)} c-9,-14 -12,-20 -12,-26 a12,12 0 1 1 24,0 c0,6 -3,12 -12,26z" fill="${col}"/><circle cx="${X(x.lng)}" cy="${Y(x.lat) - 26}" r="4.5" fill="#fff"/>${lbl(X(x.lng), Y(x.lat) + 16, fname(x), css("--ink"))}</a>`; }
+    g += `<circle cx="${X(ME.lng)}" cy="${Y(ME.lat)}" r="8" fill="#1A73E8" stroke="#fff" stroke-width="3"/>` + lbl(X(ME.lng), Y(ME.lat) + 26, t("you"), "#1A73E8"); }
+  $("#mapbox").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="min-width:380px" role="img" aria-label="${esc(t("tMap"))}">${g}</svg>`; }
+
+function fcView() { const fc = forecast(), atRisk = fc.filter((x) => x.risk !== "stable").map((x) => x.b), plan = aiPlan && aiKey === planKey() ? aiPlan : null;
+  return `<div class="card"><h2>${esc(t("forecastTitle"))} — ${esc(fname(fac("f1")))}</h2>
+    <p class="small mute">${esc(t("season"))}</p><div class="chips">${Object.keys(SEA).map((k) => `<button class="chip" data-season="${k}" aria-pressed="${FC.season === k}">${esc(t("sea_" + k))}</button>`).join("")}</div>
+    <p class="small mute">${esc(t("surge"))}</p><div class="chips">${Object.keys(SUR).map((k) => `<button class="chip" data-surge="${k}" aria-pressed="${FC.surge === k}">${esc(t("sur_" + k))}</button>`).join("")}</div>
+    <label class="small mute" for="hz" style="font-weight:600">${esc(t("horizon"))}: <span class="num" id="hzv">${FC.horizon}</span> ${esc(t("days"))}</label><input id="hz" type="range" min="7" max="30" value="${FC.horizon}"></div>
+  <div class="matrix">${fc.map((x) => `<div class="cell ${x.risk === "stable" ? "" : x.risk}"><div class="row"><span class="bt">${x.b}</span><span class="pill ${x.risk} ${x.risk === "critical" ? "blink" : ""}">${esc(t("risk_" + x.risk))}</span></div>
+    <span class="days">${x.days === null ? esc(t("noDepletion")) : `<span class="num">${x.days}</span> ${esc(t("days"))}`}</span>${x.date ? `<span class="meta num">${x.date}</span>` : ""}
+    <span class="meta">${esc(t("safety"))} <span class="num">${x.safety}</span> · ${esc(t("burn"))} <span class="num">${x.burn}</span> · ${esc(t("inflow"))} <span class="num">${x.inflow}</span></span>
+    <div class="acts"><button class="btn ghost sm" data-mv="${x.b}:-1" ${x.u ? "" : "disabled"}>− ${esc(t("issue"))}</button><button class="btn ghost sm" data-mv="${x.b}:1">+ ${esc(t("deposit"))}</button></div></div>`).join("")}</div>
+  <div class="card"><h2>${esc(t("chart"))}</h2><div class="chart" id="chart"></div><div class="legend" id="legend"></div></div>
+  <div class="card"><div class="row"><h2>${esc(t("plan_title"))}</h2><span class="pill ${plan ? "info" : "stable"}">${esc(t(plan ? "aiSource" : "rulesSource"))}</span></div>
+    <div class="list">${(plan || rulePlan(fc)).map((it) => `<div class="item"><h3>${esc(it.title)} <span class="small" style="color:var(--accent)">· ${esc(t("pr_" + it.p) || it.p)}</span></h3>${it.detail ? `<p class="small mute">${esc(it.detail)}</p>` : ""}</div>`).join("")}</div>
+    <div class="acts-row"><button class="btn ghost" id="aiBtn" hidden>${esc(t("aiPlanBtn"))}</button><span class="small mute" id="aiSt"></span></div><p class="note">${esc(t("assumptions"))}</p></div>
+  <button class="btn" id="recall" ${atRisk.length ? "" : "disabled"}>🚨 ${esc(t("recall"))} ${atRisk.length ? `(<span class="bt">${atRisk.join(" ")}</span>)` : ""}</button>`; }
+function drawChart() { const col = [css("--crit"), css("--plasma")], series = forecast().slice(0, 2), D = 14, W = 640, H = 220, L = 34, R = 14, T = 14, B = 26;
+  const pts = series.map((x) => Array.from({ length: D + 1 }, (_, d) => Math.max(0, x.u + x.net * d))), step = Math.max(1, Math.ceil(Math.max(1, ...pts.flat(), ...series.map((x) => x.safety)) * 1.1 / 4)), maxY = step * 4;
+  const X = (d) => L + (d / D) * (W - L - R), Y = (v) => T + (1 - v / maxY) * (H - T - B); let g = "";
+  for (let k = 0; k <= 4; k++) g += `<line x1="${L}" x2="${W-R}" y1="${Y(step*k)}" y2="${Y(step*k)}" stroke="${css("--line")}"/><text x="${L-6}" y="${Y(step*k)+4}" font-size="10" fill="${css("--mute")}" text-anchor="end" font-family="IBM Plex Mono, monospace">${step*k}</text>`;
+  [0, 7, 14].forEach((d) => g += `<text x="${X(d)}" y="${H-8}" font-size="10" fill="${css("--mute")}" text-anchor="middle">${d ? "+" + d : esc(t("today"))}</text>`);
+  series.forEach((x, i) => { const p = pts[i].map((v, d) => `${d ? "L" : "M"}${X(d).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+    g += `<path d="${p} L${X(D)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${col[i]}" fill-opacity="0.12"/><path d="${p}" fill="none" stroke="${col[i]}" stroke-width="2.5"/><line x1="${L}" x2="${W-R}" y1="${Y(x.safety)}" y2="${Y(x.safety)}" stroke="${col[i]}" stroke-dasharray="5 4" stroke-opacity="0.7"/><circle cx="${X(D)}" cy="${Y(pts[i][D])}" r="3.5" fill="${col[i]}"/>`; });
+  $("#chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="min-width:420px" role="img" aria-label="${esc(t("chart"))}">${g}</svg>`;
+  $("#legend").innerHTML = series.map((x, i) => `<span><i style="background:${col[i]}"></i><bdi dir="ltr">${x.b}</bdi> — - - ${esc(t("safetyLine"))}</span>`).join(""); }
+
+function adminView() { const verified = FAC.filter((x) => x.verified && !x.suspended), mrr = verified.reduce((a, x) => a + PRICE[x.plan], 0), fees = CAMPAIGNS.reduce((a, c) => a + c.fee, 0);
+  const done = DONATIONS.filter((d) => d.status !== "discarded").length;
+  const head = sub("asub", adminSub, [["overview", t("overview")], ["users", t("users")], ["facilities", t("facilities")], ["campaigns", t("campaigns")], ["audit", t("audit")]]);
+  let body = "";
+  if (adminSub === "overview") body = `<div class="stats">${[["s_mrr", f("egpMonth", { n: mrr.toLocaleString(loc()) }), "ok"], ["s_campaignFees", fees.toLocaleString(loc()), "ok"], ["s_donors", DONORS.length + 2], ["s_eligible", DONORS.filter((d) => d.eligible).length],
+      ["s_facilities", verified.length], ["s_pending", FAC.filter((x) => !x.verified).length, FAC.some((x) => !x.verified) ? "crit" : ""], ["s_open", REQUESTS.filter((r) => r.secured < r.units).length, "crit"],
+      ["s_fulfilled30", REQUESTS.filter((r) => r.secured >= r.units).length], ["s_donations30", DONATIONS.length], ["s_lives", done * 3, "crit"], ["s_suspended", USERS.filter((u) => u.suspended).length + FAC.filter((x) => x.suspended).length]]
+      .map(([k, v, tone]) => `<div class="stat"><b style="${tone ? `color:var(--${tone})` : ""}">${esc(String(v))}</b><span class="small mute">${esc(t(k))}</span></div>`).join("")}</div>
+    <div class="card"><h3>${esc(t("revenue"))} · ${esc(t("plan"))}</h3>${["free","pro","enterprise"].map((p) => `<div class="row"><span>${esc(t("plan_" + p))} — ${esc(f("egpMonth", { n: PRICE[p].toLocaleString(loc()) }))}</span><span class="num">${verified.filter((x) => x.plan === p).length}</span></div>`).join("")}</div><p class="note">${esc(t("sampleNote"))}</p>`;
+  if (adminSub === "users") body = `<div class="list">${USERS.map((u) => `<div class="item ${u.suspended ? "crit" : ""}"><div class="row"><h3>${esc(fname(u))}</h3>${u.suspended ? `<span class="pill critical">${esc(t("suspended"))}</span>` : ""}</div>
+      <p class="small mute num">${u.phone}${u.fac ? ` · ${esc(fname(fac(u.fac)))}` : ""}</p><div class="chips">${["donor","beneficiary","facility_staff","admin"].map((r) => `<button class="chip" data-urole="${u.id}:${r}" aria-pressed="${u.role === r}">${esc({ donor: t("roleDonor"), beneficiary: t("roleBeneficiary"), facility_staff: t("roleStaff"), admin: t("tAdmin") }[r])}</button>`).join("")}</div>
+      <div class="acts-row"><button class="btn ${u.suspended ? "" : "ghost"} sm" data-usus="${u.id}">${esc(cbtn("u" + u.id, t(u.suspended ? "unsuspend" : "suspend")))}</button></div></div>`).join("")}</div>`;
+  if (adminSub === "facilities") body = `<div class="list">${FAC.map((x) => `<div class="item ${x.suspended ? "crit" : !x.verified ? "warnb" : ""}"><div class="row"><h3>${esc(fname(x))}</h3><span class="pill ${x.suspended ? "critical" : x.verified ? "ok" : "warning"}">${esc(t(x.suspended ? "suspended" : x.verified ? "verified" : "pending"))}</span></div>
+      <p class="small mute">${esc(t("k_" + x.kind))} · <span class="num">${x.phone}</span></p><div class="chips">${["free","pro","enterprise"].map((p) => `<button class="chip" data-plan="${x.id}:${p}" aria-pressed="${x.plan === p}">${esc(t("plan_" + p))}</button>`).join("")}</div>
+      <div class="acts-row"><button class="btn sm ${x.verified ? "ghost" : ""}" data-fver="${x.id}">${esc(t(x.verified ? "unverify" : "verify"))}</button><button class="btn ghost sm" data-fsus="${x.id}">${esc(cbtn("f" + x.id, t(x.suspended ? "unsuspend" : "suspend")))}</button></div></div>`).join("")}</div>`;
+  if (adminSub === "campaigns") body = `<div class="card"><h3>${esc(t("createCampaign"))}</h3><label class="f">${esc(t("campaignTitle"))}<input type="text" id="cTitle"></label><label class="f">${esc(t("org"))}<input type="text" id="cOrg"></label>
+      <label class="f">${esc(t("feeEgp"))}<input type="number" id="cFee" value="20000" min="0"></label><button class="btn" id="cSave">${esc(t("save"))}</button></div>
+    <div class="list">${CAMPAIGNS.map((c) => `<div class="item"><div class="row"><h3>${esc(lang === "ar" ? c.title.ar : c.title.en)}</h3><span class="pill info code">${c.code}</span></div><p class="small mute">${esc(c.org)} · ${esc(f("signups", { n: c.signups }))} · <span class="num">${c.fee.toLocaleString(loc())}</span> EGP</p></div>`).join("")}</div>`;
+  if (adminSub === "audit") body = AUDIT.length ? `<div class="list">${AUDIT.map((a) => `<div class="item"><div class="row"><b class="small">${esc(a.action)}</b><span class="small mute">${new Date(a.at).toLocaleTimeString(loc())}</span></div><div class="audit">${esc(a.target)} ${esc(JSON.stringify(a.details))}</div></div>`).join("")}</div>` : `<p class="mute">${esc(t("auditEmpty"))}</p>`;
+  return `<div class="row"><h2>${esc(t("tAdmin"))}</h2></div>` + head + body; }
+
+// ================= المساعد =================
+const CHAT = [], BUB = [];
+let busy = false, ctl = null, agentRole = "beneficiary";
+function agentView() { if (!BUB.length) BUB.push({ k: "bot", t: t("agentHello") });
+  return `<div class="card"><div class="row"><h2>${esc(t("tAgent"))}</h2><div class="chips" aria-label="${esc(t("speakAs"))}">${[["beneficiary", t("roleBeneficiary")], ["donor", t("roleDonor")], ["facility", t("roleStaff")]].map(([k, l]) => `<button class="chip" data-arole="${k}" aria-pressed="${agentRole === k}">${esc(l)}</button>`).join("")}</div></div>
+    <p class="small mute" id="agentNote">${esc(t("agentNote"))}</p><div class="chips">${[t("sug1"), t("sug2"), t("sug3")].map((q) => `<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div></div>
+  <div class="card chat"><div class="msgs" id="msgs"></div><form class="composer" id="composer"><input type="text" id="q" autocomplete="off" placeholder="${esc(t("agentPlaceholder"))}" aria-label="${esc(t("agentPlaceholder"))}"><button class="btn" id="send">${esc(t("send"))}</button><button class="btn ghost" type="button" id="stop" hidden>${esc(t("stop"))}</button></form></div>`; }
+function paintChat() { const m = $("#msgs"); if (!m) return; m.innerHTML = BUB.map((b) => `<div class="msg ${b.k}">${esc(b.t)}</div>`).join(""); m.scrollTop = m.scrollHeight; }
+async function setupAgent() { const s = await getSample(); if (!s && view === "agent") { $("#agentNote").textContent = t("needsClaude"); const b = $("#send"); if (b) b.disabled = true; } }
+const note = (x) => { BUB.push({ k: "tool", t: x }); paintChat(); };
+const TOOLS = () => [
+  { name: "blood_compatibility", description: "Donor types compatible with a recipient type.", inputSchema: { type: "object", properties: { recipient: { type: "string", enum: TYPES } }, required: ["recipient"] }, execute: ({ recipient }) => { note("🔎 " + recipient); return { compatible: COMPAT[recipient] || [] }; } },
+  { name: "search_inventory", description: "Compatible stock at verified facilities near the user (name, phone, type, units, km).", inputSchema: { type: "object", properties: { blood_type: { type: "string", enum: TYPES } }, required: ["blood_type"] },
+    execute: ({ blood_type }) => { if (!COMPAT[blood_type]) throw new Error("bad type"); note("🔎 " + blood_type); return { results: inventoryNear(blood_type, 40).slice(0, 6).map((x) => ({ facility_id: x.fid, facility: fname(fac(x.fid)), phone: fac(x.fid).phone, type: x.b, units: x.units, km: x.km })) }; } },
+  { name: "my_eligibility", description: "Donor eligibility (interval rule).", execute: () => { note("🩺"); const n = nextEligible(); return { blood_type: DONOR.bt, last_donation: DONOR.last, eligible_now: !n, next_eligible: n ? n.toISOString().slice(0, 10) : "now" }; } },
+  { name: "open_requests_near_me", description: "Open verified requests near the donor that their type can serve.", execute: () => { note("📋"); return { requests: openForDonor().map((r) => ({ facility: fname(fac(r.fac)), type: r.bt, units_left: r.units - r.secured, urgency: r.urgency, km: r.km })) }; } },
+  { name: "my_achievements", description: "Donor's donations, estimated lives saved, points, badges, challenges.", execute: () => { note("🏅"); return achievements(); } },
+  { name: "triage_requests", description: "Staff: open requests at the user's hospital ranked by priority score with reasons.", execute: () => { note("📋 triage"); return { requests: triage().map(({ bt, left, urgency, score, reasons, stock }) => ({ type: bt, units_left: left, urgency, score, reasons, same_type_stock: stock })) }; } },
+  { name: "facility_forecast", description: "Staff: days until depletion and risk per type at the user's hospital.", execute: () => { note("📈"); return { forecast: forecast().map(({ b, u, days, risk, need }) => ({ type: b, units: u, days_until_depletion: days, risk, units_needed: need })) }; } },
+  { name: "create_blood_request", description: "Create a request. Only after the user explicitly confirmed the summarized details.", inputSchema: { type: "object", properties: { facility_id: { type: "string", enum: FAC.map((x) => x.id) }, blood_type: { type: "string", enum: TYPES }, units: { type: "integer" }, urgency: { type: "string", enum: ["routine","urgent","critical"] }, user_confirmed: { type: "boolean" } }, required: ["facility_id","blood_type","units","urgency","user_confirmed"] },
+    execute: (i) => { if (i.user_confirmed !== true) return { error: "confirmation required" }; const u = Math.round(+i.units); if (!fac(i.facility_id) || !COMPAT[i.blood_type] || !(u >= 1 && u <= 20)) throw new Error("invalid");
+      REQUESTS.push({ id: "r" + seq++, fac: i.facility_id, bt: i.blood_type, units: u, secured: 0, urgency: i.urgency, verified: false, mine: true, at: Date.now() }); note("✅ " + i.blood_type); return { created: true, status: "awaiting facility verification" }; } },
+];
+async function ask(q) { q = (q || "").trim(); if (!q || busy) return; const s = await getSample(); if (!s) return;
+  BUB.push({ k: "me", t: q }); CHAT.push({ role: "user", content: q }); const bot = { k: "bot", t: t("thinking") }; BUB.push(bot); paintChat();
+  busy = true; ctl = new AbortController(); tb(true);
+  const head = `You are "Rafeeq", assistant of a SMART BLOOD BANK demo app in Egypt. Reply in the language of the user's latest message; if unclear use ${LANG_NAME[lang]}. Short and warm.
+The user is ${{ beneficiary: "a patient's relative", donor: "a donor (type O-)", facility: "staff at " + fac("f1").en }[agentRole]}; location downtown Cairo.
+Use tools for every fact; never invent numbers. No medical diagnosis. Emergencies: first advise calling an ambulance (123 in Egypt). Never reveal donor identities. Donation is voluntary and unpaid; never suggest buying blood.
+Before create_blood_request, summarize and ask for confirmation. All data is demo data.`;
+  const input = CHAT.map((m, i) => i === 0 ? { role: "user", content: head + "\n\nUser: " + m.content } : m);
+  try { const { text } = await s(input, { tools: TOOLS(), modelTier: "quick", cache: false, signal: ctl.signal, onText: ({ text }) => { bot.t = text; BUB.splice(BUB.indexOf(bot), 1); BUB.push(bot); paintChat(); } });
+    bot.t = text || "…"; CHAT.push({ role: "assistant", content: bot.t });
+  } catch (e) { bot.t = e?.text || sampleErr(e); if (e?.text) CHAT.push({ role: "assistant", content: e.text }); else CHAT.pop(); }
+  finally { busy = false; tb(false); paintChat(); } }
+function tb(b) { const s = $("#send"), x = $("#stop"); if (s) s.disabled = b; if (x) x.hidden = !b; }
+async function aiGen(kind) { const s = await getSample(); if (!s) return; const st = $("#aiSt"), btn = $("#aiBtn"); btn.disabled = true; st.textContent = t("thinking");
+  try { if (kind === "plan") { const key = planKey();
+      const data = await s.json(`Hospital blood bank in Egypt. From this deterministic forecast JSON, give 3-5 prioritized operational interventions (donor recall, inter-hospital borrowing, PBM, season-timed drives, monitoring). Use only given numbers; no clinical orders; never suggest buying blood. Write in ${LANG_NAME[lang]}.
+Return ONLY JSON {"items":[{"p":"now|24h|this_week","title":"...","detail":"max 2 sentences"}]}
+Season ${FC.season}, surge ${FC.surge}, horizon ${FC.horizon} days. ${JSON.stringify(forecast().map(({ b, u, safety, burn, inflow, days, risk, need }) => ({ b, u, safety, burn, inflow, days, risk, need })))}`, { modelTier: "quick" });
+      if (!Array.isArray(data?.items)) throw {}; aiPlan = data.items.slice(0, 6).map((x) => ({ p: String(x.p), title: String(x.title), detail: String(x.detail || "") })); aiKey = key; render(); }
+    else { const { text } = await s(`Write a short morning operations brief (max 120 words, plain text, 3 parts: status line, urgent actions as bullets, watch list) for ${fac("f1").en} blood bank in ${LANG_NAME[lang]}. Use only this data, no clinical orders, never suggest buying blood:
+${JSON.stringify({ forecast: forecast().map(({ b, u, days, risk }) => ({ b, u, days, risk })), triage: triage().map(({ bt, left, urgency, score, reasons }) => ({ bt, left, urgency, score, reasons })), expiring_7d: { "O+": 3, "A+": 2 } })}`, { modelTier: "quick" });
+      report = { text, ai: true }; render(); }
+  } catch (e) { if ($("#aiSt")) $("#aiSt").textContent = e?.code ? sampleErr(e) : t("planErr"); if ($("#aiBtn")) $("#aiBtn").disabled = false; } }
+function drawQR() { const el = $("#qr"); if (!el) return; el.innerHTML = ""; if (window.QRCode) new QRCode(el, { text: "sbb:donor:demo-" + DONOR.id, width: 180, height: 180, colorDark: "#1C1416", colorLight: "#ffffff" }); else el.textContent = "sbb:donor:demo-" + DONOR.id; }
+
+// ================= الأحداث =================
+function on(sel, ev, fn) { document.querySelectorAll(sel).forEach((e) => e.addEventListener(ev, (x) => fn(e, x))); }
+function bind() {
+  on("[data-view]", "click", (e) => { pending = null; view = e.dataset.view; render(); scrollTo(0, 0); });
+  on("[data-go]", "click", (e) => { view = e.dataset.go; render(); });
+  on("[data-dsub]", "click", (e) => { donorSub = e.dataset.dsub; render(); });
+  on("[data-fsub]", "click", (e) => { facSub = e.dataset.fsub; render(); });
+  on("[data-asub]", "click", (e) => { adminSub = e.dataset.asub; render(); });
+  on("#avail", "change", (e) => { DONOR.available = e.checked; render(); });
+  on("#board", "change", (e) => { DONOR.board = e.checked; render(); });
+  on("[data-respond]", "click", (e) => { const r = REQUESTS.find((x) => x.id === e.dataset.respond); RESPONSES.add(r.id); toast(f("thanksResponded", { name: fname(fac(r.fac)) })); render(); });
+  on("[data-join]", "click", (e) => join(e.dataset.join)); on("#joinBtn", "click", () => join($("#code").value));
+  on("[data-bt]", "click", (e) => { benBt = e.dataset.bt; benResults = null; render(); });
+  on("#units", "change", (e) => benUnits = Math.max(1, Math.min(20, Math.round(+e.value) || 1)));
+  on("#search", "click", () => { benResults = inventoryNear(benBt); render(); });
+  on("[data-req]", "click", (e) => { REQUESTS.push({ id: "r" + seq++, fac: e.dataset.req, bt: benBt, units: benUnits, secured: 0, urgency: "urgent", verified: false, mine: true, at: Date.now() }); toast(f("requestSent", { name: fname(fac(e.dataset.req)) })); render(); });
+  on("[data-mv]", "click", (e) => { const [b, d] = e.dataset.mv.split(":"); INV.f1[b] = Math.max(0, INV.f1[b] + +d); if (+d < 0) RATES[b].burn = r1(RATES[b].burn + 1/14); else RATES[b].inflow = r1(RATES[b].inflow + 1/14); render(); });
+  on("[data-verify]", "click", (e) => { const r = REQUESTS.find((x) => x.id === e.dataset.verify); r.verified = true; audit("verify_request", r.id, { verified: [false, true] }); toast(f("verifiedMsg", { n: donorsFor(r).length }) + " " + t("simulated")); render(); });
+  on("[data-fulfil]", "click", (e) => { const r = REQUESTS.find((x) => x.id === e.dataset.fulfil); if (INV.f1[r.bt] > 0) { INV.f1[r.bt]--; r.secured++; RATES[r.bt].burn = r1(RATES[r.bt].burn + 1/14); render(); } });
+  on("#scanBtn", "click", () => { scanned = true; audit("qr_lookup", fname(DONOR), { facility: "f1" }); render(); }); on("#unscan", "click", () => { scanned = null; render(); });
+  on("#record", "click", () => { const code = Math.random().toString(16).slice(2, 12).toUpperCase(); DONATIONS.unshift({ code, donor: "u1", bt: DONOR.bt, status: "collected", events: [{ s: "collected", at: Date.now() }] });
+    DONOR.last = new Date().toISOString().slice(0, 10); scanned = null; toast(f("donationRecorded", { code })); render(); });
+  on("[data-adv]", "click", (e) => { const d = DONATIONS.find((x) => x.code === e.dataset.adv), nx = STEPS[STEPS.indexOf(d.status) + 1]; if (!nx) return;
+    if (nx === "ready") INV.f1[d.bt]++; if (nx === "issued") { INV.f1[d.bt] = Math.max(0, INV.f1[d.bt] - 1); const r = REQUESTS.find((x) => x.fac === "f1" && x.bt === d.bt && x.secured < x.units); if (r) r.secured++; }
+    d.status = nx; d.events.push({ s: nx, at: Date.now() }); toast(t("j_" + nx)); render(); });
+  on("[data-discard]", "click", (e) => { const d = DONATIONS.find((x) => x.code === e.dataset.discard); if (d.status === "ready") INV.f1[d.bt] = Math.max(0, INV.f1[d.bt] - 1); d.status = "discarded"; d.events.push({ s: "discarded", at: Date.now() }); render(); });
+  on("[data-season]", "click", (e) => { FC.season = e.dataset.season; render(); }); on("[data-surge]", "click", (e) => { FC.surge = e.dataset.surge; render(); });
+  on("#hz", "input", (e) => { FC.horizon = +e.value; $("#hzv").textContent = e.value; }); on("#hz", "change", () => render());
+  on("#recall", "click", () => { const ty = forecast().filter((x) => x.risk !== "stable").map((x) => x.b); const n = DONORS.filter((d) => d.eligible && ty.includes(d.bt) && km(d, fac("f1")) <= 25).length; toast(f("recallDone", { n, t: ty.join(" ") }) + " " + t("simulated")); });
+  on("#aiBtn", "click", () => aiGen(view === "forecast" ? "plan" : "report"));
+  on("[data-mrole]", "click", (e) => { mapRole = e.dataset.mrole; render(); });
+  on("[data-book]", "click", (e) => { const x = fac(e.dataset.book), d = new Date(Date.now() + 864e5); APPT = `${fname(x)} — ${dt(d, { weekday: "long", day: "numeric", month: "long" })} 11:00`;
+    toast(f("booked", { name: fname(x), day: dt(d, { weekday: "long", day: "numeric", month: "long" }), hour: "11:00" })); render(); });
+  on("[data-arole]", "click", (e) => { agentRole = e.dataset.arole; document.querySelectorAll("[data-arole]").forEach((x) => x.setAttribute("aria-pressed", String(x === e))); });
+  on("[data-q]", "click", (e) => ask(e.dataset.q));
+  on("#composer", "submit", (e, ev) => { ev.preventDefault(); const q = $("#q"); const v = q.value; q.value = ""; ask(v); });
+  on("#stop", "click", () => ctl?.abort());
+  on("[data-urole]", "click", (e) => { const [id, r] = e.dataset.urole.split(":"), u = USERS.find((x) => x.id === id); if (u.role === r) return; audit("set_role", fname(u), { role: [u.role, r] }); u.role = r; render(); });
+  on("[data-usus]", "click", (e) => { const u = USERS.find((x) => x.id === e.dataset.usus); twoStep("u" + u.id, () => { audit("suspend_user", fname(u), { suspended: [u.suspended, !u.suspended] }); u.suspended = !u.suspended; render(); }); });
+  on("[data-plan]", "click", (e) => { const [id, p] = e.dataset.plan.split(":"), x = fac(id); if (x.plan === p) return; audit("set_plan", fname(x), { plan: [x.plan, p] }); x.plan = p; render(); });
+  on("[data-fver]", "click", (e) => { const x = fac(e.dataset.fver); audit("verify_facility", fname(x), { verified: [x.verified, !x.verified] }); x.verified = !x.verified; render(); });
+  on("[data-fsus]", "click", (e) => { const x = fac(e.dataset.fsus); twoStep("f" + x.id, () => { audit("suspend_facility", fname(x), { suspended: [x.suspended, !x.suspended] }); x.suspended = !x.suspended; render(); }); });
+  on("#cSave", "click", () => { const title = $("#cTitle").value.trim(), org = $("#cOrg").value.trim(), fee = Math.max(0, +$("#cFee").value || 0); if (!title || !org) return;
+    const code = Math.random().toString(36).slice(2, 8).toUpperCase(); CAMPAIGNS.unshift({ id: "c" + seq++, title: { ar: title, en: title }, org, fac: "f2", code, start: Date.now() + 864e5, end: Date.now() + 8*864e5, target: 50, fee, signups: 0 });
+    audit("create_campaign", title, { fee_egp: fee, code }); toast(code); render(); });
+}
+function join(code) { const c = CAMPAIGNS.find((x) => x.code === String(code || "").trim().toUpperCase() && x.end > Date.now()); if (!c) return toast(t("campaignNotFound")); if (!JOINED.has(c.id)) { JOINED.add(c.id); c.signups++; } toast(t("joined")); render(); }
+$("#lang").addEventListener("change", (e) => { lang = e.target.value; try { localStorage.setItem("sbb.demo.lang", lang); } catch {} BUB.length = 0; CHAT.length = 0; report = null; render(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => render());
+new MutationObserver(() => { if (view === "forecast") drawChart(); if (view === "map") drawMap(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+render();
+})();
+</script>

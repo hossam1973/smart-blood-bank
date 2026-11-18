@@ -2,48 +2,50 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-/* Layout: app shell — sticky top bar with portal tabs, one working column (max 980px); cards by role only */
+/* Layout: app shell — sticky bar (brand, language, portal tabs) over one working column (max 980px) */
 :root {
   --bg: #FBF9F9; --surface: #FFFFFF; --ink: #1C1416; --mute: #6E6265; --line: #EADFE0;
-  --accent: #A3122A; --accent-soft: #F8E6E9; --on-accent: #FFFFFF; --plasma: #C9A227;
+  --accent: #A3122A; --accent-soft: #F8E6E9; --on-accent: #FFFFFF; --plasma: #C9A227; --sea: #4A90C8; --pin: #1565C0;
   --ok: #2F7D4F; --ok-soft: #E4F2E9; --warn: #B86E00; --warn-soft: #FBF0DD; --crit: #C21F3A; --crit-soft: #FBE3E7;
-  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
-  --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Noto Sans Devanagari", "Segoe UI", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Noto Sans Devanagari", "Segoe UI", Tahoma, sans-serif;
   --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
-  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52; --sea: #5FA3D9; --pin: #64A8F0;
   --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
-  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52; --sea: #5FA3D9; --pin: #64A8F0;
   --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A; color-scheme: dark }
 
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; }
+body.ur { font-family: "Noto Nastaliq Urdu", var(--f-body); line-height: 2.1; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
-.app { direction: rtl; }
 .wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 h1, h2, h3 { font-family: var(--f-display); margin: 0; line-height: 1.35; text-wrap: balance; }
+body.ur h1, body.ur h2, body.ur h3 { font-family: "Noto Nastaliq Urdu", var(--f-display); line-height: 1.9; }
 h2 { font-size: 19px; font-weight: 600; } h3 { font-size: 16px; font-weight: 600; }
 p { margin: 0; }
 .mute { color: var(--mute); } .small { font-size: 13px; }
-.num { font-family: var(--f-data); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
-.bt { font-family: var(--f-data); direction: ltr; unicode-bidi: isolate; font-weight: 500; }
-
+.num, .bt, .code { font-family: var(--f-data); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+.bt { font-weight: 500; }
 header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
 .bar .wrap { display: grid; gap: 8px; padding-block: 10px; }
 .brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .brand h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.drop { width: 14px; height: 18px; background: var(--accent); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; transform: rotate(0deg); display: inline-block; }
+.drop { width: 14px; height: 18px; background: var(--accent); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; display: inline-block; }
+.brand-r { display: flex; align-items: center; gap: 8px; }
 .demo-tag { font-size: 12px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 10px; border-radius: 999px; }
-.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+select { font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.tabs, .subtabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
 .tab { font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; white-space: nowrap; }
 .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 main { padding-block: 18px 60px; display: grid; gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
@@ -62,27 +64,39 @@ main { padding-block: 18px 60px; display: grid; gap: 16px; }
 @keyframes pulse { 50% { opacity: .4; } }
 .list { display: grid; gap: 8px; }
 .item { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; background: var(--bg); }
-.item.crit { border-color: var(--crit); }
+.item.crit { border-color: var(--crit); } .item.warnb { border-color: var(--warn); }
 label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--mute); }
-input[type=number], select { font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+input[type=number], input[type=text] { font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); min-width: 0; }
 input[type=range] { width: 100%; accent-color: var(--accent); }
 .switch { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
 .switch input { width: 18px; height: 18px; accent-color: var(--accent); }
-.big { font-family: var(--f-display); font-size: 28px; font-weight: 700; }
-
 .matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
 .cell { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: grid; gap: 3px; background: var(--bg); }
 .cell.critical { border: 2px solid var(--crit); } .cell.warning { border: 2px solid var(--warn); }
 .cell .days { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
 .cell .meta { font-size: 12px; color: var(--mute); }
-.cell .acts { display: flex; gap: 6px; margin-top: 4px; }
-.cell .acts button { flex: 1; }
-.chart { overflow-x: auto; direction: ltr; }
+.cell .acts { display: flex; gap: 6px; margin-top: 4px; } .cell .acts button { flex: 1; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); display: grid; gap: 2px; }
+.stat b { font-family: var(--f-display); font-size: 20px; line-height: 1.3; overflow-wrap: anywhere; }
+.subtabs { padding-bottom: 2px; } .subtabs .chip { white-space: nowrap; flex: none; }
+.chart, .mapbox { overflow-x: auto; direction: ltr; }
+.mapbox { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.mapbox svg, .chart svg { display: block; width: 100%; height: auto; }
 .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--mute); }
 .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-inline-end: 6px; border-radius: 2px; }
-.plan .item h3 { font-size: 15px; }
-
-/* chat */
+.gm { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; padding: 5px 10px; border-radius: 8px; background: var(--accent-soft); }
+.acts-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.timeline { display: grid; gap: 0; }
+.step { display: grid; grid-template-columns: 18px 1fr; gap: 10px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--line); margin-top: 6px; }
+.dot.on { background: var(--accent); } .dot.life { background: var(--ok); }
+.vline { width: 2px; height: 18px; background: var(--line); margin-inline-start: 6px; } .vline.on { background: var(--accent); }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.badge { text-align: center; display: grid; gap: 2px; padding: 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+.badge .ic { font-size: 30px; } .badge.off { opacity: .32; }
+.qr { background: #fff; padding: 12px; border-radius: 12px; justify-self: center; }
+.qr img, .qr canvas { display: block; }
 .chat { display: grid; grid-template-rows: 1fr auto; min-height: 420px; max-height: 70vh; padding: 0; overflow: hidden; }
 .msgs { overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 .msg { max-width: 85%; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -90,421 +104,397 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .msg.me { align-self: flex-end; background: var(--accent); color: var(--on-accent); }
 .msg.tool { align-self: flex-start; font-size: 12.5px; color: var(--mute); background: transparent; padding: 0 4px; }
 .composer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); background: var(--surface); }
-.composer input { flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
-.suggest { display: flex; flex-wrap: wrap; gap: 6px; }
-.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; direction: rtl; }
-.mapbox { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg); }
-.mapbox svg { display: block; width: 100%; height: auto; }
-.gm { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; padding: 5px 10px; border-radius: 8px; background: var(--accent-soft); }
-.gm:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.acts-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.composer input { flex: 1; }
+.report { white-space: pre-wrap; line-height: 1.9; }
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
 .note { font-size: 12.5px; color: var(--mute); border-inline-start: 2px solid var(--line); padding-inline-start: 8px; }
+.audit { font-family: var(--f-data); font-size: 12px; direction: ltr; text-align: start; unicode-bidi: plaintext; color: var(--mute); }
 </style>
 
-<div class="app">
+<div class="app" id="app">
 <header class="bar"><div class="wrap">
   <div class="brand">
-    <h1><span class="drop" aria-hidden="true"></span>بنك الدم الذكي</h1>
-    <span class="demo-tag">نسخة تجريبية · بيانات وهمية</span>
+    <h1><span class="drop" aria-hidden="true"></span><span id="appName"></span></h1>
+    <div class="brand-r"><span class="demo-tag" id="demoTag"></span>
+      <label><span class="small mute" id="langLbl" style="margin-inline-end:4px"></span><select id="lang" aria-labelledby="langLbl"></select></label></div>
   </div>
-  <div class="tabs" role="tablist" aria-label="البوابات">
-    <button class="tab" role="tab" data-view="donor">بوابة المتبرع</button>
-    <button class="tab" role="tab" data-view="beneficiary">بوابة المستفيد</button>
-    <button class="tab" role="tab" data-view="facility">بوابة المنشأة</button>
-    <button class="tab" role="tab" data-view="map">🗺️ الخريطة</button>
-    <button class="tab" role="tab" data-view="forecast">📈 تنبؤ المخزون</button>
-    <button class="tab" role="tab" data-view="agent">🤖 المساعد رفيق</button>
-  </div>
+  <div class="tabs" role="tablist" id="tabs"></div>
 </div></header>
 <main class="wrap" id="view" aria-live="polite"></main>
 </div>
 <div class="toast" id="toast" hidden></div>
+<script type="application/json" id="i18n">{"ar":{"appName":"بنك الدم الذكي","save":"حفظ","cancel":"إلغاء","confirm":"تأكيد","loading":"جاري التحميل…","error":"خطأ","km":"كم","units":"وحدة","days":"يوم","perDay":"/يوم","directions":"📍 الاتجاهات","call":"اتصال","askAgent":"اسأل المساعد الذكي","none":"لا شيء","search":"بحث","optional":"اختياري","tDonor":"بوابة المتبرع","tBeneficiary":"بوابة المستفيد","tFacility":"بوابة المنشأة","tAgent":"المساعد الذكي","tMap":"الخريطة","tBook":"حجز موعد تبرع","tForecast":"تنبؤ المخزون","tAdmin":"إدارة المنصة","tCard":"بطاقة المتبرع","tJourney":"رحلة تبرعاتي","tAchievements":"أوسمتي وتحدياتي","tCampaigns":"حملات التبرع","tReport":"التقرير اليومي","tSettings":"الإعدادات","tScan":"مسح بطاقة متبرع","tOnboarding":"إكمال الحساب","loginTagline":"قطرة دم تنقذ حياة 🩸","loginSub":"نربط المتبرعين والمرضى بالمستشفيات وبنوك الدم الأقرب إليك، في دقائق.","phone":"رقم الهاتف","otpCode":"رمز التحقق","sendCode":"إرسال رمز التحقق","verifyCode":"تأكيد الدخول","wrongCode":"رمز غير صحيح","iAm":"أنا…","roleDonor":"متبرع","roleBeneficiary":"مريض / مستفيد","roleStaff":"موظف مستشفى / بنك دم","name":"الاسم","bloodType":"فصيلة الدم","bloodTypePatient":"فصيلة الدم (للمريض إن وُجدت)","sex":"النوع","male":"ذكر","female":"أنثى","locationPrivacy":"نستخدم موقعك لحساب المسافة فقط، ولا يظهر موقعك الدقيق لأي مستخدم آخر.","saveContinue":"حفظ ومتابعة","completeData":"أكمل البيانات","staffPending":"سيتم ربط حسابك بالمنشأة بعد توثيقها من إدارة المنصة.","yourType":"فصيلتك","eligibleNow":"أنت مؤهل للتبرع الآن ✅","eligibleAfter":"يمكنك التبرع مجددًا بعد {date}","availableToggle":"متاح لاستقبال نداءات الطوارئ","nearestSites":"🗺️ أقرب أماكن التبرع","nearbyRequests":"طلبات قريبة تحتاج فصيلتك ({n})","noRequests":"لا توجد طلبات متوافقة قريبة الآن. سنرسل لك إشعارًا عند الحاجة.","willDonate":"سأتبرع","thanksResponded":"شكرًا لك ❤️ تم إبلاغ {name}. توجّه إليه ومعك بطاقة الهوية.","alreadyResponded":"سبق أن استجبت لهذا الطلب","urg_routine":"عادي","urg_urgent":"عاجل","urg_critical":"حرج 🚨","unitsLeftKm":"{u} وحدة متبقية · {km} كم","myCard":"🪪 بطاقتي","myJourney":"🩸 رحلة تبرعاتي","myAchievements":"🏅 أوسمتي","campaigns":"📣 الحملات","patientType":"فصيلة المريض","unitsNeeded":"عدد الوحدات المطلوبة","findStock":"ابحث عن أقرب مخزون متوافق","enableLocation":"فعّل الموقع","enableLocationMsg":"نحتاج موقعك لإيجاد أقرب مخزون.","noStock":"لا يوجد مخزون متوافق قريب. أنشئ طلبًا لدى أقرب مستشفى وسنطلق نداءً للمتبرعين.","unitsAvailableKm":"{u} وحدة متاحة · {km} كم","requestHere":"اطلب الآن","requestSent":"تم إرسال الطلب إلى {name}، وسيتواصل معك للتأكيد.","myRequests":"طلباتي","securedOf":"تم تأمين {s} من {n} وحدة","showOnMap":"🗺️ عرض المخزون على الخريطة","st_open":"مفتوح","st_matching":"جاري البحث","st_partially_fulfilled":"تم جزئيًا","st_fulfilled":"مكتمل ✅","st_cancelled":"ملغي","st_expired":"منتهي","inventoryTitle":"المخزون (كريات حمراء)","low":"منخفض","issue":"صرف","deposit":"إيداع","expiringSoon":"⚠️ وحدات تنتهي خلال 7 أيام","expiringHint":"اقتراح: انقلها لمنشأة قريبة تحتاجها بدل إهدارها.","incoming":"الطلبات الواردة حسب الأولوية ({n})","verifyAndCall":"توثيق الطلب ونداء المتبرعين","verifiedMsg":"يوجد {n} متبرع مؤهل قريب وسيتم إشعارهم.","sameTypeStock":"المتوفر من نفس الفصيلة: {n}","notLinked":"حسابك بانتظار ربطه بمنشأة موثقة من إدارة المنصة.","donorDensityMap":"🗺️ خريطة كثافة المتبرعين","score":"الأولوية {n}","r_critical":"حرج","r_waiting_24h":"ينتظر +24 ساعة","r_insufficient_stock":"المخزون لا يكفي","r_due_soon":"مطلوب خلال 6 ساعات","r_unverified":"غير موثّق","scanDonor":"📷 مسح بطاقة متبرع","recordDonation":"تسجيل تبرع","bagCode":"رمز الكيس","donationRecorded":"تم تسجيل التبرع. رمز الكيس: {code}","advanceBag":"تحديث رحلة كيس","nextStep":"الخطوة التالية","discard":"استبعاد","dailyReport":"📋 التقرير اليومي","regenerate":"تحديث التقرير","reportAi":"مكتوب بالذكاء الاصطناعي","reportTemplate":"ملخص تلقائي","donorInfo":"{name} · {type}","eligible":"مؤهل ✅","notEligible":"غير مؤهل الآن","donationsCount":"تبرعات سابقة: {n}","cameraDenied":"نحتاج إذن الكاميرا لمسح البطاقة.","grantCamera":"السماح بالكاميرا","scanHint":"وجّه الكاميرا إلى رمز QR في بطاقة المتبرع","j_collected":"تم سحب الدم","j_testing":"قيد الفحص المخبري","j_ready":"جاهز في بنك الدم","j_issued":"صُرف لمريض","j_transfused":"أنقذ حياة مريض ❤️","j_discarded":"استُبعد بعد الفحص","journeyEmpty":"لا توجد تبرعات مسجلة بعد. بعد أول تبرع ستتابع رحلة كيسك هنا خطوة بخطوة.","journeyHint":"لا نعرض أي بيانات عن المريض، فقط مراحل رحلة تبرعك.","points":"النقاط","livesSaved":"أرواح أنقذتها (تقدير)","donationsTotal":"تبرعاتك","b_first_donation":"أول تبرع","b_hero_5":"بطل (5 تبرعات)","b_super_10":"بطل خارق (10)","b_legend_15":"أسطورة (15)","b_rare_blood":"حارس الدم النادر","b_emergency_responder":"مستجيب للطوارئ","nextBadge":"الوسام التالي عند {n} تبرعات","challenges":"تحديات","ch_weekly_response":"استجب لنداء طوارئ هذا الأسبوع","ch_quarter_donation":"تبرّع مرة هذا الربع","ch_rare_standby":"ابقَ متاحًا كحارس للدم النادر","heroOfWeek":"🏆 أبطال الأسبوع","showOnBoard":"أظهر اسمي الأول في لوحة الأبطال","noHeroes":"لا يوجد أبطال هذا الأسبوع بعد. كن الأول!","pointsN":"{n} نقطة","cardHint":"اعرض هذا الرمز في بنك الدم لتسريع الاستقبال.","lastDonation":"آخر تبرع","nextEligible":"الأهلية القادمة","joinCode":"رمز الحملة","join":"انضمام","joined":"تم تسجيلك في الحملة ✅","noCampaigns":"لا توجد حملات نشطة الآن.","campaignTarget":"الهدف: {n} متبرع","createCampaign":"إنشاء حملة","org":"الجهة","campaignTitle":"عنوان الحملة","starts":"تبدأ","ends":"تنتهي","campaignNotFound":"رمز غير صحيح أو حملة منتهية.","signups":"المسجلون: {n}","feeEgp":"رسوم التنظيم (ج.م)","agentHello":"أهلًا، أنا رفيق 👋 أساعدك في إيجاد الدم، والتبرع، ومتابعة الطلبات. بماذا أخدمك؟","agentPlaceholder":"اكتب سؤالك…","send":"إرسال","agentErr":"حدث خطأ في الاتصال. حاول مرة أخرى.","sug1":"أين أجد دم O- قريب مني؟","sug2":"هل أستطيع التبرع الآن؟","sug3":"ما الفصائل المتوافقة مع A+؟","mapEnableLoc":"فعّل خدمة الموقع لعرض الأماكن الأقرب إليك.","noSites":"لا توجد أماكن تبرع موثّقة قريبة بعد.","chooseType":"اختر فصيلة المريض لعرض أقرب مخزون متوافق.","densityInfo":"{n} متبرعًا مؤهلًا في {c} منطقة ضمن 20 كم.","bookDonation":"احجز موعد تبرع","needsNow":"يحتاج {t} الآن ({u} وحدة)","openInMaps":"📍 الاتجاهات في خرائط جوجل","day":"اليوم","hour":"الساعة","bookConfirm":"تأكيد الحجز","booked":"تم الحجز ❤️ موعدك في {name} يوم {day} الساعة {hour}. اشرب 500 مل ماء قبل الموعد بنصف ساعة.","bookFail":"تعذّر الحجز","errNotEligible":"لم يحن موعد أهليتك للتبرع بعد.","errFull":"هذا اليوم ممتلئ، اختر يومًا آخر.","errNotAccepting":"هذا المكان لا يستقبل متبرعين حاليًا.","errDuplicate":"لديك موعد محجوز بالفعل.","bookHint":"التبرع يستغرق حوالي 45 دقيقة، منها 10 دقائق لسحب الدم. وحدة واحدة قد تنقذ حتى 3 أرواح.","overview":"نظرة عامة","users":"المستخدمون","facilities":"المنشآت","audit":"سجل التدقيق","revenue":"الإيرادات","s_donors":"متبرعون","s_eligible":"مؤهلون الآن","s_facilities":"منشآت موثّقة","s_pending":"بانتظار التوثيق","s_open":"طلبات مفتوحة","s_fulfilled30":"طلبات مكتملة (30 يومًا)","s_avgHours":"متوسط زمن التلبية (ساعة)","s_donations30":"تبرعات (30 يومًا)","s_lives":"أرواح أُنقذت (تقدير)","s_mrr":"الإيراد الشهري المتكرر","s_campaignFees":"رسوم الحملات (30 يومًا)","s_suspended":"حسابات موقوفة","searchUsers":"ابحث بالاسم أو الهاتف","role":"الدور","setRole":"تغيير الدور","linkFacility":"ربط بمنشأة","unlink":"إلغاء الربط","suspend":"إيقاف","unsuspend":"رفع الإيقاف","verify":"توثيق","unverify":"إلغاء التوثيق","plan":"الباقة","plan_free":"أساسي (مجاني)","plan_pro":"Pro","plan_enterprise":"Network","suspended":"موقوف","verified":"موثّق","pending":"بانتظار التوثيق","auditEmpty":"لا توجد عمليات مسجلة بعد.","addFacility":"إضافة منشأة","facName":"اسم المنشأة","facKind":"النوع","k_hospital":"مستشفى","k_blood_bank":"بنك دم","k_medical_center":"مركز طبي","k_lab":"معمل","lat":"خط العرض","lng":"خط الطول","adminOnly":"هذه الشاشة لمدير المنصة فقط.","egpMonth":"{n} ج.م/شهر","confirmAction":"هل أنت متأكد؟","language":"اللغة","languageHint":"يتغير اتجاه الواجهة تلقائيًا للعربية والأوردو.","signOut":"تسجيل الخروج","settings":"⚙️ الإعدادات","forecastTitle":"التنبؤ الذكي بنقص المخزون","forecastBtn":"تنبؤ المخزون","season":"الموسم","surge":"ضغط المستشفى","horizon":"أفق التنبؤ","sea_none":"عادي","sea_ramadan":"🌙 رمضان","sea_hajj":"🕋 الحج والعمرة","sea_summer":"☀️ الصيف والسفر","sea_flu":"❄️ الإنفلونزا","sea_holidays":"🎉 الأعياد","sur_moderate":"معتدل","sur_high":"مرتفع +25%","sur_code_red":"كود أحمر +60%","risk_critical":"🚨 خطر حاد","risk_warning":"⚠️ إنذار مبكر","risk_stable":"🟢 مستقر","safety":"الحد الآمن","burn":"الصرف","inflow":"الإيداع","net":"الفجوة الصافية","depletesIn":"النفاد خلال {d} يوم ({date})","noDepletion":"لا نفاد متوقع","chart":"منحنى الاستنزاف — 14 يومًا","safetyLine":"الحد الآمن","plan_title":"خطة التدخل الاستباقي","aiSource":"مولّدة بالذكاء الاصطناعي","rulesSource":"خطة احتياطية فورية","recall":"إطلاق نداء فوري للمتبرعين","recallDone":"تم إرسال النداء إلى {n} متبرع مؤهل ({t}).","recallNone":"لا توجد فصائل في خطر حاليًا.","cooldown":"تم إرسال نداء لهذه الفصائل خلال آخر 6 ساعات.","pr_now":"فورًا","pr_24h":"خلال 24 ساعة","pr_this_week":"هذا الأسبوع","offline":"تعذّر الاتصال، والأرقام محسوبة على الجهاز.","assumptions":"المعاملات الموسمية تقديرية وتُعاير تلقائيًا من بيانات منشأتك بمرور الوقت.","demoTag":"نسخة تجريبية · بيانات وهمية","demoLoc":"الموقع الافتراضي في هذه التجربة: وسط القاهرة.","howTitle":"كيف يعمل؟","howBody":"تصلك الطلبات القريبة التي تحتاج فصيلتك. لا يرى المستشفى رقمك أو موقعك حتى تضغط \"سأتبرع\".","mapNote":"في التطبيق تظهر خريطة جوجل الحقيقية. هنا خريطة توضيحية لوسط القاهرة، وكل زر \"الاتجاهات\" يفتح خرائط جوجل فعلًا.","simulated":"(محاكاة)","needsClaude":"المساعد يعمل عند فتح هذه الصفحة داخل Claude. باقي التجربة يعمل بالكامل.","thinking":"يفكر…","stop":"إيقاف","aiPlanBtn":"✨ خطة مخصصة بالذكاء الاصطناعي","planErr":"تعذّر توليد الخطة، والخطة الفورية معروضة.","speakAs":"أتحدث بصفتي","you":"أنت","nile":"النيل","today":"اليوم","simScan":"📷 محاكاة مسح بطاقة متبرع","sampleNote":"كل الأرقام من بيانات هذه التجربة.","agentNote":"يعمل على بيانات هذه التجربة ويرد بلغتك.","reportDemo":"ولّد التقرير"},"en":{"appName":"Smart Blood Bank","save":"Save","cancel":"Cancel","confirm":"Confirm","loading":"Loading…","error":"Error","km":"km","units":"units","days":"days","perDay":"/day","directions":"📍 Directions","call":"Call","askAgent":"Ask the AI assistant","none":"None","search":"Search","optional":"optional","tDonor":"Donor portal","tBeneficiary":"Patient portal","tFacility":"Facility portal","tAgent":"AI assistant","tMap":"Map","tBook":"Book a donation","tForecast":"Inventory forecast","tAdmin":"Platform admin","tCard":"Donor card","tJourney":"My donation journey","tAchievements":"Badges & challenges","tCampaigns":"Donation drives","tReport":"Daily report","tSettings":"Settings","tScan":"Scan donor card","tOnboarding":"Complete your account","loginTagline":"A drop of blood saves a life 🩸","loginSub":"We connect donors and patients with the nearest hospitals and blood banks, in minutes.","phone":"Phone number","otpCode":"Verification code","sendCode":"Send code","verifyCode":"Sign in","wrongCode":"Incorrect code","iAm":"I am…","roleDonor":"Donor","roleBeneficiary":"Patient / family","roleStaff":"Hospital / blood bank staff","name":"Name","bloodType":"Blood type","bloodTypePatient":"Blood type (patient's, if known)","sex":"Sex","male":"Male","female":"Female","locationPrivacy":"We only use your location to calculate distance. Your exact location is never shown to anyone.","saveContinue":"Save and continue","completeData":"Please complete the form","staffPending":"Your account will be linked to your facility after the platform admin verifies it.","yourType":"Your type","eligibleNow":"You can donate now ✅","eligibleAfter":"You can donate again after {date}","availableToggle":"Available for emergency calls","nearestSites":"🗺️ Nearest donation sites","nearbyRequests":"Nearby requests that need your type ({n})","noRequests":"No compatible requests nearby right now. We'll notify you when needed.","willDonate":"I'll donate","thanksResponded":"Thank you ❤️ {name} has been notified. Bring your ID.","alreadyResponded":"You already responded to this request","urg_routine":"Routine","urg_urgent":"Urgent","urg_critical":"Critical 🚨","unitsLeftKm":"{u} units left · {km} km","myCard":"🪪 My card","myJourney":"🩸 My journey","myAchievements":"🏅 Badges","campaigns":"📣 Drives","patientType":"Patient's blood type","unitsNeeded":"Units needed","findStock":"Find the nearest compatible stock","enableLocation":"Enable location","enableLocationMsg":"We need your location to find the nearest stock.","noStock":"No compatible stock nearby. Create a request at the nearest hospital and we'll call donors.","unitsAvailableKm":"{u} units available · {km} km","requestHere":"Request now","requestSent":"Request sent to {name}. They will contact you to confirm.","myRequests":"My requests","securedOf":"{s} of {n} units secured","showOnMap":"🗺️ Show stock on map","st_open":"Open","st_matching":"Finding donors","st_partially_fulfilled":"Partly fulfilled","st_fulfilled":"Fulfilled ✅","st_cancelled":"Cancelled","st_expired":"Expired","inventoryTitle":"Inventory (red cells)","low":"Low","issue":"Issue","deposit":"Deposit","expiringSoon":"⚠️ Units expiring within 7 days","expiringHint":"Tip: transfer them to a nearby facility that needs them instead of wasting them.","incoming":"Incoming requests by priority ({n})","verifyAndCall":"Verify and call donors","verifiedMsg":"{n} eligible donors nearby will be notified.","sameTypeStock":"Same-type stock: {n}","notLinked":"Your account is waiting to be linked to a verified facility by the platform admin.","donorDensityMap":"🗺️ Donor density map","score":"Priority {n}","r_critical":"Critical","r_waiting_24h":"Waiting 24h+","r_insufficient_stock":"Not enough stock","r_due_soon":"Needed within 6h","r_unverified":"Unverified","scanDonor":"📷 Scan donor card","recordDonation":"Record donation","bagCode":"Bag code","donationRecorded":"Donation recorded. Bag code: {code}","advanceBag":"Update a bag's journey","nextStep":"Next step","discard":"Discard","dailyReport":"📋 Daily report","regenerate":"Refresh report","reportAi":"Written by AI","reportTemplate":"Automatic summary","donorInfo":"{name} · {type}","eligible":"Eligible ✅","notEligible":"Not eligible yet","donationsCount":"Previous donations: {n}","cameraDenied":"We need camera permission to scan the card.","grantCamera":"Allow camera","scanHint":"Point the camera at the QR code on the donor card","j_collected":"Blood collected","j_testing":"Lab testing","j_ready":"Ready at the blood bank","j_issued":"Issued to a patient","j_transfused":"Saved a patient's life ❤️","j_discarded":"Discarded after testing","journeyEmpty":"No donations recorded yet. After your first donation you'll follow your bag's journey here, step by step.","journeyHint":"We never show any patient data, only the stages of your donation.","points":"Points","livesSaved":"Lives saved (estimate)","donationsTotal":"Your donations","b_first_donation":"First donation","b_hero_5":"Hero (5 donations)","b_super_10":"Super hero (10)","b_legend_15":"Legend (15)","b_rare_blood":"Rare blood guardian","b_emergency_responder":"Emergency responder","nextBadge":"Next badge at {n} donations","challenges":"Challenges","ch_weekly_response":"Answer an emergency call this week","ch_quarter_donation":"Donate once this quarter","ch_rare_standby":"Stay available as a rare blood guardian","heroOfWeek":"🏆 Heroes of the week","showOnBoard":"Show my first name on the heroes board","noHeroes":"No heroes this week yet. Be the first!","pointsN":"{n} pts","cardHint":"Show this code at the blood bank for faster check-in.","lastDonation":"Last donation","nextEligible":"Next eligible","joinCode":"Drive code","join":"Join","joined":"You're registered for the drive ✅","noCampaigns":"No active drives right now.","campaignTarget":"Target: {n} donors","createCampaign":"Create a drive","org":"Organization","campaignTitle":"Drive title","starts":"Starts","ends":"Ends","campaignNotFound":"Wrong code or the drive has ended.","signups":"Sign-ups: {n}","feeEgp":"Organizing fee (EGP)","agentHello":"Hi, I'm Rafeeq 👋 I help you find blood, donate, and follow requests. How can I help?","agentPlaceholder":"Type your question…","send":"Send","agentErr":"Connection error. Please try again.","sug1":"Where can I find O- blood near me?","sug2":"Can I donate now?","sug3":"Which types are compatible with A+?","mapEnableLoc":"Enable location services to see the places nearest to you.","noSites":"No verified donation sites nearby yet.","chooseType":"Choose the patient's blood type to see the nearest compatible stock.","densityInfo":"{n} eligible donors in {c} areas within 20 km.","bookDonation":"Book a donation","needsNow":"Needs {t} now ({u} units)","openInMaps":"📍 Directions in Google Maps","day":"Day","hour":"Time","bookConfirm":"Confirm booking","booked":"Booked ❤️ Your appointment at {name} on {day} at {hour}. Drink 500 ml of water 30 minutes before.","bookFail":"Booking failed","errNotEligible":"You are not eligible to donate yet.","errFull":"That day is full; choose another.","errNotAccepting":"This site isn't accepting donors right now.","errDuplicate":"You already have an appointment.","bookHint":"Donating takes about 45 minutes, only 10 of them for the blood draw. One unit can save up to 3 lives.","overview":"Overview","users":"Users","facilities":"Facilities","audit":"Audit log","revenue":"Revenue","s_donors":"Donors","s_eligible":"Eligible now","s_facilities":"Verified facilities","s_pending":"Awaiting verification","s_open":"Open requests","s_fulfilled30":"Fulfilled requests (30 days)","s_avgHours":"Avg. time to fulfil (hours)","s_donations30":"Donations (30 days)","s_lives":"Lives saved (estimate)","s_mrr":"Monthly recurring revenue","s_campaignFees":"Drive fees (30 days)","s_suspended":"Suspended accounts","searchUsers":"Search by name or phone","role":"Role","setRole":"Change role","linkFacility":"Link to facility","unlink":"Unlink","suspend":"Suspend","unsuspend":"Lift suspension","verify":"Verify","unverify":"Revoke verification","plan":"Plan","plan_free":"Basic (free)","plan_pro":"Pro","plan_enterprise":"Network","suspended":"Suspended","verified":"Verified","pending":"Awaiting verification","auditEmpty":"No actions recorded yet.","addFacility":"Add facility","facName":"Facility name","facKind":"Type","k_hospital":"Hospital","k_blood_bank":"Blood bank","k_medical_center":"Medical center","k_lab":"Lab","lat":"Latitude","lng":"Longitude","adminOnly":"This screen is for the platform admin only.","egpMonth":"EGP {n}/month","confirmAction":"Are you sure?","language":"Language","languageHint":"The layout switches to right-to-left for Arabic and Urdu.","signOut":"Sign out","settings":"⚙️ Settings","forecastTitle":"AI shortage prediction","forecastBtn":"AI Inventory","season":"Season","surge":"Hospital intake surge","horizon":"Forecast horizon","sea_none":"Normal","sea_ramadan":"🌙 Ramadan","sea_hajj":"🕋 Hajj & Umrah","sea_summer":"☀️ Summer travel","sea_flu":"❄️ Flu season","sea_holidays":"🎉 Eid & holidays","sur_moderate":"Moderate","sur_high":"High +25%","sur_code_red":"Code Red +60%","risk_critical":"🚨 Critical","risk_warning":"⚠️ Warning","risk_stable":"🟢 Stable","safety":"Safety","burn":"Burn","inflow":"Inflow","net":"Net gap","depletesIn":"Depletes in {d} days ({date})","noDepletion":"No depletion expected","chart":"14-day depletion trajectory","safetyLine":"Safety level","plan_title":"AI actionable interventions","aiSource":"AI-generated","rulesSource":"Instant fallback plan","recall":"Smart donor recall","recallDone":"Recall sent to {n} eligible donors ({t}).","recallNone":"No blood types at risk right now.","cooldown":"These types were recalled in the last 6 hours.","pr_now":"Now","pr_24h":"Within 24h","pr_this_week":"This week","offline":"Offline: figures computed on this device.","assumptions":"Seasonal factors are estimates and auto-calibrate from your facility's data over time.","demoTag":"Demo · sample data","demoLoc":"Demo location: downtown Cairo.","howTitle":"How it works","howBody":"You get nearby requests that need your blood type. The hospital never sees your number or location until you tap \"I'll donate\".","mapNote":"The app shows a real Google Map. Here is an illustrative map of downtown Cairo; every \"Directions\" button really opens Google Maps.","simulated":"(simulated)","needsClaude":"The assistant works when this page is opened inside Claude. Everything else works fully.","thinking":"Thinking…","stop":"Stop","aiPlanBtn":"✨ AI custom plan","planErr":"Couldn't generate the plan; the instant plan is shown.","speakAs":"I'm speaking as","you":"You","nile":"Nile","today":"Today","simScan":"📷 Simulate scanning a donor card","sampleNote":"All figures come from this demo's data.","agentNote":"Works on this demo's data and replies in your language.","reportDemo":"Generate report"},"fr":{"appName":"Banque de sang intelligente","save":"Enregistrer","cancel":"Annuler","confirm":"Confirmer","loading":"Chargement…","error":"Erreur","km":"km","units":"unités","days":"jours","perDay":"/jour","directions":"📍 Itinéraire","call":"Appeler","askAgent":"Demander à l'assistant IA","none":"Aucun","search":"Rechercher","optional":"facultatif","tDonor":"Espace donneur","tBeneficiary":"Espace patient","tFacility":"Espace établissement","tAgent":"Assistant IA","tMap":"Carte","tBook":"Prendre rendez-vous","tForecast":"Prévision des stocks","tAdmin":"Administration","tCard":"Carte de donneur","tJourney":"Parcours de mes dons","tAchievements":"Badges et défis","tCampaigns":"Collectes","tReport":"Rapport quotidien","tSettings":"Paramètres","tScan":"Scanner une carte","tOnboarding":"Compléter le compte","loginTagline":"Une goutte de sang sauve une vie 🩸","loginSub":"Nous relions donneurs et patients aux hôpitaux et banques de sang les plus proches, en quelques minutes.","phone":"Numéro de téléphone","otpCode":"Code de vérification","sendCode":"Envoyer le code","verifyCode":"Se connecter","wrongCode":"Code incorrect","iAm":"Je suis…","roleDonor":"Donneur","roleBeneficiary":"Patient / proche","roleStaff":"Personnel d'hôpital / banque de sang","name":"Nom","bloodType":"Groupe sanguin","bloodTypePatient":"Groupe sanguin (du patient, si connu)","sex":"Sexe","male":"Homme","female":"Femme","locationPrivacy":"Votre position sert uniquement à calculer la distance. Elle n'est jamais montrée à personne.","saveContinue":"Enregistrer et continuer","completeData":"Veuillez compléter le formulaire","staffPending":"Votre compte sera lié à votre établissement après sa vérification par l'administrateur.","yourType":"Votre groupe","eligibleNow":"Vous pouvez donner maintenant ✅","eligibleAfter":"Vous pourrez redonner après le {date}","availableToggle":"Disponible pour les appels d'urgence","nearestSites":"🗺️ Lieux de don les plus proches","nearbyRequests":"Demandes proches pour votre groupe ({n})","noRequests":"Aucune demande compatible à proximité. Nous vous préviendrons si besoin.","willDonate":"Je donne","thanksResponded":"Merci ❤️ {name} a été prévenu. Apportez votre pièce d'identité.","alreadyResponded":"Vous avez déjà répondu à cette demande","urg_routine":"Normale","urg_urgent":"Urgente","urg_critical":"Critique 🚨","unitsLeftKm":"{u} unités restantes · {km} km","myCard":"🪪 Ma carte","myJourney":"🩸 Mon parcours","myAchievements":"🏅 Badges","campaigns":"📣 Collectes","patientType":"Groupe sanguin du patient","unitsNeeded":"Unités nécessaires","findStock":"Trouver le stock compatible le plus proche","enableLocation":"Activez la localisation","enableLocationMsg":"Nous avons besoin de votre position pour trouver le stock le plus proche.","noStock":"Aucun stock compatible à proximité. Créez une demande à l'hôpital le plus proche et nous appellerons des donneurs.","unitsAvailableKm":"{u} unités disponibles · {km} km","requestHere":"Demander","requestSent":"Demande envoyée à {name}, qui vous contactera pour confirmer.","myRequests":"Mes demandes","securedOf":"{s} sur {n} unités obtenues","showOnMap":"🗺️ Voir le stock sur la carte","st_open":"Ouverte","st_matching":"Recherche en cours","st_partially_fulfilled":"Partiellement servie","st_fulfilled":"Servie ✅","st_cancelled":"Annulée","st_expired":"Expirée","inventoryTitle":"Stock (globules rouges)","low":"Bas","issue":"Sortie","deposit":"Entrée","expiringSoon":"⚠️ Unités qui expirent sous 7 jours","expiringHint":"Conseil : transférez-les à un établissement proche plutôt que de les perdre.","incoming":"Demandes reçues par priorité ({n})","verifyAndCall":"Vérifier et appeler des donneurs","verifiedMsg":"{n} donneurs éligibles à proximité seront prévenus.","sameTypeStock":"Stock du même groupe : {n}","notLinked":"Votre compte attend d'être lié à un établissement vérifié par l'administrateur.","donorDensityMap":"🗺️ Carte de densité des donneurs","score":"Priorité {n}","r_critical":"Critique","r_waiting_24h":"En attente 24 h+","r_insufficient_stock":"Stock insuffisant","r_due_soon":"Requis sous 6 h","r_unverified":"Non vérifiée","scanDonor":"📷 Scanner une carte","recordDonation":"Enregistrer un don","bagCode":"Code de poche","donationRecorded":"Don enregistré. Code de poche : {code}","advanceBag":"Mettre à jour une poche","nextStep":"Étape suivante","discard":"Écarter","dailyReport":"📋 Rapport quotidien","regenerate":"Actualiser le rapport","reportAi":"Rédigé par l'IA","reportTemplate":"Résumé automatique","donorInfo":"{name} · {type}","eligible":"Éligible ✅","notEligible":"Pas encore éligible","donationsCount":"Dons précédents : {n}","cameraDenied":"Nous avons besoin de la caméra pour scanner la carte.","grantCamera":"Autoriser la caméra","scanHint":"Visez le QR code de la carte du donneur","j_collected":"Sang prélevé","j_testing":"Analyse en laboratoire","j_ready":"Prêt à la banque de sang","j_issued":"Délivré à un patient","j_transfused":"A sauvé la vie d'un patient ❤️","j_discarded":"Écarté après analyse","journeyEmpty":"Aucun don enregistré. Après votre premier don, vous suivrez ici le parcours de votre poche, étape par étape.","journeyHint":"Aucune donnée de patient n'est affichée, seulement les étapes de votre don.","points":"Points","livesSaved":"Vies sauvées (estimation)","donationsTotal":"Vos dons","b_first_donation":"Premier don","b_hero_5":"Héros (5 dons)","b_super_10":"Super-héros (10)","b_legend_15":"Légende (15)","b_rare_blood":"Gardien du sang rare","b_emergency_responder":"Secouriste d'urgence","nextBadge":"Prochain badge à {n} dons","challenges":"Défis","ch_weekly_response":"Répondre à un appel d'urgence cette semaine","ch_quarter_donation":"Donner une fois ce trimestre","ch_rare_standby":"Rester disponible comme gardien du sang rare","heroOfWeek":"🏆 Héros de la semaine","showOnBoard":"Afficher mon prénom au tableau des héros","noHeroes":"Pas encore de héros cette semaine. Soyez le premier !","pointsN":"{n} pts","cardHint":"Présentez ce code à la banque de sang pour un accueil plus rapide.","lastDonation":"Dernier don","nextEligible":"Prochaine éligibilité","joinCode":"Code de collecte","join":"Rejoindre","joined":"Vous êtes inscrit à la collecte ✅","noCampaigns":"Aucune collecte active.","campaignTarget":"Objectif : {n} donneurs","createCampaign":"Créer une collecte","org":"Organisme","campaignTitle":"Titre de la collecte","starts":"Début","ends":"Fin","campaignNotFound":"Code erroné ou collecte terminée.","signups":"Inscrits : {n}","feeEgp":"Frais d'organisation (EGP)","agentHello":"Bonjour, je suis Rafeeq 👋 Je vous aide à trouver du sang, donner et suivre les demandes. Que puis-je faire ?","agentPlaceholder":"Écrivez votre question…","send":"Envoyer","agentErr":"Erreur de connexion. Réessayez.","sug1":"Où trouver du sang O- près de moi ?","sug2":"Puis-je donner maintenant ?","sug3":"Quels groupes sont compatibles avec A+ ?","mapEnableLoc":"Activez la localisation pour voir les lieux les plus proches.","noSites":"Aucun lieu de don vérifié à proximité.","chooseType":"Choisissez le groupe du patient pour voir le stock compatible le plus proche.","densityInfo":"{n} donneurs éligibles dans {c} zones à moins de 20 km.","bookDonation":"Prendre rendez-vous","needsNow":"Besoin de {t} maintenant ({u} unités)","openInMaps":"📍 Itinéraire dans Google Maps","day":"Jour","hour":"Heure","bookConfirm":"Confirmer","booked":"Réservé ❤️ Rendez-vous à {name} le {day} à {hour}. Buvez 500 ml d'eau 30 minutes avant.","bookFail":"Réservation impossible","errNotEligible":"Vous n'êtes pas encore éligible.","errFull":"Cette journée est complète.","errNotAccepting":"Ce lieu n'accueille pas de donneurs actuellement.","errDuplicate":"Vous avez déjà un rendez-vous.","bookHint":"Le don dure environ 45 minutes, dont 10 pour le prélèvement. Une unité peut sauver jusqu'à 3 vies.","overview":"Vue d'ensemble","users":"Utilisateurs","facilities":"Établissements","audit":"Journal d'audit","revenue":"Revenus","s_donors":"Donneurs","s_eligible":"Éligibles","s_facilities":"Établissements vérifiés","s_pending":"En attente de vérification","s_open":"Demandes ouvertes","s_fulfilled30":"Demandes servies (30 j)","s_avgHours":"Délai moyen (heures)","s_donations30":"Dons (30 j)","s_lives":"Vies sauvées (estimation)","s_mrr":"Revenu mensuel récurrent","s_campaignFees":"Frais de collectes (30 j)","s_suspended":"Comptes suspendus","searchUsers":"Rechercher par nom ou téléphone","role":"Rôle","setRole":"Changer le rôle","linkFacility":"Lier à un établissement","unlink":"Délier","suspend":"Suspendre","unsuspend":"Lever la suspension","verify":"Vérifier","unverify":"Retirer la vérification","plan":"Offre","plan_free":"Basique (gratuit)","plan_pro":"Pro","plan_enterprise":"Network","suspended":"Suspendu","verified":"Vérifié","pending":"En attente","auditEmpty":"Aucune action enregistrée.","addFacility":"Ajouter un établissement","facName":"Nom de l'établissement","facKind":"Type","k_hospital":"Hôpital","k_blood_bank":"Banque de sang","k_medical_center":"Centre médical","k_lab":"Laboratoire","lat":"Latitude","lng":"Longitude","adminOnly":"Écran réservé à l'administrateur.","egpMonth":"{n} EGP/mois","confirmAction":"Êtes-vous sûr ?","language":"Langue","languageHint":"L'interface passe de droite à gauche pour l'arabe et l'ourdou.","signOut":"Se déconnecter","settings":"⚙️ Paramètres","forecastTitle":"Prévision IA des pénuries","forecastBtn":"Stock IA","season":"Saison","surge":"Afflux hospitalier","horizon":"Horizon","sea_none":"Normale","sea_ramadan":"🌙 Ramadan","sea_hajj":"🕋 Hajj et Omra","sea_summer":"☀️ Été et voyages","sea_flu":"❄️ Grippe","sea_holidays":"🎉 Fêtes","sur_moderate":"Modéré","sur_high":"Élevé +25 %","sur_code_red":"Code rouge +60 %","risk_critical":"🚨 Critique","risk_warning":"⚠️ Alerte","risk_stable":"🟢 Stable","safety":"Seuil","burn":"Sorties","inflow":"Entrées","net":"Écart net","depletesIn":"Épuisé dans {d} jours ({date})","noDepletion":"Pas d'épuisement prévu","chart":"Trajectoire sur 14 jours","safetyLine":"Seuil de sécurité","plan_title":"Interventions recommandées","aiSource":"Générées par l'IA","rulesSource":"Plan de secours immédiat","recall":"Rappel immédiat des donneurs","recallDone":"Rappel envoyé à {n} donneurs éligibles ({t}).","recallNone":"Aucun groupe à risque actuellement.","cooldown":"Ces groupes ont été rappelés il y a moins de 6 heures.","pr_now":"Immédiat","pr_24h":"Sous 24 h","pr_this_week":"Cette semaine","offline":"Hors ligne : chiffres calculés sur l'appareil.","assumptions":"Les facteurs saisonniers sont estimés et s'ajustent automatiquement avec les données de votre établissement.","demoTag":"Démo · données fictives","demoLoc":"Position de démo : centre du Caire.","howTitle":"Comment ça marche","howBody":"Vous recevez les demandes proches qui ont besoin de votre groupe. L'hôpital ne voit ni votre numéro ni votre position avant que vous touchiez « Je donne ».","mapNote":"L'application affiche une vraie carte Google. Ici, une carte illustrative du centre du Caire ; chaque bouton « Itinéraire » ouvre vraiment Google Maps.","simulated":"(simulation)","needsClaude":"L'assistant fonctionne quand cette page est ouverte dans Claude. Tout le reste fonctionne.","thinking":"Réflexion…","stop":"Arrêter","aiPlanBtn":"✨ Plan personnalisé par l'IA","planErr":"Impossible de générer le plan ; le plan immédiat est affiché.","speakAs":"Je parle en tant que","you":"Vous","nile":"Nil","today":"Auj.","simScan":"📷 Simuler le scan d'une carte","sampleNote":"Tous les chiffres viennent des données de cette démo.","agentNote":"Utilise les données de cette démo et répond dans votre langue.","reportDemo":"Générer le rapport"},"ur":{"appName":"اسمارٹ بلڈ بینک","save":"محفوظ کریں","cancel":"منسوخ","confirm":"تصدیق","loading":"لوڈ ہو رہا ہے…","error":"خرابی","km":"کلومیٹر","units":"یونٹ","days":"دن","perDay":"/دن","directions":"📍 راستہ","call":"کال","askAgent":"AI معاون سے پوچھیں","none":"کوئی نہیں","search":"تلاش","optional":"اختیاری","tDonor":"عطیہ دہندہ پورٹل","tBeneficiary":"مریض پورٹل","tFacility":"ادارہ پورٹل","tAgent":"AI معاون","tMap":"نقشہ","tBook":"عطیہ کی بکنگ","tForecast":"ذخیرے کی پیش گوئی","tAdmin":"پلیٹ فارم انتظامیہ","tCard":"عطیہ دہندہ کارڈ","tJourney":"میرے عطیات کا سفر","tAchievements":"تمغے اور چیلنج","tCampaigns":"عطیہ مہمات","tReport":"روزانہ رپورٹ","tSettings":"ترتیبات","tScan":"کارڈ اسکین کریں","tOnboarding":"اکاؤنٹ مکمل کریں","loginTagline":"خون کا ایک قطرہ زندگی بچاتا ہے 🩸","loginSub":"ہم عطیہ دہندگان اور مریضوں کو قریب ترین اسپتالوں اور بلڈ بینکوں سے منٹوں میں جوڑتے ہیں۔","phone":"فون نمبر","otpCode":"تصدیقی کوڈ","sendCode":"کوڈ بھیجیں","verifyCode":"داخل ہوں","wrongCode":"غلط کوڈ","iAm":"میں…","roleDonor":"عطیہ دہندہ","roleBeneficiary":"مریض / رشتہ دار","roleStaff":"اسپتال / بلڈ بینک عملہ","name":"نام","bloodType":"بلڈ گروپ","bloodTypePatient":"بلڈ گروپ (مریض کا، اگر معلوم ہو)","sex":"جنس","male":"مرد","female":"عورت","locationPrivacy":"ہم آپ کا مقام صرف فاصلہ ناپنے کے لیے استعمال کرتے ہیں، یہ کسی کو نہیں دکھایا جاتا۔","saveContinue":"محفوظ کر کے آگے بڑھیں","completeData":"براہ کرم فارم مکمل کریں","staffPending":"انتظامیہ کی تصدیق کے بعد آپ کا اکاؤنٹ ادارے سے منسلک ہو جائے گا۔","yourType":"آپ کا گروپ","eligibleNow":"آپ ابھی عطیہ دے سکتے ہیں ✅","eligibleAfter":"آپ {date} کے بعد دوبارہ عطیہ دے سکتے ہیں","availableToggle":"ہنگامی کالز کے لیے دستیاب","nearestSites":"🗺️ قریب ترین عطیہ مراکز","nearbyRequests":"آپ کے گروپ کی قریبی درخواستیں ({n})","noRequests":"ابھی قریب کوئی موزوں درخواست نہیں۔ ضرورت پر ہم آپ کو اطلاع دیں گے۔","willDonate":"میں عطیہ دوں گا","thanksResponded":"شکریہ ❤️ {name} کو اطلاع دے دی گئی۔ اپنا شناختی کارڈ ساتھ لائیں۔","alreadyResponded":"آپ پہلے ہی جواب دے چکے ہیں","urg_routine":"عام","urg_urgent":"فوری","urg_critical":"نازک 🚨","unitsLeftKm":"{u} یونٹ باقی · {km} کلومیٹر","myCard":"🪪 میرا کارڈ","myJourney":"🩸 میرا سفر","myAchievements":"🏅 تمغے","campaigns":"📣 مہمات","patientType":"مریض کا بلڈ گروپ","unitsNeeded":"مطلوبہ یونٹ","findStock":"قریب ترین موزوں ذخیرہ تلاش کریں","enableLocation":"مقام فعال کریں","enableLocationMsg":"قریب ترین ذخیرہ تلاش کرنے کے لیے آپ کا مقام درکار ہے۔","noStock":"قریب کوئی موزوں ذخیرہ نہیں۔ قریبی اسپتال میں درخواست بنائیں، ہم عطیہ دہندگان کو بلائیں گے۔","unitsAvailableKm":"{u} یونٹ دستیاب · {km} کلومیٹر","requestHere":"ابھی درخواست دیں","requestSent":"درخواست {name} کو بھیج دی گئی، وہ تصدیق کے لیے رابطہ کریں گے۔","myRequests":"میری درخواستیں","securedOf":"{n} میں سے {s} یونٹ حاصل","showOnMap":"🗺️ نقشے پر ذخیرہ دکھائیں","st_open":"کھلی","st_matching":"تلاش جاری","st_partially_fulfilled":"جزوی مکمل","st_fulfilled":"مکمل ✅","st_cancelled":"منسوخ","st_expired":"ختم","inventoryTitle":"ذخیرہ (سرخ خلیے)","low":"کم","issue":"اجرا","deposit":"جمع","expiringSoon":"⚠️ 7 دن میں ختم ہونے والے یونٹ","expiringHint":"مشورہ: ضائع کرنے کے بجائے قریبی ضرورت مند ادارے کو منتقل کریں۔","incoming":"ترجیح کے مطابق موصول درخواستیں ({n})","verifyAndCall":"تصدیق کریں اور عطیہ دہندگان کو بلائیں","verifiedMsg":"{n} اہل عطیہ دہندگان کو اطلاع دی جائے گی۔","sameTypeStock":"اسی گروپ کا ذخیرہ: {n}","notLinked":"آپ کا اکاؤنٹ تصدیق شدہ ادارے سے منسلک ہونے کا منتظر ہے۔","donorDensityMap":"🗺️ عطیہ دہندگان کی کثافت","score":"ترجیح {n}","r_critical":"نازک","r_waiting_24h":"24 گھنٹے+ انتظار","r_insufficient_stock":"ذخیرہ ناکافی","r_due_soon":"6 گھنٹے میں درکار","r_unverified":"غیر تصدیق شدہ","scanDonor":"📷 کارڈ اسکین کریں","recordDonation":"عطیہ درج کریں","bagCode":"بیگ کوڈ","donationRecorded":"عطیہ درج ہو گیا۔ بیگ کوڈ: {code}","advanceBag":"بیگ کا سفر اپ ڈیٹ کریں","nextStep":"اگلا مرحلہ","discard":"مسترد","dailyReport":"📋 روزانہ رپورٹ","regenerate":"رپورٹ تازہ کریں","reportAi":"AI سے لکھی گئی","reportTemplate":"خودکار خلاصہ","donorInfo":"{name} · {type}","eligible":"اہل ✅","notEligible":"ابھی اہل نہیں","donationsCount":"سابقہ عطیات: {n}","cameraDenied":"کارڈ اسکین کرنے کے لیے کیمرے کی اجازت درکار ہے۔","grantCamera":"کیمرا کی اجازت دیں","scanHint":"کیمرا کارڈ کے QR کوڈ کی طرف کریں","j_collected":"خون لیا گیا","j_testing":"لیبارٹری جانچ","j_ready":"بلڈ بینک میں تیار","j_issued":"مریض کو جاری","j_transfused":"ایک مریض کی جان بچائی ❤️","j_discarded":"جانچ کے بعد مسترد","journeyEmpty":"ابھی کوئی عطیہ درج نہیں۔ پہلے عطیے کے بعد آپ یہاں اپنے بیگ کا سفر دیکھیں گے۔","journeyHint":"ہم مریض کی کوئی معلومات نہیں دکھاتے، صرف آپ کے عطیے کے مراحل۔","points":"پوائنٹس","livesSaved":"بچائی گئی جانیں (اندازہ)","donationsTotal":"آپ کے عطیات","b_first_donation":"پہلا عطیہ","b_hero_5":"ہیرو (5 عطیات)","b_super_10":"سپر ہیرو (10)","b_legend_15":"لیجنڈ (15)","b_rare_blood":"نایاب خون کا محافظ","b_emergency_responder":"ہنگامی مددگار","nextBadge":"اگلا تمغہ {n} عطیات پر","challenges":"چیلنج","ch_weekly_response":"اس ہفتے ایک ہنگامی کال کا جواب دیں","ch_quarter_donation":"اس سہ ماہی ایک بار عطیہ دیں","ch_rare_standby":"نایاب خون کے محافظ کے طور پر دستیاب رہیں","heroOfWeek":"🏆 ہفتے کے ہیرو","showOnBoard":"ہیرو بورڈ پر میرا پہلا نام دکھائیں","noHeroes":"اس ہفتے ابھی کوئی ہیرو نہیں۔ پہلے بنیں!","pointsN":"{n} پوائنٹس","cardHint":"تیز استقبال کے لیے یہ کوڈ بلڈ بینک میں دکھائیں۔","lastDonation":"آخری عطیہ","nextEligible":"اگلی اہلیت","joinCode":"مہم کوڈ","join":"شامل ہوں","joined":"آپ مہم میں رجسٹر ہو گئے ✅","noCampaigns":"ابھی کوئی فعال مہم نہیں۔","campaignTarget":"ہدف: {n} عطیہ دہندگان","createCampaign":"مہم بنائیں","org":"ادارہ","campaignTitle":"مہم کا عنوان","starts":"آغاز","ends":"اختتام","campaignNotFound":"غلط کوڈ یا مہم ختم ہو چکی۔","signups":"رجسٹرڈ: {n}","feeEgp":"انتظامی فیس (EGP)","agentHello":"السلام علیکم، میں رفیق ہوں 👋 خون ڈھونڈنے، عطیہ دینے اور درخواستوں میں مدد کرتا ہوں۔ کیا مدد کروں؟","agentPlaceholder":"اپنا سوال لکھیں…","send":"بھیجیں","agentErr":"رابطے میں خرابی۔ دوبارہ کوشش کریں۔","sug1":"میرے قریب O- خون کہاں ملے گا؟","sug2":"کیا میں ابھی عطیہ دے سکتا ہوں؟","sug3":"A+ کے ساتھ کون سے گروپ موزوں ہیں؟","mapEnableLoc":"قریب ترین مقامات دیکھنے کے لیے مقام فعال کریں۔","noSites":"قریب ابھی کوئی تصدیق شدہ عطیہ مرکز نہیں۔","chooseType":"قریب ترین موزوں ذخیرہ دیکھنے کے لیے مریض کا گروپ منتخب کریں۔","densityInfo":"20 کلومیٹر میں {c} علاقوں میں {n} اہل عطیہ دہندگان۔","bookDonation":"عطیہ بک کریں","needsNow":"ابھی {t} درکار ({u} یونٹ)","openInMaps":"📍 گوگل میپس میں راستہ","day":"دن","hour":"وقت","bookConfirm":"بکنگ کی تصدیق","booked":"بک ہو گیا ❤️ {name} میں {day} کو {hour} بجے۔ 30 منٹ پہلے 500 ملی لیٹر پانی پئیں۔","bookFail":"بکنگ نہیں ہو سکی","errNotEligible":"آپ ابھی عطیہ کے اہل نہیں۔","errFull":"یہ دن بھر چکا ہے۔","errNotAccepting":"یہ مرکز ابھی عطیہ دہندگان قبول نہیں کر رہا۔","errDuplicate":"آپ کی پہلے سے بکنگ موجود ہے۔","bookHint":"عطیہ تقریباً 45 منٹ لیتا ہے، صرف 10 منٹ خون لینے میں۔ ایک یونٹ 3 جانیں بچا سکتا ہے۔","overview":"جائزہ","users":"صارفین","facilities":"ادارے","audit":"آڈٹ لاگ","revenue":"آمدنی","s_donors":"عطیہ دہندگان","s_eligible":"ابھی اہل","s_facilities":"تصدیق شدہ ادارے","s_pending":"تصدیق کے منتظر","s_open":"کھلی درخواستیں","s_fulfilled30":"مکمل درخواستیں (30 دن)","s_avgHours":"اوسط تکمیل (گھنٹے)","s_donations30":"عطیات (30 دن)","s_lives":"بچائی گئی جانیں (اندازہ)","s_mrr":"ماہانہ آمدنی","s_campaignFees":"مہم فیس (30 دن)","s_suspended":"معطل اکاؤنٹس","searchUsers":"نام یا فون سے تلاش کریں","role":"کردار","setRole":"کردار بدلیں","linkFacility":"ادارے سے منسلک کریں","unlink":"علیحدہ کریں","suspend":"معطل کریں","unsuspend":"معطلی ختم کریں","verify":"تصدیق کریں","unverify":"تصدیق واپس لیں","plan":"پلان","plan_free":"بنیادی (مفت)","plan_pro":"Pro","plan_enterprise":"Network","suspended":"معطل","verified":"تصدیق شدہ","pending":"منتظر","auditEmpty":"ابھی کوئی کارروائی درج نہیں۔","addFacility":"ادارہ شامل کریں","facName":"ادارے کا نام","facKind":"قسم","k_hospital":"اسپتال","k_blood_bank":"بلڈ بینک","k_medical_center":"طبی مرکز","k_lab":"لیبارٹری","lat":"عرض بلد","lng":"طول بلد","adminOnly":"یہ اسکرین صرف منتظم کے لیے ہے۔","egpMonth":"{n} EGP/ماہ","confirmAction":"کیا آپ کو یقین ہے؟","language":"زبان","languageHint":"عربی اور اردو کے لیے انٹرفیس دائیں سے بائیں ہو جاتا ہے۔","signOut":"لاگ آؤٹ","settings":"⚙️ ترتیبات","forecastTitle":"AI قلت کی پیش گوئی","forecastBtn":"AI ذخیرہ","season":"موسم","surge":"اسپتال کا دباؤ","horizon":"مدت","sea_none":"عام","sea_ramadan":"🌙 رمضان","sea_hajj":"🕋 حج و عمرہ","sea_summer":"☀️ گرمیاں","sea_flu":"❄️ فلو","sea_holidays":"🎉 عید و تعطیلات","sur_moderate":"معتدل","sur_high":"زیادہ +25%","sur_code_red":"کوڈ ریڈ +60%","risk_critical":"🚨 نازک","risk_warning":"⚠️ انتباہ","risk_stable":"🟢 مستحکم","safety":"محفوظ حد","burn":"اخراج","inflow":"آمد","net":"خالص فرق","depletesIn":"{d} دن میں ختم ({date})","noDepletion":"ختم ہونے کا امکان نہیں","chart":"14 دن کا رجحان","safetyLine":"محفوظ حد","plan_title":"پیشگی اقدامات","aiSource":"AI سے تیار","rulesSource":"فوری متبادل منصوبہ","recall":"عطیہ دہندگان کو فوری کال","recallDone":"{n} اہل عطیہ دہندگان کو کال بھیجی گئی ({t})۔","recallNone":"ابھی کوئی گروپ خطرے میں نہیں۔","cooldown":"ان گروپس کو پچھلے 6 گھنٹوں میں کال کی جا چکی ہے۔","pr_now":"فوراً","pr_24h":"24 گھنٹے میں","pr_this_week":"اس ہفتے","offline":"آف لائن: اعداد آلے پر شمار کیے گئے۔","assumptions":"موسمی عوامل تخمینی ہیں اور وقت کے ساتھ ادارے کے ڈیٹا سے خود درست ہوتے ہیں۔","demoTag":"ڈیمو · فرضی ڈیٹا","demoLoc":"ڈیمو مقام: وسطی قاہرہ۔","howTitle":"یہ کیسے کام کرتا ہے","howBody":"آپ کو قریبی درخواستیں ملتی ہیں جنہیں آپ کے گروپ کی ضرورت ہے۔ \"میں عطیہ دوں گا\" دبانے تک اسپتال آپ کا نمبر یا مقام نہیں دیکھتا۔","mapNote":"ایپ میں حقیقی گوگل نقشہ دکھتا ہے۔ یہاں وسطی قاہرہ کا وضاحتی نقشہ ہے؛ ہر \"راستہ\" بٹن واقعی گوگل میپس کھولتا ہے۔","simulated":"(نقلی)","needsClaude":"معاون اس وقت کام کرتا ہے جب یہ صفحہ Claude میں کھولا جائے۔ باقی سب مکمل کام کرتا ہے۔","thinking":"سوچ رہا ہے…","stop":"روکیں","aiPlanBtn":"✨ AI مخصوص منصوبہ","planErr":"منصوبہ نہیں بن سکا؛ فوری منصوبہ دکھایا گیا ہے۔","speakAs":"میں بطور","you":"آپ","nile":"نیل","today":"آج","simScan":"📷 کارڈ اسکین کی نقل","sampleNote":"تمام اعداد اس ڈیمو کے ڈیٹا سے ہیں۔","agentNote":"اس ڈیمو کے ڈیٹا پر کام کرتا ہے اور آپ کی زبان میں جواب دیتا ہے۔","reportDemo":"رپورٹ بنائیں"},"hi":{"appName":"स्मार्ट ब्लड बैंक","save":"सहेजें","cancel":"रद्द करें","confirm":"पुष्टि करें","loading":"लोड हो रहा है…","error":"त्रुटि","km":"किमी","units":"यूनिट","days":"दिन","perDay":"/दिन","directions":"📍 रास्ता","call":"कॉल","askAgent":"AI सहायक से पूछें","none":"कोई नहीं","search":"खोजें","optional":"वैकल्पिक","tDonor":"दाता पोर्टल","tBeneficiary":"मरीज़ पोर्टल","tFacility":"संस्थान पोर्टल","tAgent":"AI सहायक","tMap":"मानचित्र","tBook":"दान बुक करें","tForecast":"स्टॉक पूर्वानुमान","tAdmin":"प्लेटफ़ॉर्म प्रबंधन","tCard":"दाता कार्ड","tJourney":"मेरे दान की यात्रा","tAchievements":"बैज और चुनौतियाँ","tCampaigns":"रक्तदान शिविर","tReport":"दैनिक रिपोर्ट","tSettings":"सेटिंग्स","tScan":"दाता कार्ड स्कैन करें","tOnboarding":"खाता पूरा करें","loginTagline":"खून की एक बूँद जान बचाती है 🩸","loginSub":"हम दाताओं और मरीज़ों को कुछ ही मिनटों में निकटतम अस्पतालों और ब्लड बैंकों से जोड़ते हैं।","phone":"फ़ोन नंबर","otpCode":"सत्यापन कोड","sendCode":"कोड भेजें","verifyCode":"साइन इन करें","wrongCode":"गलत कोड","iAm":"मैं हूँ…","roleDonor":"दाता","roleBeneficiary":"मरीज़ / परिजन","roleStaff":"अस्पताल / ब्लड बैंक स्टाफ़","name":"नाम","bloodType":"ब्लड ग्रुप","bloodTypePatient":"ब्लड ग्रुप (मरीज़ का, अगर पता हो)","sex":"लिंग","male":"पुरुष","female":"महिला","locationPrivacy":"हम आपकी लोकेशन सिर्फ़ दूरी जानने के लिए उपयोग करते हैं, यह किसी को नहीं दिखाई जाती।","saveContinue":"सहेजें और आगे बढ़ें","completeData":"कृपया फ़ॉर्म पूरा करें","staffPending":"प्रबंधन द्वारा सत्यापन के बाद आपका खाता संस्थान से जुड़ जाएगा।","yourType":"आपका ग्रुप","eligibleNow":"आप अभी दान कर सकते हैं ✅","eligibleAfter":"आप {date} के बाद फिर दान कर सकते हैं","availableToggle":"आपात कॉल के लिए उपलब्ध","nearestSites":"🗺️ निकटतम दान केंद्र","nearbyRequests":"आपके ग्रुप के लिए पास के अनुरोध ({n})","noRequests":"अभी पास में कोई अनुरूप अनुरोध नहीं। ज़रूरत पड़ने पर हम सूचित करेंगे।","willDonate":"मैं दान करूँगा","thanksResponded":"धन्यवाद ❤️ {name} को सूचित कर दिया गया है। पहचान पत्र साथ लाएँ।","alreadyResponded":"आप पहले ही जवाब दे चुके हैं","urg_routine":"सामान्य","urg_urgent":"तत्काल","urg_critical":"गंभीर 🚨","unitsLeftKm":"{u} यूनिट शेष · {km} किमी","myCard":"🪪 मेरा कार्ड","myJourney":"🩸 मेरी यात्रा","myAchievements":"🏅 बैज","campaigns":"📣 शिविर","patientType":"मरीज़ का ब्लड ग्रुप","unitsNeeded":"आवश्यक यूनिट","findStock":"निकटतम अनुरूप स्टॉक खोजें","enableLocation":"लोकेशन चालू करें","enableLocationMsg":"निकटतम स्टॉक खोजने के लिए आपकी लोकेशन चाहिए।","noStock":"पास में कोई अनुरूप स्टॉक नहीं। निकटतम अस्पताल में अनुरोध बनाएँ, हम दाताओं को बुलाएँगे।","unitsAvailableKm":"{u} यूनिट उपलब्ध · {km} किमी","requestHere":"अभी अनुरोध करें","requestSent":"अनुरोध {name} को भेजा गया, वे पुष्टि के लिए संपर्क करेंगे।","myRequests":"मेरे अनुरोध","securedOf":"{n} में से {s} यूनिट मिले","showOnMap":"🗺️ मानचित्र पर स्टॉक देखें","st_open":"खुला","st_matching":"खोज जारी","st_partially_fulfilled":"आंशिक पूर्ण","st_fulfilled":"पूर्ण ✅","st_cancelled":"रद्द","st_expired":"समाप्त","inventoryTitle":"स्टॉक (लाल कोशिकाएँ)","low":"कम","issue":"जारी","deposit":"जमा","expiringSoon":"⚠️ 7 दिनों में समाप्त होने वाली यूनिट","expiringHint":"सुझाव: बर्बाद करने के बजाय पास के ज़रूरतमंद संस्थान को भेजें।","incoming":"प्राथमिकता के अनुसार अनुरोध ({n})","verifyAndCall":"सत्यापित करें और दाताओं को बुलाएँ","verifiedMsg":"पास के {n} योग्य दाताओं को सूचित किया जाएगा।","sameTypeStock":"उसी ग्रुप का स्टॉक: {n}","notLinked":"आपका खाता सत्यापित संस्थान से जुड़ने की प्रतीक्षा में है।","donorDensityMap":"🗺️ दाता घनत्व मानचित्र","score":"प्राथमिकता {n}","r_critical":"गंभीर","r_waiting_24h":"24+ घंटे से प्रतीक्षा","r_insufficient_stock":"स्टॉक अपर्याप्त","r_due_soon":"6 घंटे में आवश्यक","r_unverified":"असत्यापित","scanDonor":"📷 दाता कार्ड स्कैन करें","recordDonation":"दान दर्ज करें","bagCode":"बैग कोड","donationRecorded":"दान दर्ज हुआ। बैग कोड: {code}","advanceBag":"बैग की यात्रा अपडेट करें","nextStep":"अगला चरण","discard":"अस्वीकार","dailyReport":"📋 दैनिक रिपोर्ट","regenerate":"रिपोर्ट रिफ़्रेश करें","reportAi":"AI द्वारा लिखित","reportTemplate":"स्वचालित सारांश","donorInfo":"{name} · {type}","eligible":"योग्य ✅","notEligible":"अभी योग्य नहीं","donationsCount":"पिछले दान: {n}","cameraDenied":"कार्ड स्कैन करने के लिए कैमरा अनुमति चाहिए।","grantCamera":"कैमरा अनुमति दें","scanHint":"कैमरे को दाता कार्ड के QR कोड पर रखें","j_collected":"रक्त लिया गया","j_testing":"प्रयोगशाला जाँच","j_ready":"ब्लड बैंक में तैयार","j_issued":"मरीज़ को जारी","j_transfused":"एक मरीज़ की जान बचाई ❤️","j_discarded":"जाँच के बाद अस्वीकृत","journeyEmpty":"अभी कोई दान दर्ज नहीं। पहले दान के बाद आप यहाँ अपने बैग की यात्रा देखेंगे।","journeyHint":"हम मरीज़ की कोई जानकारी नहीं दिखाते, सिर्फ़ आपके दान के चरण।","points":"अंक","livesSaved":"बचाई गई जानें (अनुमान)","donationsTotal":"आपके दान","b_first_donation":"पहला दान","b_hero_5":"हीरो (5 दान)","b_super_10":"सुपर हीरो (10)","b_legend_15":"लीजेंड (15)","b_rare_blood":"दुर्लभ रक्त रक्षक","b_emergency_responder":"आपात सहायक","nextBadge":"अगला बैज {n} दान पर","challenges":"चुनौतियाँ","ch_weekly_response":"इस सप्ताह एक आपात कॉल का जवाब दें","ch_quarter_donation":"इस तिमाही एक बार दान करें","ch_rare_standby":"दुर्लभ रक्त रक्षक के रूप में उपलब्ध रहें","heroOfWeek":"🏆 सप्ताह के हीरो","showOnBoard":"हीरो बोर्ड पर मेरा पहला नाम दिखाएँ","noHeroes":"इस सप्ताह अभी कोई हीरो नहीं। पहले बनें!","pointsN":"{n} अंक","cardHint":"तेज़ स्वागत के लिए ब्लड बैंक में यह कोड दिखाएँ।","lastDonation":"पिछला दान","nextEligible":"अगली पात्रता","joinCode":"शिविर कोड","join":"जुड़ें","joined":"आप शिविर में पंजीकृत हैं ✅","noCampaigns":"अभी कोई सक्रिय शिविर नहीं।","campaignTarget":"लक्ष्य: {n} दाता","createCampaign":"शिविर बनाएँ","org":"संस्था","campaignTitle":"शिविर का नाम","starts":"शुरू","ends":"समाप्त","campaignNotFound":"गलत कोड या शिविर समाप्त।","signups":"पंजीकरण: {n}","feeEgp":"आयोजन शुल्क (EGP)","agentHello":"नमस्ते, मैं रफ़ीक़ हूँ 👋 खून खोजने, दान करने और अनुरोधों में मदद करता हूँ। कैसे मदद करूँ?","agentPlaceholder":"अपना सवाल लिखें…","send":"भेजें","agentErr":"कनेक्शन त्रुटि। फिर कोशिश करें।","sug1":"मेरे पास O- खून कहाँ मिलेगा?","sug2":"क्या मैं अभी दान कर सकता हूँ?","sug3":"A+ के साथ कौन से ग्रुप अनुरूप हैं?","mapEnableLoc":"निकटतम स्थान देखने के लिए लोकेशन चालू करें।","noSites":"पास में अभी कोई सत्यापित दान केंद्र नहीं।","chooseType":"निकटतम अनुरूप स्टॉक देखने के लिए मरीज़ का ग्रुप चुनें।","densityInfo":"20 किमी में {c} क्षेत्रों में {n} योग्य दाता।","bookDonation":"दान बुक करें","needsNow":"अभी {t} चाहिए ({u} यूनिट)","openInMaps":"📍 गूगल मैप्स में रास्ता","day":"दिन","hour":"समय","bookConfirm":"बुकिंग की पुष्टि","booked":"बुक हो गया ❤️ {name} में {day} को {hour} बजे। 30 मिनट पहले 500 मि.ली. पानी पिएँ।","bookFail":"बुकिंग नहीं हो सकी","errNotEligible":"आप अभी दान के योग्य नहीं हैं।","errFull":"यह दिन भर चुका है।","errNotAccepting":"यह केंद्र अभी दाता स्वीकार नहीं कर रहा।","errDuplicate":"आपकी पहले से एक बुकिंग है।","bookHint":"दान में लगभग 45 मिनट लगते हैं, खून लेने में सिर्फ़ 10 मिनट। एक यूनिट 3 जानें बचा सकती है।","overview":"सारांश","users":"उपयोगकर्ता","facilities":"संस्थान","audit":"ऑडिट लॉग","revenue":"राजस्व","s_donors":"दाता","s_eligible":"अभी योग्य","s_facilities":"सत्यापित संस्थान","s_pending":"सत्यापन लंबित","s_open":"खुले अनुरोध","s_fulfilled30":"पूर्ण अनुरोध (30 दिन)","s_avgHours":"औसत पूर्ति समय (घंटे)","s_donations30":"दान (30 दिन)","s_lives":"बचाई गई जानें (अनुमान)","s_mrr":"मासिक आवर्ती राजस्व","s_campaignFees":"शिविर शुल्क (30 दिन)","s_suspended":"निलंबित खाते","searchUsers":"नाम या फ़ोन से खोजें","role":"भूमिका","setRole":"भूमिका बदलें","linkFacility":"संस्थान से जोड़ें","unlink":"अलग करें","suspend":"निलंबित करें","unsuspend":"निलंबन हटाएँ","verify":"सत्यापित करें","unverify":"सत्यापन हटाएँ","plan":"प्लान","plan_free":"बेसिक (मुफ़्त)","plan_pro":"Pro","plan_enterprise":"Network","suspended":"निलंबित","verified":"सत्यापित","pending":"लंबित","auditEmpty":"अभी कोई कार्रवाई दर्ज नहीं।","addFacility":"संस्थान जोड़ें","facName":"संस्थान का नाम","facKind":"प्रकार","k_hospital":"अस्पताल","k_blood_bank":"ब्लड बैंक","k_medical_center":"चिकित्सा केंद्र","k_lab":"प्रयोगशाला","lat":"अक्षांश","lng":"देशांतर","adminOnly":"यह स्क्रीन केवल प्रबंधक के लिए है।","egpMonth":"{n} EGP/माह","confirmAction":"क्या आप निश्चित हैं?","language":"भाषा","languageHint":"अरबी और उर्दू के लिए इंटरफ़ेस दाएँ से बाएँ हो जाता है।","signOut":"साइन आउट","settings":"⚙️ सेटिंग्स","forecastTitle":"AI कमी पूर्वानुमान","forecastBtn":"AI स्टॉक","season":"मौसम","surge":"अस्पताल दबाव","horizon":"अवधि","sea_none":"सामान्य","sea_ramadan":"🌙 रमज़ान","sea_hajj":"🕋 हज और उमरा","sea_summer":"☀️ गर्मी और यात्रा","sea_flu":"❄️ फ़्लू","sea_holidays":"🎉 त्योहार","sur_moderate":"सामान्य","sur_high":"अधिक +25%","sur_code_red":"कोड रेड +60%","risk_critical":"🚨 गंभीर","risk_warning":"⚠️ चेतावनी","risk_stable":"🟢 स्थिर","safety":"सुरक्षित स्तर","burn":"खपत","inflow":"आवक","net":"शुद्ध अंतर","depletesIn":"{d} दिनों में समाप्त ({date})","noDepletion":"समाप्ति की संभावना नहीं","chart":"14 दिन का रुझान","safetyLine":"सुरक्षित स्तर","plan_title":"पूर्व-निवारक कदम","aiSource":"AI द्वारा तैयार","rulesSource":"तत्काल वैकल्पिक योजना","recall":"दाताओं को तुरंत बुलाएँ","recallDone":"{n} योग्य दाताओं को बुलावा भेजा गया ({t})।","recallNone":"अभी कोई ग्रुप जोखिम में नहीं।","cooldown":"इन ग्रुप्स को पिछले 6 घंटों में बुलाया जा चुका है।","pr_now":"तुरंत","pr_24h":"24 घंटे में","pr_this_week":"इस सप्ताह","offline":"ऑफ़लाइन: आँकड़े डिवाइस पर गणना किए गए।","assumptions":"मौसमी कारक अनुमानित हैं और समय के साथ संस्थान के डेटा से स्वतः सुधरते हैं।","demoTag":"डेमो · नमूना डेटा","demoLoc":"डेमो लोकेशन: मध्य काहिरा।","howTitle":"यह कैसे काम करता है","howBody":"आपको पास के वे अनुरोध मिलते हैं जिन्हें आपके ग्रुप की ज़रूरत है। \"मैं दान करूँगा\" दबाने तक अस्पताल आपका नंबर या लोकेशन नहीं देखता।","mapNote":"ऐप में असली गूगल मैप दिखता है। यहाँ मध्य काहिरा का उदाहरण मानचित्र है; हर \"रास्ता\" बटन सच में गूगल मैप्स खोलता है।","simulated":"(नक़ली)","needsClaude":"सहायक तब काम करता है जब यह पेज Claude में खोला जाए। बाकी सब पूरी तरह काम करता है।","thinking":"सोच रहा है…","stop":"रोकें","aiPlanBtn":"✨ AI कस्टम योजना","planErr":"योजना नहीं बन सकी; तत्काल योजना दिखाई गई है।","speakAs":"मैं बोल रहा हूँ बतौर","you":"आप","nile":"नील","today":"आज","simScan":"📷 दाता कार्ड स्कैन का अनुकरण","sampleNote":"सभी आँकड़े इस डेमो के डेटा से हैं।","agentNote":"इस डेमो के डेटा पर काम करता है और आपकी भाषा में जवाब देता है।","reportDemo":"रिपोर्ट बनाएँ"},"tr":{"appName":"Akıllı Kan Bankası","save":"Kaydet","cancel":"İptal","confirm":"Onayla","loading":"Yükleniyor…","error":"Hata","km":"km","units":"ünite","days":"gün","perDay":"/gün","directions":"📍 Yol tarifi","call":"Ara","askAgent":"Yapay zekâ asistanına sor","none":"Yok","search":"Ara","optional":"isteğe bağlı","tDonor":"Bağışçı paneli","tBeneficiary":"Hasta paneli","tFacility":"Kurum paneli","tAgent":"Yapay zekâ asistanı","tMap":"Harita","tBook":"Bağış randevusu","tForecast":"Stok tahmini","tAdmin":"Platform yönetimi","tCard":"Bağışçı kartı","tJourney":"Bağışlarımın yolculuğu","tAchievements":"Rozetler ve görevler","tCampaigns":"Bağış kampanyaları","tReport":"Günlük rapor","tSettings":"Ayarlar","tScan":"Bağışçı kartını tara","tOnboarding":"Hesabı tamamla","loginTagline":"Bir damla kan bir hayat kurtarır 🩸","loginSub":"Bağışçıları ve hastaları en yakın hastane ve kan bankalarıyla dakikalar içinde buluşturuyoruz.","phone":"Telefon numarası","otpCode":"Doğrulama kodu","sendCode":"Kod gönder","verifyCode":"Giriş yap","wrongCode":"Hatalı kod","iAm":"Ben…","roleDonor":"Bağışçı","roleBeneficiary":"Hasta / yakını","roleStaff":"Hastane / kan bankası personeli","name":"Ad","bloodType":"Kan grubu","bloodTypePatient":"Kan grubu (biliniyorsa hastanın)","sex":"Cinsiyet","male":"Erkek","female":"Kadın","locationPrivacy":"Konumunuzu yalnızca mesafe hesabı için kullanırız; kimseye gösterilmez.","saveContinue":"Kaydet ve devam et","completeData":"Lütfen formu tamamlayın","staffPending":"Hesabınız, yönetici kurumu doğruladıktan sonra kurumunuza bağlanacak.","yourType":"Kan grubunuz","eligibleNow":"Şimdi bağış yapabilirsiniz ✅","eligibleAfter":"{date} tarihinden sonra tekrar bağış yapabilirsiniz","availableToggle":"Acil çağrılara açığım","nearestSites":"🗺️ En yakın bağış noktaları","nearbyRequests":"Grubunuza uygun yakın talepler ({n})","noRequests":"Şu an yakında uygun talep yok. Gerektiğinde size haber vereceğiz.","willDonate":"Bağış yapacağım","thanksResponded":"Teşekkürler ❤️ {name} bilgilendirildi. Kimliğinizi getirin.","alreadyResponded":"Bu talebe zaten yanıt verdiniz","urg_routine":"Normal","urg_urgent":"Acil","urg_critical":"Kritik 🚨","unitsLeftKm":"{u} ünite kaldı · {km} km","myCard":"🪪 Kartım","myJourney":"🩸 Yolculuğum","myAchievements":"🏅 Rozetler","campaigns":"📣 Kampanyalar","patientType":"Hastanın kan grubu","unitsNeeded":"Gereken ünite","findStock":"En yakın uygun stoku bul","enableLocation":"Konumu açın","enableLocationMsg":"En yakın stoku bulmak için konumunuz gerekli.","noStock":"Yakında uygun stok yok. En yakın hastanede talep oluşturun, bağışçıları çağıralım.","unitsAvailableKm":"{u} ünite mevcut · {km} km","requestHere":"Şimdi talep et","requestSent":"Talep {name} kurumuna gönderildi; onay için sizinle iletişime geçecekler.","myRequests":"Taleplerim","securedOf":"{n} üniteden {s} tanesi sağlandı","showOnMap":"🗺️ Stoku haritada göster","st_open":"Açık","st_matching":"Bağışçı aranıyor","st_partially_fulfilled":"Kısmen karşılandı","st_fulfilled":"Karşılandı ✅","st_cancelled":"İptal","st_expired":"Süresi doldu","inventoryTitle":"Stok (eritrosit)","low":"Düşük","issue":"Çıkış","deposit":"Giriş","expiringSoon":"⚠️ 7 gün içinde süresi dolacak üniteler","expiringHint":"Öneri: israf etmek yerine ihtiyacı olan yakın bir kuruma aktarın.","incoming":"Önceliğe göre gelen talepler ({n})","verifyAndCall":"Doğrula ve bağışçıları çağır","verifiedMsg":"Yakındaki {n} uygun bağışçı bilgilendirilecek.","sameTypeStock":"Aynı grup stoğu: {n}","notLinked":"Hesabınız, yöneticinin doğrulanmış bir kuruma bağlamasını bekliyor.","donorDensityMap":"🗺️ Bağışçı yoğunluk haritası","score":"Öncelik {n}","r_critical":"Kritik","r_waiting_24h":"24+ saattir bekliyor","r_insufficient_stock":"Stok yetersiz","r_due_soon":"6 saat içinde gerekli","r_unverified":"Doğrulanmamış","scanDonor":"📷 Bağışçı kartını tara","recordDonation":"Bağışı kaydet","bagCode":"Torba kodu","donationRecorded":"Bağış kaydedildi. Torba kodu: {code}","advanceBag":"Torba yolculuğunu güncelle","nextStep":"Sonraki adım","discard":"İmha","dailyReport":"📋 Günlük rapor","regenerate":"Raporu yenile","reportAi":"Yapay zekâ tarafından yazıldı","reportTemplate":"Otomatik özet","donorInfo":"{name} · {type}","eligible":"Uygun ✅","notEligible":"Henüz uygun değil","donationsCount":"Önceki bağışlar: {n}","cameraDenied":"Kartı taramak için kamera izni gerekli.","grantCamera":"Kameraya izin ver","scanHint":"Kamerayı bağışçı kartındaki QR koda tutun","j_collected":"Kan alındı","j_testing":"Laboratuvar testinde","j_ready":"Kan bankasında hazır","j_issued":"Bir hastaya verildi","j_transfused":"Bir hastanın hayatını kurtardı ❤️","j_discarded":"Testten sonra imha edildi","journeyEmpty":"Henüz kayıtlı bağış yok. İlk bağışınızdan sonra torbanızın yolculuğunu burada adım adım izleyeceksiniz.","journeyHint":"Hasta bilgisi asla gösterilmez, yalnızca bağışınızın aşamaları.","points":"Puan","livesSaved":"Kurtarılan hayat (tahmini)","donationsTotal":"Bağışlarınız","b_first_donation":"İlk bağış","b_hero_5":"Kahraman (5 bağış)","b_super_10":"Süper kahraman (10)","b_legend_15":"Efsane (15)","b_rare_blood":"Nadir kan koruyucusu","b_emergency_responder":"Acil durum gönüllüsü","nextBadge":"Sonraki rozet {n} bağışta","challenges":"Görevler","ch_weekly_response":"Bu hafta bir acil çağrıya yanıt ver","ch_quarter_donation":"Bu çeyrekte bir kez bağış yap","ch_rare_standby":"Nadir kan koruyucusu olarak hazırda kal","heroOfWeek":"🏆 Haftanın kahramanları","showOnBoard":"Adımı kahramanlar panosunda göster","noHeroes":"Bu hafta henüz kahraman yok. İlk sen ol!","pointsN":"{n} puan","cardHint":"Daha hızlı kabul için bu kodu kan bankasında gösterin.","lastDonation":"Son bağış","nextEligible":"Sonraki uygunluk","joinCode":"Kampanya kodu","join":"Katıl","joined":"Kampanyaya kaydoldunuz ✅","noCampaigns":"Şu an aktif kampanya yok.","campaignTarget":"Hedef: {n} bağışçı","createCampaign":"Kampanya oluştur","org":"Kurum","campaignTitle":"Kampanya başlığı","starts":"Başlangıç","ends":"Bitiş","campaignNotFound":"Kod hatalı ya da kampanya bitti.","signups":"Kayıtlı: {n}","feeEgp":"Organizasyon ücreti (EGP)","agentHello":"Merhaba, ben Rafik 👋 Kan bulmanıza, bağış yapmanıza ve talepleri takip etmenize yardım ederim. Nasıl yardımcı olabilirim?","agentPlaceholder":"Sorunuzu yazın…","send":"Gönder","agentErr":"Bağlantı hatası. Tekrar deneyin.","sug1":"Yakınımda O- kan nerede var?","sug2":"Şimdi bağış yapabilir miyim?","sug3":"A+ ile hangi gruplar uyumlu?","mapEnableLoc":"Size en yakın yerleri görmek için konumu açın.","noSites":"Yakında doğrulanmış bağış noktası yok.","chooseType":"En yakın uygun stoku görmek için hastanın kan grubunu seçin.","densityInfo":"20 km içinde {c} bölgede {n} uygun bağışçı.","bookDonation":"Randevu al","needsNow":"Şu an {t} gerekli ({u} ünite)","openInMaps":"📍 Google Haritalar'da yol tarifi","day":"Gün","hour":"Saat","bookConfirm":"Randevuyu onayla","booked":"Randevu alındı ❤️ {name}, {day} saat {hour}. 30 dakika önce 500 ml su için.","bookFail":"Randevu alınamadı","errNotEligible":"Henüz bağış için uygun değilsiniz.","errFull":"Bu gün dolu.","errNotAccepting":"Bu nokta şu an bağışçı kabul etmiyor.","errDuplicate":"Zaten bir randevunuz var.","bookHint":"Bağış yaklaşık 45 dakika sürer; kan alma yalnızca 10 dakika. Bir ünite 3 hayat kurtarabilir.","overview":"Genel bakış","users":"Kullanıcılar","facilities":"Kurumlar","audit":"Denetim kaydı","revenue":"Gelir","s_donors":"Bağışçılar","s_eligible":"Şu an uygun","s_facilities":"Doğrulanmış kurumlar","s_pending":"Doğrulama bekleyen","s_open":"Açık talepler","s_fulfilled30":"Karşılanan talepler (30 gün)","s_avgHours":"Ort. karşılama süresi (saat)","s_donations30":"Bağışlar (30 gün)","s_lives":"Kurtarılan hayat (tahmini)","s_mrr":"Aylık yinelenen gelir","s_campaignFees":"Kampanya ücretleri (30 gün)","s_suspended":"Askıya alınan hesaplar","searchUsers":"Ad veya telefonla ara","role":"Rol","setRole":"Rolü değiştir","linkFacility":"Kuruma bağla","unlink":"Bağlantıyı kaldır","suspend":"Askıya al","unsuspend":"Askıyı kaldır","verify":"Doğrula","unverify":"Doğrulamayı kaldır","plan":"Paket","plan_free":"Temel (ücretsiz)","plan_pro":"Pro","plan_enterprise":"Network","suspended":"Askıda","verified":"Doğrulandı","pending":"Bekliyor","auditEmpty":"Henüz kayıtlı işlem yok.","addFacility":"Kurum ekle","facName":"Kurum adı","facKind":"Tür","k_hospital":"Hastane","k_blood_bank":"Kan bankası","k_medical_center":"Tıp merkezi","k_lab":"Laboratuvar","lat":"Enlem","lng":"Boylam","adminOnly":"Bu ekran yalnızca platform yöneticisi içindir.","egpMonth":"{n} EGP/ay","confirmAction":"Emin misiniz?","language":"Dil","languageHint":"Arapça ve Urduca için arayüz sağdan sola döner.","signOut":"Çıkış yap","settings":"⚙️ Ayarlar","forecastTitle":"Yapay zekâ ile eksiklik tahmini","forecastBtn":"AI Stok","season":"Sezon","surge":"Hastane yoğunluğu","horizon":"Tahmin süresi","sea_none":"Normal","sea_ramadan":"🌙 Ramazan","sea_hajj":"🕋 Hac ve Umre","sea_summer":"☀️ Yaz ve seyahat","sea_flu":"❄️ Grip sezonu","sea_holidays":"🎉 Bayramlar","sur_moderate":"Normal","sur_high":"Yüksek +%25","sur_code_red":"Kod Kırmızı +%60","risk_critical":"🚨 Kritik","risk_warning":"⚠️ Uyarı","risk_stable":"🟢 Stabil","safety":"Güvenli seviye","burn":"Tüketim","inflow":"Giriş","net":"Net fark","depletesIn":"{d} günde tükenir ({date})","noDepletion":"Tükenme beklenmiyor","chart":"14 günlük tükenme eğrisi","safetyLine":"Güvenli seviye","plan_title":"Önleyici eylem planı","aiSource":"Yapay zekâ üretti","rulesSource":"Anlık yedek plan","recall":"Bağışçıları hemen çağır","recallDone":"{n} uygun bağışçıya çağrı gönderildi ({t}).","recallNone":"Şu an risk altında grup yok.","cooldown":"Bu gruplar son 6 saatte çağrıldı.","pr_now":"Hemen","pr_24h":"24 saat içinde","pr_this_week":"Bu hafta","offline":"Çevrimdışı: rakamlar cihazda hesaplandı.","assumptions":"Sezon katsayıları tahminidir ve zamanla kurumunuzun verileriyle otomatik ayarlanır.","demoTag":"Demo · örnek veriler","demoLoc":"Demo konumu: Kahire merkez.","howTitle":"Nasıl çalışır","howBody":"Grubunuza ihtiyaç duyan yakın talepleri alırsınız. \"Bağış yapacağım\"a basana kadar hastane numaranızı veya konumunuzu görmez.","mapNote":"Uygulamada gerçek Google Haritası görünür. Burada Kahire merkezinin temsili haritası var; her \"Yol tarifi\" düğmesi gerçekten Google Haritalar'ı açar.","simulated":"(simülasyon)","needsClaude":"Asistan, bu sayfa Claude içinde açıldığında çalışır. Geri kalan her şey tam çalışır.","thinking":"Düşünüyor…","stop":"Durdur","aiPlanBtn":"✨ Yapay zekâ ile özel plan","planErr":"Plan oluşturulamadı; anlık plan gösteriliyor.","speakAs":"Şu rolle konuşuyorum","you":"Siz","nile":"Nil","today":"Bugün","simScan":"📷 Bağışçı kartı taramayı dene","sampleNote":"Tüm rakamlar bu demonun verilerinden.","agentNote":"Bu demonun verileriyle çalışır ve sizin dilinizde yanıt verir.","reportDemo":"Rapor oluştur"}}</script>
 
 <script>
 (() => {
-// ============ بيانات تجريبية (وهمية) ============
-const ME = { lat: 30.0444, lng: 31.2357 }; // وسط القاهرة (موقع افتراضي للتجربة)
+const D = JSON.parse(document.getElementById("i18n").textContent);
+const LANGS = [["ar","العربية",1],["en","English",0],["fr","Français",0],["ur","اردو",1],["hi","हिन्दी",0],["tr","Türkçe",0]];
+let lang = "ar"; try { const s = localStorage.getItem("sbb.demo.lang"); if (D[s]) lang = s; } catch {}
+const t = (k) => (D[lang] && D[lang][k]) ?? D.en[k] ?? k;
+const f = (k, v) => t(k).replace(/\{(\w+)\}/g, (_, x) => v[x] ?? "");
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const loc = () => ({ ar: "ar-EG", en: "en-GB", fr: "fr-FR", ur: "ur-PK", hi: "hi-IN", tr: "tr-TR" }[lang]);
+const dt = (d, o = { day: "numeric", month: "short" }) => o.timeStyle ? new Date(d).toLocaleString(loc(), o) : new Date(d).toLocaleDateString(loc(), o);
+
+// ================= بيانات تجريبية =================
+const ME = { lat: 30.0444, lng: 31.2357 };
 const TYPES = ["O-","O+","A-","A+","B-","B+","AB-","AB+"];
 const COMPAT = { "O-":["O-"], "O+":["O+","O-"], "A-":["A-","O-"], "A+":["A+","A-","O+","O-"], "B-":["B-","O-"], "B+":["B+","B-","O+","O-"], "AB-":["AB-","A-","B-","O-"], "AB+":TYPES.slice() };
 const FAC = [
-  { id: "f1", name: "مستشفى النيل التجريبي", kind: "مستشفى", lat: 30.0480, lng: 31.2290, phone: "0100 000 0001" },
-  { id: "f2", name: "بنك دم الزمالك التجريبي", kind: "بنك دم", lat: 30.0626, lng: 31.2197, phone: "0100 000 0002" },
-  { id: "f3", name: "مركز المعادي الطبي (تجريبي)", kind: "مركز طبي", lat: 29.9602, lng: 31.2569, phone: "0100 000 0003" },
-  { id: "f4", name: "مستشفى الجيزة التجريبي", kind: "مستشفى", lat: 30.0131, lng: 31.2089, phone: "0100 000 0004" },
+  { id: "f1", ar: "مستشفى النيل التجريبي", en: "Nile Demo Hospital", kind: "hospital", lat: 30.0480, lng: 31.2290, phone: "0100 000 0001", hours: "9–21", verified: true, plan: "pro", suspended: false },
+  { id: "f2", ar: "بنك دم الزمالك التجريبي", en: "Zamalek Demo Blood Bank", kind: "blood_bank", lat: 30.0626, lng: 31.2197, phone: "0100 000 0002", hours: "24h", verified: true, plan: "enterprise", suspended: false },
+  { id: "f3", ar: "مركز المعادي الطبي (تجريبي)", en: "Maadi Demo Medical Center", kind: "medical_center", lat: 29.9602, lng: 31.2569, phone: "0100 000 0003", hours: "10–18", verified: true, plan: "free", suspended: false },
+  { id: "f4", ar: "مستشفى الجيزة التجريبي", en: "Giza Demo Hospital", kind: "hospital", lat: 30.0131, lng: 31.2089, phone: "0100 000 0004", hours: "8–20", verified: true, plan: "pro", suspended: false },
+  { id: "f5", ar: "مركز الدقي الطبي (تجريبي)", en: "Dokki Demo Clinic", kind: "medical_center", lat: 30.0385, lng: 31.2110, phone: "0100 000 0005", hours: "9–17", verified: false, plan: "free", suspended: false },
 ];
-// مخزون كل منشأة + معدلات الصرف/الإيداع اليومية (للمنشأة f1 = منشأتك في بوابة المنشأة)
-const STOCK = {
-  f1: { "O-":[12,10,4,1], "O+":[30,15,6,7], "A-":[9,6,1.2,0.6], "A+":[40,15,5,4], "B-":[6,5,1,0.2], "B+":[22,10,3,2.6], "AB-":[4,3,0.3,0.2], "AB+":[11,5,1,1] },
-  f2: { "O-":[25], "O+":[60], "A-":[8], "A+":[45], "B-":[3], "B+":[30], "AB-":[2], "AB+":[9] },
-  f3: { "O-":[0], "O+":[14], "A-":[2], "A+":[18], "B-":[0], "B+":[7], "AB-":[0], "AB+":[4] },
-  f4: { "O-":[5], "O+":[20], "A-":[3], "A+":[16], "B-":[1], "B+":[12], "AB-":[1], "AB+":[6] },
-};
-const INV = {}; for (const f in STOCK) { INV[f] = {}; for (const t of TYPES) INV[f][t] = STOCK[f][t][0]; }
-const RATES = {}; for (const t of TYPES) RATES[t] = { safety: STOCK.f1[t][1], burn: STOCK.f1[t][2], inflow: STOCK.f1[t][3] };
-// متبرعون وهميون (أعداد فقط تُعرض للمنشأة)
-const DONORS = []; (function seed(){ let s = 7; const r = () => (s = (s * 9301 + 49297) % 233280) / 233280;
-  const dist = ["O+","O+","O+","A+","A+","B+","B+","O-","A-","AB+","B-","AB-"];
+const PRICE = { free: 0, pro: 4500, enterprise: 25000 };
+const fname = (x) => (lang === "ar" ? x.ar : x.en);
+const fac = (id) => FAC.find((x) => x.id === id);
+const STOCK = { f1: { "O-":[12,10,4,1], "O+":[30,15,6,7], "A-":[9,6,1.2,0.6], "A+":[40,15,5,4], "B-":[6,5,1,0.2], "B+":[22,10,3,2.6], "AB-":[4,3,0.3,0.2], "AB+":[11,5,1,1] },
+  f2: { "O-":[25], "O+":[60], "A-":[8], "A+":[45], "B-":[3], "B+":[30], "AB-":[2], "AB+":[9] }, f3: { "O-":[0], "O+":[14], "A-":[2], "A+":[18], "B-":[0], "B+":[7], "AB-":[0], "AB+":[4] },
+  f4: { "O-":[5], "O+":[20], "A-":[3], "A+":[16], "B-":[1], "B+":[12], "AB-":[1], "AB+":[6] }, f5: {} };
+const INV = {}; for (const x in STOCK) { INV[x] = {}; for (const b of TYPES) INV[x][b] = (STOCK[x][b] || [0])[0]; }
+const RATES = {}; for (const b of TYPES) RATES[b] = { safety: STOCK.f1[b][1], burn: STOCK.f1[b][2], inflow: STOCK.f1[b][3] };
+const DONORS = []; (function(){ let s = 7; const r = () => (s = (s * 9301 + 49297) % 233280) / 233280; const dist = ["O+","O+","O+","A+","A+","B+","B+","O-","A-","AB+","B-","AB-"];
   for (let i = 0; i < 180; i++) DONORS.push({ bt: dist[Math.floor(r()*dist.length)], lat: 30.0444 + (r()-.5)*0.25, lng: 31.2357 + (r()-.5)*0.25, eligible: r() > .3 }); })();
-const DONOR = { name: "أحمد (متبرع تجريبي)", bt: "O-", sex: "male", last: "2026-07-10", available: true };
-let REQUESTS = [
-  { id: "r1", fac: "f1", bt: "O-", units: 3, secured: 1, urgency: "critical", verified: true, mine: false },
-  { id: "r2", fac: "f4", bt: "A-", units: 2, secured: 0, urgency: "urgent", verified: true, mine: false },
-  { id: "r3", fac: "f3", bt: "B+", units: 1, secured: 0, urgency: "routine", verified: true, mine: false },
+const DONOR = { id: "u1", ar: "أحمد", en: "Ahmed", bt: "O-", sex: "male", last: "2026-07-10", available: true, board: true };
+const USERS = [
+  { id: "u1", ar: "أحمد (متبرع)", en: "Ahmed (donor)", role: "donor", phone: "+20 100 000 1001", suspended: false },
+  { id: "u2", ar: "منى (مستفيدة)", en: "Mona (patient's family)", role: "beneficiary", phone: "+20 100 000 1002", suspended: false },
+  { id: "u3", ar: "د. كريم (موظف)", en: "Dr. Karim (staff)", role: "facility_staff", phone: "+20 100 000 1003", suspended: false, fac: "f1" },
+  { id: "u4", ar: "سارة (متبرعة)", en: "Sara (donor)", role: "donor", phone: "+20 100 000 1004", suspended: false },
+  { id: "u5", ar: "حساب مشبوه", en: "Suspicious account", role: "beneficiary", phone: "+20 100 000 1005", suspended: false },
 ];
+const H = 3600e3;
+let REQUESTS = [
+  { id: "r1", fac: "f1", bt: "O-", units: 3, secured: 1, urgency: "critical", verified: true, mine: false, at: Date.now() - 5*H },
+  { id: "r2", fac: "f4", bt: "A-", units: 2, secured: 0, urgency: "urgent", verified: true, mine: false, at: Date.now() - 30*H },
+  { id: "r3", fac: "f3", bt: "B+", units: 1, secured: 0, urgency: "routine", verified: true, mine: false, at: Date.now() - 2*H },
+  { id: "r4", fac: "f1", bt: "A+", units: 2, secured: 0, urgency: "urgent", verified: false, mine: false, at: Date.now() - 26*H },
+];
+const STEPS = ["collected","testing","ready","issued","transfused"];
+const DONATIONS = [{ code: "7F3A91C2DE", donor: "u1", bt: "O-", status: "transfused",
+  events: STEPS.map((s, i) => ({ s, at: new Date("2026-07-10T10:00:00").getTime() + i * 26 * H })) }];
+const CAMPAIGNS = [{ id: "c1", title: { ar: "حملة شركة النيل للتقنية", en: "Nile Tech Co. blood drive" }, org: "Nile Tech", fac: "f2", code: "NILE24", start: Date.now() + 2*24*H, end: Date.now() + 4*24*H, target: 80, fee: 30000, signups: 34 }];
+const JOINED = new Set();
+const HEROES = [{ ar: "سارة", en: "Sara", pts: 150 }, { ar: "يوسف", en: "Youssef", pts: 100 }];
+const AUDIT = [];
 const RESPONSES = new Set();
-const HOURS = { f1: "يوميًا 9 ص – 9 م", f2: "24 ساعة", f3: "السبت–الخميس 10 ص – 6 م", f4: "يوميًا 8 ص – 8 م" };
-let APPT = null; // موعد التبرع المحجوز
-const gmDir = (p) => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
-const gmLink = (p, label = "📍 الاتجاهات في خرائط جوجل") => `<a class="gm" href="${gmDir(p)}" target="_blank" rel="noopener">${label}</a>`;
-function sites() { return FAC.map((f) => ({ ...f, km: km(ME, f), hours: HOURS[f.id] })).sort((a, b) => a.km - b.km); }
-function density() { const cells = new Map(); for (const d of DONORS) { if (!d.eligible || km(d, fac("f1")) > 20) continue; const k = (Math.round(d.lat*100)/100) + "," + (Math.round(d.lng*100)/100); cells.set(k, (cells.get(k) || 0) + 1); }
-  return [...cells].filter(([, n]) => n >= 3).map(([k, n]) => { const [lat, lng] = k.split(",").map(Number); return { lat, lng, n }; }); }
-let seq = 4;
+let seq = 5, APPT = null;
+let pending = null; // تأكيد بخطوتين داخل الصفحة (confirm() لا يظهر في صفحات Claude)
+function twoStep(key, fn) { if (pending === key) { pending = null; fn(); } else { pending = key; render(); } }
+const cbtn = (key, label) => pending === key ? "⚠️ " + t("confirm") + "?" : label;
+const audit = (action, target, details) => AUDIT.unshift({ at: Date.now(), action, target, details });
 
-// ============ أدوات ============
-const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-const km = (a, b) => { const R = 6371, d2r = Math.PI/180; const dLat = (b.lat-a.lat)*d2r, dLng = (b.lng-a.lng)*d2r;
-  const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*d2r)*Math.cos(b.lat*d2r)*Math.sin(dLng/2)**2; return Math.round(2*R*Math.asin(Math.sqrt(x))*10)/10; };
-const fac = (id) => FAC.find((f) => f.id === id);
-const URG = { routine: "عادي", urgent: "عاجل", critical: "حرج 🚨" };
-function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3200); }
+// ================= أدوات =================
+const km = (a, b) => { const R = 6371, r = Math.PI/180, dLa = (b.lat-a.lat)*r, dLn = (b.lng-a.lng)*r;
+  const x = Math.sin(dLa/2)**2 + Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLn/2)**2; return Math.round(2*R*Math.asin(Math.sqrt(x))*10)/10; };
+const live = () => FAC.filter((x) => x.verified && !x.suspended);
+function toast(m) { const e = $("#toast"); e.textContent = m; e.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => e.hidden = true, 3400); }
 function nextEligible() { const gap = DONOR.sex === "female" ? 112 : 84; const d = new Date(new Date(DONOR.last).getTime() + gap*864e5); return d > new Date() ? d : null; }
-function inventoryNear(bt, radius = 30) {
-  const out = [];
-  for (const f of FAC) for (const t of COMPAT[bt]) if (INV[f.id][t] > 0) { const d = km(ME, f); if (d <= radius) out.push({ fid: f.id, name: f.name, kind: f.kind, phone: f.phone, bt: t, units: INV[f.id][t], km: d, exact: t === bt }); }
-  return out.sort((a, b) => (b.exact - a.exact) || a.km - b.km);
-}
-function donorsFor(req, radius = 15) { const f = fac(req.fac); return DONORS.filter((d) => d.eligible && COMPAT[req.bt].includes(d.bt) && km(d, f) <= radius); }
-function openForDonor() { return REQUESTS.filter((r) => r.verified && r.secured < r.units && COMPAT[r.bt].includes(DONOR.bt)).map((r) => ({ ...r, km: km(ME, fac(r.fac)) })).sort((a, b) => ({critical:0,urgent:1,routine:2}[a.urgency] - {critical:0,urgent:1,routine:2}[b.urgency]) || a.km - b.km); }
+function inventoryNear(bt, radius = 30) { const out = []; for (const x of live()) for (const b of COMPAT[bt]) if (INV[x.id][b] > 0) { const d = km(ME, x); if (d <= radius) out.push({ fid: x.id, b, units: INV[x.id][b], km: d, exact: b === bt }); }
+  return out.sort((a, c) => (c.exact - a.exact) || a.km - c.km); }
+function donorsFor(r, radius = 15) { const x = fac(r.fac); return DONORS.filter((d) => d.eligible && COMPAT[r.bt].includes(d.bt) && km(d, x) <= radius); }
+function openForDonor() { return REQUESTS.filter((r) => r.verified && r.secured < r.units && COMPAT[r.bt].includes(DONOR.bt) && !fac(r.fac).suspended).map((r) => ({ ...r, km: km(ME, fac(r.fac)) }))
+  .sort((a, b) => ({critical:0,urgent:1,routine:2}[a.urgency] - {critical:0,urgent:1,routine:2}[b.urgency]) || a.km - b.km); }
+const gmDir = (p) => `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
+const gm = (p, label = t("openInMaps")) => `<a class="gm" href="${gmDir(p)}" target="_blank" rel="noopener">${esc(label)}</a>`;
+function triage() { return REQUESTS.filter((r) => r.fac === "f1" && r.secured < r.units).map((r) => { const left = r.units - r.secured, wait = (Date.now() - r.at) / H, stock = INV.f1[r.bt];
+  const reasons = [r.urgency === "critical" && "critical", wait >= 24 && "waiting_24h", stock < left && "insufficient_stock", !r.verified && "unverified"].filter(Boolean);
+  return { ...r, left, stock, reasons, score: ({ critical: 60, urgent: 35, routine: 10 }[r.urgency]) + Math.floor(Math.min(wait, 48) / 2) + (stock < left ? 15 : 0) }; }).sort((a, b) => b.score - a.score); }
+function achievements() { const n = DONATIONS.filter((d) => d.donor === "u1" && d.status !== "discarded").length, resp = RESPONSES.size;
+  const badges = [n >= 1 && "first_donation", n >= 5 && "hero_5", n >= 10 && "super_10", n >= 15 && "legend_15", n >= 1 && ["O-","A-","B-","AB-"].includes(DONOR.bt) && "rare_blood", resp >= 1 && "emergency_responder"].filter(Boolean);
+  return { n, lives: n * 3, pts: n * 100 + resp * 50, badges, next: n < 1 ? 1 : n < 5 ? 5 : n < 10 ? 10 : n < 15 ? 15 : null,
+    ch: [["weekly_response", resp >= 1, 50], ["quarter_donation", DONATIONS.some((d) => d.donor === "u1" && Date.now() - d.events[0].at < 90*24*H), 100], ["rare_standby", DONOR.available, 30]] }; }
 
-// ============ محرك التنبؤ (نفس منطق التطبيق) ============
-const SEASONS = { none:["عادي",1,1], ramadan:["🌙 رمضان",0.92,0.62], hajj:["🕋 الحج والعمرة",1.2,0.9,{"O-":1.35,"A-":1.25,"B-":1.25,"AB-":1.2}], summer:["☀️ الصيف",1,0.7], flu:["❄️ الإنفلونزا",1,0.8], holidays:["🎉 الأعياد",1.25,0.75,{"O-":1.2,"O+":1.15}] };
-const SURGES = { moderate:["معتدل",1], high:["مرتفع +25%",1.25], code_red:["كود أحمر +60%",1.6] };
-const RISK = { critical: "🚨 خطر حاد", warning: "⚠️ إنذار مبكر", stable: "🟢 مستقر" };
+// ================= محرك التنبؤ =================
+const SEA = { none:[1,1], ramadan:[0.92,0.62], hajj:[1.2,0.9,{"O-":1.35,"A-":1.25,"B-":1.25,"AB-":1.2}], summer:[1,0.7], flu:[1,0.8], holidays:[1.25,0.75,{"O-":1.2,"O+":1.15}] };
+const SUR = { moderate: 1, high: 1.25, code_red: 1.6 };
 const FC = { season: "none", surge: "moderate", horizon: 14 };
 const r1 = (n) => Math.round(n*10)/10;
-function forecast() {
-  const [, sb, si, tb] = SEASONS[FC.season], sf = SURGES[FC.surge][1];
-  return TYPES.map((t) => { const u = INV.f1[t], R = RATES[t];
-    const burn = R.burn*sb*((tb && tb[t]) || 1)*sf, inflow = R.inflow*si, net = inflow - burn;
-    const days = net >= 0 ? null : u / -net;
-    let risk = days !== null && days < 4 ? "critical" : days !== null && days <= 8 ? "warning" : u < R.safety ? "warning" : "stable";
-    if (u === 0 && burn > 0) risk = "critical";
-    const date = days === null ? null : new Date(Date.now() + Math.floor(days)*864e5).toISOString().slice(0,10);
-    return { t, u, safety: R.safety, burn: r1(burn), inflow: r1(inflow), net, days: days === null ? null : r1(days), date, risk, need: Math.max(0, Math.ceil(R.safety - (u + net*FC.horizon))) };
-  }).sort((a, b) => ({critical:0,warning:1,stable:2}[a.risk] - {critical:0,warning:1,stable:2}[b.risk]) || (a.days ?? 1e9) - (b.days ?? 1e9));
-}
-function rulePlan(f) {
-  const crit = f.filter((x) => x.risk === "critical"), warn = f.filter((x) => x.risk === "warning"), out = [];
-  if (crit.length) {
-    out.push({ p: "فورًا", title: "نداء فوري للمتبرعين", detail: `استدعِ متبرعين مؤهلين من فصائل ${crit.map((x) => x.t).join("، ")} — المطلوب تقريبًا: ${crit.map((x) => `${x.t}: ${x.need} وحدة`).join("، ")}.` });
-    out.push({ p: "فورًا", title: "تفعيل الاستعارة بين المستشفيات", detail: "اطلب تحويل وحدات من منشآت قريبة لديها فائض أو وحدات قريبة الانتهاء، مع التزام سلسلة التبريد." });
-    out.push({ p: "خلال 24 ساعة", title: "ترشيد الاستهلاك", detail: "راجع جدول العمليات الاختيارية مع لجنة نقل الدم، وطبّق إدارة دم المريض (PBM)." });
-  }
-  if (warn.length) out.push({ p: "هذا الأسبوع", title: "جدولة حملة تبرع متنقلة", detail: `نظّم حملة ${FC.season === "ramadan" ? "مسائية بعد الإفطار" : "في جامعة أو شركة قريبة"} تستهدف ${warn.map((x) => x.t).join("، ")} قبل دخولها مرحلة الخطر.` });
-  if (!out.length) out.push({ p: "هذا الأسبوع", title: "الرصيد مستقر", detail: "استمر في المتابعة اليومية وحافظ على الحد الآمن." });
-  return out;
-}
-let aiPlan = null, aiPlanKey = "";
+function forecast() { const [sb, si, tb] = SEA[FC.season], sf = SUR[FC.surge];
+  return TYPES.map((b) => { const u = INV.f1[b], R = RATES[b], burn = R.burn*sb*((tb && tb[b]) || 1)*sf, inflow = R.inflow*si, net = inflow - burn, days = net >= 0 ? null : u / -net;
+    let risk = days !== null && days < 4 ? "critical" : days !== null && days <= 8 ? "warning" : u < R.safety ? "warning" : "stable"; if (u === 0 && burn > 0) risk = "critical";
+    return { b, u, safety: R.safety, burn: r1(burn), inflow: r1(inflow), net, days: days === null ? null : r1(days), date: days === null ? null : new Date(Date.now() + Math.floor(days)*864e5).toISOString().slice(0,10), risk, need: Math.max(0, Math.ceil(R.safety - (u + net*FC.horizon))) }; })
+    .sort((a, c) => ({critical:0,warning:1,stable:2}[a.risk] - {critical:0,warning:1,stable:2}[c.risk]) || (a.days ?? 1e9) - (c.days ?? 1e9)); }
+function rulePlan(fc) { const crit = fc.filter((x) => x.risk === "critical"), warn = fc.filter((x) => x.risk === "warning"), ar = lang === "ar", out = [];
+  if (crit.length) { out.push({ p: "now", title: ar ? "نداء فوري للمتبرعين" : "Immediate donor recall", detail: crit.map((x) => `${x.b}: ${x.need}`).join(" · ") });
+    out.push({ p: "now", title: ar ? "تفعيل الاستعارة بين المستشفيات" : "Activate inter-hospital borrowing", detail: ar ? "من منشآت قريبة لديها فائض أو وحدات قريبة الانتهاء." : "From nearby facilities with surplus or near-expiry units." });
+    out.push({ p: "24h", title: ar ? "ترشيد الاستهلاك (PBM)" : "Conserve usage (PBM)", detail: ar ? "مراجعة العمليات الاختيارية مع لجنة نقل الدم." : "Review elective surgery with the transfusion committee." }); }
+  if (warn.length) out.push({ p: "this_week", title: ar ? "جدولة حملة تبرع متنقلة" : "Schedule a mobile drive", detail: warn.map((x) => x.b).join(" · ") });
+  if (!out.length) out.push({ p: "this_week", title: t("risk_stable"), detail: "" }); return out; }
+let aiPlan = null, aiKey = "";
+const planKey = () => `${lang}|${FC.season}|${FC.surge}|${FC.horizon}|${TYPES.map((b) => INV.f1[b]).join(",")}`;
 
-// ============ الذكاء الاصطناعي (عبر حساب Claude الخاص بالمشاهد) ============
+// ================= الذكاء الاصطناعي =================
 let samplePromise = null;
 const getSample = () => (samplePromise ||= (window.claude?.use ? window.claude.use("sample").catch(() => null) : Promise.resolve(null)));
-const SAMPLE_ERR = { not_granted: "لم يتم السماح للصفحة باستخدام Claude، فالمساعد متوقف في هذه الجلسة.", rate_limited: "طلبات كثيرة، انتظر قليلًا ثم حاول.", cancelled: "تم الإيقاف." };
+const sampleErr = (e) => ({ not_granted: t("needsClaude"), rate_limited: "⏳" }[e?.code] || t("agentErr"));
+const LANG_NAME = { ar: "Arabic", en: "English", fr: "French", ur: "Urdu", hi: "Hindi", tr: "Turkish" };
 
-// ============ العرض ============
-let view = "donor";
-function setView(v) { view = v; document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v))); render(); window.scrollTo(0, 0); }
-document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
-
-function render() {
-  const el = $("#view");
-  if (view === "donor") el.innerHTML = donorView();
-  else if (view === "beneficiary") el.innerHTML = benView();
-  else if (view === "facility") el.innerHTML = facView();
-  else if (view === "forecast") el.innerHTML = fcView();
-  else if (view === "map") el.innerHTML = mapView();
-  else el.innerHTML = agentView();
-  bind();
-  if (view === "forecast") drawChart();
-  if (view === "map") drawMap();
-  if (view === "agent") { paintChat(); setupAgent(); }
+// ================= العرض =================
+const TABS = [["donor","tDonor"],["beneficiary","tBeneficiary"],["facility","tFacility"],["map","tMap"],["forecast","tForecast"],["agent","tAgent"],["admin","tAdmin"]];
+let view = "donor", donorSub = "requests", facSub = "ops", adminSub = "overview", mapRole = "donor", benBt = null, benUnits = 1, benResults = null, scanned = null, report = null;
+function chrome() {
+  document.documentElement.lang = lang; document.documentElement.dir = LANGS.find((x) => x[0] === lang)[2] ? "rtl" : "ltr";
+  document.body.classList.toggle("ur", lang === "ur");
+  $("#appName").textContent = t("appName"); $("#demoTag").textContent = t("demoTag"); $("#langLbl").textContent = "🌐";
+  $("#lang").innerHTML = LANGS.map(([c, n]) => `<option value="${c}" ${c === lang ? "selected" : ""}>${n}</option>`).join("");
+  $("#tabs").innerHTML = TABS.map(([k, l]) => `<button class="tab" role="tab" data-view="${k}" aria-selected="${view === k}">${esc(t(l))}</button>`).join("");
 }
+function render() { chrome(); const v = { donor: donorView, beneficiary: benView, facility: facView, map: mapView, forecast: fcView, agent: agentView, admin: adminView }[view];
+  $("#view").innerHTML = v(); bind(); if (view === "forecast") drawChart(); if (view === "map") drawMap(); if (view === "agent") { paintChat(); setupAgent(); }
+  if (view === "donor" && donorSub === "card") drawQR(); if (view === "forecast" || (view === "facility" && facSub === "report")) getSample().then((s) => { const b = $("#aiBtn"); if (s && b) b.hidden = false; }); }
+const sub = (key, cur, items) => `<div class="subtabs">${items.map(([k, l]) => `<button class="chip" data-${key}="${k}" aria-pressed="${cur === k}">${esc(l)}</button>`).join("")}</div>`;
 
 function donorView() {
-  const next = nextEligible(), reqs = openForDonor();
-  return `
-  <div class="grid2">
-    <div class="card">
-      <div class="row"><h2>${esc(DONOR.name)}</h2><span class="pill info bt" style="font-size:16px">${DONOR.bt}</span></div>
-      <p class="${next ? "mute" : ""}" style="${next ? "" : "color:var(--ok);font-weight:600"}">${next ? `يمكنك التبرع مجددًا بعد ${next.toLocaleDateString("ar-EG")}` : "أنت مؤهل للتبرع الآن ✅"}</p>
-      <p class="small mute">آخر تبرع: <span class="num">${DONOR.last}</span> · الفترة بين التبرعات 84 يومًا للرجال و112 للنساء</p>
-      <label class="switch"><input type="checkbox" id="avail" ${DONOR.available ? "checked" : ""}> متاح لاستقبال نداءات الطوارئ</label>
-    </div>
-    <div class="card">
-      <h2>كيف يعمل؟</h2>
-      <p class="mute small">تصلك الطلبات القريبة التي تحتاج فصيلتك أو تقبلها. لا يرى المستشفى رقمك أو موقعك حتى تضغط "سأتبرع".</p>
-      <div class="acts-row"><button class="btn" data-go="map">🗺️ أقرب أماكن التبرع</button><button class="btn ghost" data-go="agent">اسأل المساعد</button></div>
-      ${APPT ? `<p class="small" style="color:var(--ok);font-weight:600">موعدك: ${esc(APPT.name)} — ${esc(APPT.when)}</p>` : ""}
-    </div>
-  </div>
-  <div class="card">
-    <div class="row"><h2>طلبات قريبة تحتاج فصيلتك</h2><span class="pill info">${reqs.length}</span></div>
-    <div class="list">${reqs.length ? reqs.map((r) => `
-      <div class="item ${r.urgency === "critical" ? "crit" : ""}">
-        <div class="row"><h3>${esc(fac(r.fac).name)}</h3><span class="pill info bt">${r.bt}</span></div>
-        <p class="small mute">${URG[r.urgency]} · <span class="num">${r.units - r.secured}</span> وحدة متبقية · <span class="num">${r.km}</span> كم</p>
-        <div class="acts-row"><button class="btn sm" data-respond="${r.id}" ${next || !DONOR.available || RESPONSES.has(r.id) ? "disabled" : ""}>${RESPONSES.has(r.id) ? "تم ✓ بانتظارك" : "سأتبرع"}</button>${gmLink(fac(r.fac), "📍 الاتجاهات")}</div>
-      </div>`).join("") : `<p class="mute">لا توجد طلبات متوافقة قريبة الآن. سنرسل لك إشعارًا عند الحاجة.</p>`}</div>
-  </div>`;
+  const next = nextEligible();
+  const head = `<div class="card"><div class="row"><h2>${esc(fname(DONOR))}</h2><span class="pill info bt" style="font-size:16px">${DONOR.bt}</span></div>
+    <p style="${next ? "" : "color:var(--ok);font-weight:600"}" class="${next ? "mute" : ""}">${next ? esc(f("eligibleAfter", { date: dt(next) })) : esc(t("eligibleNow"))}</p>
+    <label class="switch"><input type="checkbox" id="avail" ${DONOR.available ? "checked" : ""}> ${esc(t("availableToggle"))}</label>
+    ${APPT ? `<p class="small" style="color:var(--ok);font-weight:600">✓ ${esc(APPT)}</p>` : ""}</div>
+    ${sub("dsub", donorSub, [["requests", t("nearbyRequests").replace(/\s*\(\{n\}\)/, "")], ["card", t("myCard")], ["journey", t("myJourney")], ["badges", t("myAchievements")], ["campaigns", t("campaigns")]])}`;
+  let body = "";
+  if (donorSub === "requests") { const reqs = openForDonor();
+    body = `<div class="card"><div class="row"><h2>${esc(f("nearbyRequests", { n: reqs.length }))}</h2><button class="btn ghost sm" data-go="map">${esc(t("nearestSites"))}</button></div>
+    <p class="small mute">${esc(t("howBody"))}</p><div class="list">${reqs.length ? reqs.map((r) => `<div class="item ${r.urgency === "critical" ? "crit" : ""}">
+      <div class="row"><h3>${esc(fname(fac(r.fac)))}</h3><span class="pill info bt">${r.bt}</span></div>
+      <p class="small mute">${esc(t("urg_" + r.urgency))} · ${esc(f("unitsLeftKm", { u: r.units - r.secured, km: r.km }))}</p>
+      <div class="acts-row"><button class="btn sm" data-respond="${r.id}" ${next || !DONOR.available || RESPONSES.has(r.id) ? "disabled" : ""}>${RESPONSES.has(r.id) ? "✓" : esc(t("willDonate"))}</button>${gm(fac(r.fac), t("directions"))}</div></div>`).join("") : `<p class="mute">${esc(t("noRequests"))}</p>`}</div></div>`; }
+  if (donorSub === "card") body = `<div class="card" style="justify-items:center;border:2px solid var(--accent)"><h3>${esc(t("appName"))}</h3><h2>${esc(fname(DONOR))}</h2>
+    <span class="pill info bt" style="font-size:22px;padding:4px 16px">${DONOR.bt}</span><div class="qr" id="qr" role="img" aria-label="QR"></div>
+    <p style="${next ? "" : "color:var(--ok);font-weight:600"}">${next ? esc(f("eligibleAfter", { date: dt(next) })) : esc(t("eligibleNow"))}</p>
+    <p class="small mute">${esc(t("lastDonation"))}: <span class="num">${DONOR.last}</span></p></div><p class="note">${esc(t("cardHint"))}</p>`;
+  if (donorSub === "journey") body = DONATIONS.filter((d) => d.donor === "u1").map((d) => { const reached = new Map(d.events.map((e) => [e.s, e.at])); const steps = d.status === "discarded" ? ["collected","testing","discarded"] : STEPS;
+    return `<div class="card"><div class="row"><h3>${dt(d.events[0].at, { dateStyle: "medium" })}</h3><span class="pill info bt">${d.bt}</span></div><p class="small mute">${esc(t("bagCode"))}: <span class="code">${d.code}</span></p>
+      <div class="timeline">${steps.map((s, i) => { const at = reached.get(s); return `<div class="step"><div><div class="dot ${at ? (s === "transfused" ? "life" : "on") : ""}"></div>${i < steps.length - 1 ? `<div class="vline ${at ? "on" : ""}"></div>` : ""}</div>
+        <div><b style="${at ? "" : "color:var(--mute)"}">${esc(t("j_" + s))}</b>${at ? `<div class="small mute">${dt(at, { dateStyle: "medium", timeStyle: "short" })}</div>` : ""}</div></div>`; }).join("")}</div></div>`; }).join("") + `<p class="note">${esc(t("journeyHint"))}</p>`;
+  if (donorSub === "badges") { const a = achievements(), icon = { first_donation: "🩸", hero_5: "🦸", super_10: "⚡", legend_15: "👑", rare_blood: "💎", emergency_responder: "🚑" };
+    body = `<div class="stats"><div class="stat"><b>${a.n}</b><span class="small mute">${esc(t("donationsTotal"))}</span></div><div class="stat"><b style="color:var(--accent)">${a.lives}</b><span class="small mute">${esc(t("livesSaved"))}</span></div><div class="stat"><b>${a.pts}</b><span class="small mute">${esc(t("points"))}</span></div></div>
+    <div class="card"><div class="badges">${Object.keys(icon).map((b) => `<div class="badge ${a.badges.includes(b) ? "" : "off"}"><span class="ic">${icon[b]}</span><span class="small">${esc(t("b_" + b))}</span></div>`).join("")}</div>
+    ${a.next ? `<p class="small mute">${esc(f("nextBadge", { n: a.next }))}</p>` : ""}</div>
+    <div class="card"><h3>${esc(t("challenges"))}</h3><div class="list">${a.ch.map(([id, done, p]) => `<div class="row"><span style="${done ? "color:var(--ok)" : ""}">${done ? "✅" : "⬜"} ${esc(t("ch_" + id))}</span><span class="pill info">+${p}</span></div>`).join("")}</div></div>
+    <div class="card"><h3>${esc(t("heroOfWeek"))}</h3>${HEROES.concat(DONOR.board && a.pts ? [{ ar: fname(DONOR), en: fname(DONOR), pts: a.pts }] : []).sort((x, y) => y.pts - x.pts).map((h, i) => `<div class="row"><span>${["🥇","🥈","🥉"][i] || "#" + (i + 1)} ${esc(fname(h))}</span><span class="small mute">${esc(f("pointsN", { n: h.pts }))}</span></div>`).join("")}
+    <label class="switch small"><input type="checkbox" id="board" ${DONOR.board ? "checked" : ""}> ${esc(t("showOnBoard"))}</label></div>`; }
+  if (donorSub === "campaigns") body = `<div class="card"><div class="acts-row"><input type="text" id="code" placeholder="NILE24" aria-label="${esc(t("joinCode"))}" style="flex:1"><button class="btn" id="joinBtn">${esc(t("join"))}</button></div></div>
+    ${CAMPAIGNS.filter((c) => c.end > Date.now()).map((c) => `<div class="card"><h3>${esc(lang === "ar" ? c.title.ar : c.title.en)}</h3><p class="small mute">${esc(c.org)} · ${esc(fname(fac(c.fac)))}</p>
+      <p class="small">${esc(t("starts"))}: ${dt(c.start, { dateStyle: "medium" })} · ${esc(t("ends"))}: ${dt(c.end, { dateStyle: "medium" })}</p>
+      <div class="row"><span class="small mute">${esc(f("campaignTarget", { n: c.target }))} · ${esc(f("signups", { n: c.signups }))}</span>${JOINED.has(c.id) ? `<span class="pill ok">✓ ${esc(t("joined"))}</span>` : `<button class="btn sm" data-join="${c.code}">${esc(t("join"))}</button>`}</div></div>`).join("") || `<p class="mute">${esc(t("noCampaigns"))}</p>`}`;
+  return head + body;
 }
 
-let benBt = null, benUnits = 1, benResults = null;
-function benView() {
-  const mine = REQUESTS.filter((r) => r.mine);
-  return `
-  <div class="card">
-    <h2>ابحث عن دم متوافق قريب منك</h2>
-    <p class="small mute">فصيلة المريض</p>
-    <div class="chips">${TYPES.map((t) => `<button class="chip bt" data-bt="${t}" aria-pressed="${benBt === t}">${t}</button>`).join("")}</div>
-    <div class="row" style="justify-content:flex-start">
-      <label class="f">عدد الوحدات <input type="number" id="units" min="1" max="20" value="${benUnits}" style="width:90px"></label>
-      <button class="btn" id="search" ${benBt ? "" : "disabled"} style="align-self:end">ابحث عن أقرب مخزون</button>
-    </div>
-    <p class="note">الموقع الافتراضي في هذه التجربة: وسط القاهرة.</p>
-  </div>
-  ${benResults ? `<div class="card"><div class="row"><h2>مخزون متوافق مع ${benBt ? `<span class="bt">${benBt}</span>` : ""}</h2><span class="pill info">${benResults.length}</span></div>
-    <div class="list">${benResults.length ? benResults.map((x) => `
-      <div class="item"><div class="row"><h3>${esc(x.name)}</h3><span class="pill ${x.exact ? "ok" : "info"} bt">${x.bt}</span></div>
-      <p class="small mute">${x.kind} · <span class="num">${x.units}</span> وحدة · <span class="num">${x.km}</span> كم${x.exact ? "" : " · فصيلة بديلة متوافقة"} · هاتف: <span class="num">${x.phone}</span></p>
-      <div class="acts-row"><button class="btn sm" data-req="${x.fid}">اطلب من هنا</button>${gmLink(fac(x.fid), "📍 الاتجاهات")}</div></div>`).join("") : `<p class="mute">لا يوجد مخزون متوافق ضمن 30 كم. أنشئ طلبًا لدى أقرب مستشفى وسنطلق نداءً للمتبرعين.</p>`}</div></div>` : ""}
-  <div class="card"><h2>طلباتي</h2>
-    <div class="list">${mine.length ? mine.map((r) => `<div class="item"><div class="row"><h3>${esc(fac(r.fac).name)}</h3><span class="pill info bt">${r.bt}</span></div>
-      <p class="small mute">${r.verified ? "موثّق — جاري نداء المتبرعين" : "بانتظار توثيق المستشفى"} · تم تأمين <span class="num">${r.secured}</span> من <span class="num">${r.units}</span></p></div>`).join("") : `<p class="mute small">لا توجد طلبات بعد.</p>`}</div>
-  </div>`;
-}
+function benView() { const mine = REQUESTS.filter((r) => r.mine);
+  return `<div class="card"><h2>${esc(t("findStock"))}</h2><p class="small mute">${esc(t("patientType"))}</p>
+    <div class="chips">${TYPES.map((b) => `<button class="chip bt" data-bt="${b}" aria-pressed="${benBt === b}">${b}</button>`).join("")}</div>
+    <div class="acts-row"><label class="f">${esc(t("unitsNeeded"))} <input type="number" id="units" min="1" max="20" value="${benUnits}" style="width:90px"></label>
+    <button class="btn" id="search" ${benBt ? "" : "disabled"} style="align-self:end">${esc(t("search"))}</button></div><p class="note">${esc(t("demoLoc"))}</p></div>
+  ${benResults ? `<div class="card"><div class="list">${benResults.length ? benResults.map((x) => `<div class="item"><div class="row"><h3>${esc(fname(fac(x.fid)))}</h3><span class="pill ${x.exact ? "ok" : "info"} bt">${x.b}</span></div>
+    <p class="small mute">${esc(f("unitsAvailableKm", { u: x.units, km: x.km }))} · <span class="num">${fac(x.fid).phone}</span></p>
+    <div class="acts-row"><button class="btn sm" data-req="${x.fid}">${esc(t("requestHere"))}</button>${gm(fac(x.fid), t("directions"))}</div></div>`).join("") : `<p class="mute">${esc(t("noStock"))}</p>`}</div></div>` : ""}
+  <div class="card"><h2>${esc(t("myRequests"))}</h2><div class="list">${mine.length ? mine.map((r) => `<div class="item"><div class="row"><h3>${esc(fname(fac(r.fac)))}</h3><span class="pill info bt">${r.bt}</span></div>
+    <p class="small mute">${esc(t(r.verified ? (r.secured >= r.units ? "st_fulfilled" : "st_matching") : "st_open"))} · ${esc(f("securedOf", { s: r.secured, n: r.units }))}</p></div>`).join("") : `<p class="mute small">—</p>`}</div></div>`; }
 
 function facView() {
-  const inc = REQUESTS.filter((r) => r.fac === "f1" && r.secured < r.units);
-  return `
-  <div class="card">
-    <div class="row"><h2>${esc(fac("f1").name)} — المخزون (كريات حمراء)</h2><button class="btn ghost sm" data-go="forecast">📈 تنبؤ المخزون</button></div>
-    <div class="matrix">${TYPES.map((t) => { const u = INV.f1[t], low = u < RATES[t].safety; return `
-      <div class="cell ${low ? "warning" : ""}"><div class="row"><span class="bt" style="font-size:16px">${t}</span>${low ? `<span class="pill warning">منخفض</span>` : ""}</div>
-      <span class="days num">${u}</span><span class="meta">الحد الآمن <span class="num">${RATES[t].safety}</span></span>
-      <div class="acts"><button class="btn ghost sm" data-mv="${t}:-1" ${u ? "" : "disabled"}>− صرف</button><button class="btn ghost sm" data-mv="${t}:1">+ إيداع</button></div></div>`; }).join("")}</div>
-    <p class="note">كل صرف أو إيداع يُسجَّل حركةً ويحدّث محرك التنبؤ فورًا.</p>
-  </div>
-  <div class="card"><div class="row"><h2>الطلبات الواردة</h2><span class="pill info">${inc.length}</span></div>
-    <div class="list">${inc.length ? inc.map((r) => `<div class="item ${r.urgency === "critical" ? "crit" : ""}">
-      <div class="row"><h3>${URG[r.urgency]}${r.mine ? " · من مستفيد" : ""}</h3><span class="pill info bt">${r.bt}</span></div>
-      <p class="small mute">تم تأمين <span class="num">${r.secured}</span>/<span class="num">${r.units}</span> · المتوفر لديكم من نفس الفصيلة: <span class="num">${INV.f1[r.bt]}</span> · ${r.verified ? `متبرعون مؤهلون ضمن 15 كم: <span class="num">${donorsFor(r).length}</span>` : "غير موثّق"}</p>
-      <div class="row" style="justify-content:flex-start">${r.verified ? "" : `<button class="btn sm" data-verify="${r.id}">توثيق الطلب ونداء المتبرعين</button>`}
-      <button class="btn ghost sm" data-fulfil="${r.id}" ${INV.f1[r.bt] ? "" : "disabled"}>صرف وحدة من المخزون</button></div></div>`).join("") : `<p class="mute small">لا توجد طلبات مفتوحة.</p>`}</div>
-    <p class="note">المستشفى يرى أعداد المتبرعين فقط، دون أسمائهم أو أرقامهم أو مواقعهم.</p>
-  </div>`;
+  const head = `<div class="row"><h2>${esc(fname(fac("f1")))}</h2><span class="pill info">${esc(t("plan_pro"))}</span></div>${sub("fsub", facSub, [["ops", t("inventoryTitle")], ["triage", f("incoming", { n: triage().length })], ["scan", t("scanDonor")], ["report", t("dailyReport")]])}`;
+  let body = "";
+  if (facSub === "ops") { const soon = [["O+", 3, 4], ["A+", 2, 6]];
+    body = `<div class="card"><div class="matrix">${TYPES.map((b) => { const u = INV.f1[b], low = u < RATES[b].safety; return `<div class="cell ${low ? "warning" : ""}"><div class="row"><span class="bt">${b}</span>${low ? `<span class="pill warning">${esc(t("low"))}</span>` : ""}</div>
+      <span class="days num">${u}</span><span class="meta">${esc(t("safety"))} <span class="num">${RATES[b].safety}</span></span>
+      <div class="acts"><button class="btn ghost sm" data-mv="${b}:-1" ${u ? "" : "disabled"}>− ${esc(t("issue"))}</button><button class="btn ghost sm" data-mv="${b}:1">+ ${esc(t("deposit"))}</button></div></div>`; }).join("")}</div></div>
+    <div class="card" style="background:var(--warn-soft)"><h3>${esc(t("expiringSoon"))}</h3>${soon.map(([b, u, d]) => `<p class="small"><span class="bt">${b}</span> × <span class="num">${u}</span> — +${d} ${esc(t("days"))}</p>`).join("")}<p class="small">${esc(t("expiringHint"))}</p></div>`; }
+  if (facSub === "triage") body = `<div class="list">${triage().map((r) => `<div class="item ${r.score >= 60 ? "crit" : r.score >= 40 ? "warnb" : ""}">
+      <div class="row"><h3>${esc(f("score", { n: r.score }))} · ${esc(t("urg_" + r.urgency))}</h3><span class="pill info bt">${r.bt}</span></div>
+      <p class="small mute"><span class="num">${r.left}</span> ${esc(t("units"))} · ${esc(f("sameTypeStock", { n: r.stock }))}</p>
+      <div class="chips">${r.reasons.map((x) => `<span class="pill ${x === "critical" ? "critical" : "warning"}">${esc(t("r_" + x))}</span>`).join("")}</div>
+      <div class="acts-row">${r.verified ? `<span class="small mute">${esc(f("verifiedMsg", { n: donorsFor(r).length }))}</span>` : `<button class="btn sm" data-verify="${r.id}">${esc(t("verifyAndCall"))}</button>`}
+      <button class="btn ghost sm" data-fulfil="${r.id}" ${INV.f1[r.bt] ? "" : "disabled"}>− ${esc(t("issue"))}</button></div></div>`).join("") || `<p class="mute">—</p>`}</div>`;
+  if (facSub === "scan") { const bags = DONATIONS.filter((d) => !["transfused","discarded"].includes(d.status));
+    body = `<div class="card">${scanned ? `<div class="row"><h3>${esc(f("donorInfo", { name: fname(DONOR), type: DONOR.bt }))}</h3><span class="pill ${nextEligible() ? "warning" : "ok"}">${esc(t(nextEligible() ? "notEligible" : "eligible"))}</span></div>
+      <p class="small mute">${esc(t("lastDonation"))}: <span class="num">${DONOR.last}</span> · ${esc(f("donationsCount", { n: achievements().n }))}</p>
+      <div class="acts-row"><button class="btn" id="record" ${nextEligible() ? "disabled" : ""}>${esc(t("recordDonation"))}</button><button class="btn ghost" id="unscan">${esc(t("cancel"))}</button></div>`
+      : `<button class="btn" id="scanBtn">${esc(t("simScan"))}</button><p class="small mute">${esc(t("scanHint"))}</p>`}</div>
+    <div class="card"><h3>${esc(t("advanceBag"))}</h3><div class="list">${bags.map((d) => { const nx = STEPS[STEPS.indexOf(d.status) + 1];
+      return `<div class="item"><div class="row"><span class="code">${d.code}</span><span class="pill info">${esc(t("j_" + d.status))}</span></div><div class="acts-row">
+      <button class="btn sm" data-adv="${d.code}">${esc(t("nextStep"))}: ${esc(t("j_" + nx))}</button><button class="btn ghost sm" data-discard="${d.code}">${esc(t("discard"))}</button></div></div>`; }).join("") || `<p class="small mute">—</p>`}</div></div>`; }
+  if (facSub === "report") body = `<div class="card"><div class="row"><h3>${esc(t("tReport"))} · ${dt(Date.now(), { dateStyle: "medium" })}</h3><span class="pill ${report?.ai ? "info" : "stable"}">${esc(t(report?.ai ? "reportAi" : "reportTemplate"))}</span></div>
+    <p class="report">${esc(report?.text ?? templateReport())}</p><div class="acts-row"><button class="btn ghost" id="aiBtn" hidden>✨ ${esc(t("reportDemo"))}</button><span class="small mute" id="aiSt"></span></div></div>`;
+  return head + body;
 }
+function templateReport() { const fc = forecast(), tr = triage(); const L = (k) => t(k);
+  return [`🔴 ${L("risk_critical")}: ${fc.filter((x) => x.risk === "critical").map((x) => `${x.b} (${x.days ?? "–"})`).join(", ") || L("none")}`,
+    `🟠 ${L("risk_warning")}: ${fc.filter((x) => x.risk === "warning").map((x) => `${x.b} (${x.days ?? "–"})`).join(", ") || L("none")}`,
+    `📋 ${f("incoming", { n: tr.length })}: ${tr.slice(0, 3).map((r) => `${r.bt}×${r.left} [${r.score}]`).join(", ") || L("none")}`,
+    `⚠️ ${L("expiringSoon").replace("⚠️ ", "")}: O+×3, A+×2`].join("\n"); }
 
-let mapRole = "donor";
-function mapView() {
-  const roleChips = [["donor","متبرع"],["beneficiary","مستفيد"],["facility","منشأة"]].map(([k, l]) => `<button class="chip" data-mrole="${k}" aria-pressed="${mapRole === k}">${l}</button>`).join("");
-  let list = "", hint = "";
-  if (mapRole === "donor") {
-    hint = "أقرب أماكن التبرع إليك. الأحمر يحتاج فصيلتك الآن.";
-    const urgent = new Set(openForDonor().map((r) => r.fac));
-    list = sites().map((f) => `<div class="item ${urgent.has(f.id) ? "crit" : ""}"><div class="row"><h3>${esc(f.name)}</h3>${urgent.has(f.id) ? `<span class="pill critical">يحتاج <span class="bt">${DONOR.bt}</span></span>` : `<span class="pill info">${f.kind}</span>`}</div>
-      <p class="small mute"><span class="num">${f.km}</span> كم · ${esc(f.hours)}</p>
-      <div class="acts-row">${gmLink(f)}<button class="btn sm" data-book="${f.id}" ${nextEligible() || APPT ? "disabled" : ""}>${APPT && APPT.fid === f.id ? "محجوز ✓" : "احجز موعد تبرع"}</button></div></div>`).join("");
-  } else if (mapRole === "beneficiary") {
-    hint = benBt ? `أقرب مخزون متوافق مع ${benBt}.` : "اختر فصيلة المريض من بوابة المستفيد أولًا (افتراضيًا O-).";
-    const bt = benBt || "O-"; const byF = new Map();
-    for (const x of inventoryNear(bt, 50)) { const p = byF.get(x.fid); byF.set(x.fid, p ? { ...p, parts: p.parts + ` · <span class="bt">${x.bt}</span>: ${x.units}` } : { ...x, parts: `<span class="bt">${x.bt}</span>: ${x.units}` }); }
-    list = [...byF.values()].map((x) => `<div class="item"><div class="row"><h3>${esc(x.name)}</h3><span class="pill info">${x.kind}</span></div><p class="small mute"><span class="num">${x.km}</span> كم · ${x.parts}</p><div class="acts-row">${gmLink(fac(x.fid))}</div></div>`).join("") || `<p class="mute">لا يوجد مخزون متوافق.</p>`;
-  } else {
-    const cells = density(), total = cells.reduce((a, c) => a + c.n, 0);
-    hint = `كثافة المتبرعين المؤهلين حول ${fac("f1").name}: ${total} متبرعًا في ${cells.length} منطقة ضمن 20 كم. لا يظهر موقع أي متبرع بعينه، والمنطقة التي فيها أقل من 3 متبرعين لا تُعرض.`;
-    list = `<button class="btn" data-go="forecast">🚨 النداء الفوري من لوحة التنبؤ</button>`;
-  }
-  return `<div class="card"><div class="row"><h2>الخريطة</h2><div class="chips" aria-label="أعرض بصفتي">${roleChips}</div></div>
-    <div class="mapbox" id="mapbox"></div>
-    <p class="small mute">${hint}</p>
-    <p class="note">في التطبيق تظهر خريطة جوجل الحقيقية. في هذه التجربة خريطة توضيحية لمواقع وسط القاهرة، وكل زر "الاتجاهات" يفتح خرائط جوجل فعليًا.</p></div>
-  <div class="list">${list}</div>`;
-}
-function drawMap() {
-  const css = getComputedStyle(document.documentElement), c = (n) => css.getPropertyValue(n).trim();
-  const W = 640, H = 380, box = { minLat: 29.93, maxLat: 30.12, minLng: 31.13, maxLng: 31.36 };
-  const X = (lng) => ((lng - box.minLng) / (box.maxLng - box.minLng)) * W, Y = (lat) => H - ((lat - box.minLat) / (box.maxLat - box.minLat)) * H;
-  let g = `<rect width="${W}" height="${H}" fill="${c("--bg")}"/>`;
-  for (let i = 1; i < 8; i++) g += `<line x1="${i*W/8}" y1="0" x2="${i*W/8}" y2="${H}" stroke="${c("--line")}"/><line x1="0" y1="${i*H/8}" x2="${W}" y2="${i*H/8}" stroke="${c("--line")}"/>`;
-  // النيل (مسار تقريبي للتوضيح)
+function mapView() { const roles = [["donor", t("roleDonor")], ["beneficiary", t("roleBeneficiary")], ["facility", t("tFacility")]]; let list = "", hint = "";
+  if (mapRole === "donor") { const urgent = new Set(openForDonor().map((r) => r.fac)); hint = t("nearestSites");
+    list = live().map((x) => ({ ...x, km: km(ME, x) })).sort((a, b) => a.km - b.km).map((x) => `<div class="item ${urgent.has(x.id) ? "crit" : ""}"><div class="row"><h3>${esc(fname(x))}</h3>${urgent.has(x.id) ? `<span class="pill critical">${esc(f("needsNow", { t: DONOR.bt, u: "" }).replace(/\s*\(\s*\S*\s*\)\s*$/, ""))}</span>` : `<span class="pill info">${esc(t("k_" + x.kind))}</span>`}</div>
+      <p class="small mute"><span class="num">${x.km}</span> ${esc(t("km"))} · <span class="num">${x.hours}</span></p><div class="acts-row">${gm(x)}<button class="btn sm" data-book="${x.id}" ${nextEligible() || APPT ? "disabled" : ""}>${esc(t("bookDonation"))}</button></div></div>`).join(""); }
+  else if (mapRole === "beneficiary") { const bt = benBt || "O-"; hint = `${t("patientType")}: ${bt}`; const by = new Map(); for (const x of inventoryNear(bt, 50)) { const p = by.get(x.fid); by.set(x.fid, (p ? p + " · " : "") + `${x.b}: ${x.units}`); }
+    list = [...by].map(([id, parts]) => `<div class="item"><div class="row"><h3>${esc(fname(fac(id)))}</h3><span class="small num">${km(ME, fac(id))} ${esc(t("km"))}</span></div><p class="small mute bt">${parts}</p><div class="acts-row">${gm(fac(id))}</div></div>`).join("") || `<p class="mute">${esc(t("noStock"))}</p>`; }
+  else { const c = density(); hint = f("densityInfo", { n: c.reduce((a, x) => a + x.n, 0), c: c.length }); list = `<button class="btn" data-go="forecast">🚨 ${esc(t("recall"))}</button>`; }
+  return `<div class="card"><div class="row"><h2>${esc(t("tMap"))}</h2><div class="chips">${roles.map(([k, l]) => `<button class="chip" data-mrole="${k}" aria-pressed="${mapRole === k}">${esc(l)}</button>`).join("")}</div></div>
+    <div class="mapbox" id="mapbox"></div><p class="small mute">${esc(hint)}</p><p class="note">${esc(t("mapNote"))}</p></div><div class="list">${list}</div>`; }
+function density() { const cells = new Map(); for (const d of DONORS) { if (!d.eligible || km(d, fac("f1")) > 20) continue; const k = (Math.round(d.lat*100)/100) + "," + (Math.round(d.lng*100)/100); cells.set(k, (cells.get(k) || 0) + 1); }
+  return [...cells].filter(([, n]) => n >= 3).map(([k, n]) => { const [lat, lng] = k.split(",").map(Number); return { lat, lng, n }; }); }
+function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function drawMap() { const W = 640, H = 380, bx = { a: 29.93, b: 30.12, c: 31.13, d: 31.36 }, X = (g) => ((g - bx.c) / (bx.d - bx.c)) * W, Y = (l) => H - ((l - bx.a) / (bx.b - bx.a)) * H;
+  let g = `<rect width="${W}" height="${H}" fill="${css("--bg")}"/>`; for (let i = 1; i < 8; i++) g += `<line x1="${i*W/8}" y1="0" x2="${i*W/8}" y2="${H}" stroke="${css("--line")}"/><line x1="0" y1="${i*H/8}" x2="${W}" y2="${i*H/8}" stroke="${css("--line")}"/>`;
   const nile = [[29.93,31.245],[29.97,31.235],[30.01,31.228],[30.04,31.226],[30.065,31.222],[30.09,31.228],[30.12,31.235]];
-  g += `<path d="${nile.map(([la, ln], i) => `${i ? "L" : "M"}${X(ln).toFixed(1)},${Y(la).toFixed(1)}`).join(" ")}" stroke="#4A90C8" stroke-opacity=".55" stroke-width="9" fill="none" stroke-linecap="round"/>`;
-  g += `<text x="${X(31.222)+10}" y="${Y(30.105)}" font-size="12" fill="#4A90C8">النيل</text>`;
-  if (mapRole === "facility") {
-    const cells = density(), mx = Math.max(1, ...cells.map((x) => x.n));
-    for (const cl of cells) g += `<circle cx="${X(cl.lng)}" cy="${Y(cl.lat)}" r="${10 + 16*cl.n/mx}" fill="${c("--accent")}" fill-opacity="${.15 + .45*cl.n/mx}"/><text x="${X(cl.lng)}" y="${Y(cl.lat)+4}" font-size="11" text-anchor="middle" fill="${c("--ink")}" font-family="IBM Plex Mono, monospace">${cl.n}</text>`;
-    const f = fac("f1"); g += `<circle cx="${X(f.lng)}" cy="${Y(f.lat)}" r="9" fill="${c("--ink")}" stroke="${c("--surface")}" stroke-width="3"/><text x="${X(f.lng)}" y="${Y(f.lat)-14}" font-size="12" text-anchor="middle" fill="${c("--ink")}" font-weight="700">${esc(f.name)}</text>`;
-  } else {
-    const urgent = mapRole === "donor" ? new Set(openForDonor().map((r) => r.fac)) : new Set();
-    const shown = mapRole === "beneficiary" ? new Set(inventoryNear(benBt || "O-", 50).map((x) => x.fid)) : new Set(FAC.map((f) => f.id));
-    for (const f of FAC) { if (!shown.has(f.id)) continue; const col = urgent.has(f.id) ? c("--crit") : "#1565C0";
-      g += `<a href="${gmDir(f)}" target="_blank" rel="noopener"><path d="M${X(f.lng)},${Y(f.lat)} c-9,-14 -12,-20 -12,-26 a12,12 0 1 1 24,0 c0,6 -3,12 -12,26z" fill="${col}"/><circle cx="${X(f.lng)}" cy="${Y(f.lat)-26}" r="4.5" fill="#fff"/>
-      <text x="${X(f.lng)}" y="${Y(f.lat)+16}" font-size="12" text-anchor="middle" fill="${c("--ink")}" font-weight="600" paint-order="stroke" stroke="${c("--bg")}" stroke-width="4">${esc(f.name)}</text></a>`; }
-    g += `<circle cx="${X(ME.lng)}" cy="${Y(ME.lat)}" r="8" fill="#1A73E8" stroke="#fff" stroke-width="3"/><text x="${X(ME.lng)}" y="${Y(ME.lat)+26}" font-size="12" text-anchor="middle" fill="#1A73E8" font-weight="700" paint-order="stroke" stroke="${c("--bg")}" stroke-width="4">أنت</text>`;
-  }
-  $("#mapbox").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة توضيحية للأماكن القريبة">${g}</svg>`;
-}
+  g += `<path d="${nile.map(([a, b], i) => `${i ? "L" : "M"}${X(b).toFixed(1)},${Y(a).toFixed(1)}`).join(" ")}" stroke="${css("--sea")}" stroke-opacity=".55" stroke-width="9" fill="none" stroke-linecap="round"/><text x="${X(31.222) + 10}" y="${Y(30.105)}" font-size="12" fill="${css("--sea")}">${esc(t("nile"))}</text>`;
+  const lbl = (x, y, s, c) => `<text x="${x}" y="${y}" font-size="12" text-anchor="middle" fill="${c}" font-weight="600" paint-order="stroke" stroke="${css("--bg")}" stroke-width="4">${esc(s)}</text>`;
+  if (mapRole === "facility") { const c = density(), mx = Math.max(1, ...c.map((x) => x.n)); for (const cl of c) g += `<circle cx="${X(cl.lng)}" cy="${Y(cl.lat)}" r="${10 + 16*cl.n/mx}" fill="${css("--accent")}" fill-opacity="${.15 + .45*cl.n/mx}"/><text x="${X(cl.lng)}" y="${Y(cl.lat)+4}" font-size="11" text-anchor="middle" fill="${css("--ink")}" font-family="IBM Plex Mono, monospace">${cl.n}</text>`;
+    const x = fac("f1"); g += `<circle cx="${X(x.lng)}" cy="${Y(x.lat)}" r="9" fill="${css("--ink")}" stroke="${css("--surface")}" stroke-width="3"/>` + lbl(X(x.lng), Y(x.lat) - 14, fname(x), css("--ink")); }
+  else { const urgent = mapRole === "donor" ? new Set(openForDonor().map((r) => r.fac)) : new Set(); const shown = mapRole === "beneficiary" ? new Set(inventoryNear(benBt || "O-", 50).map((x) => x.fid)) : new Set(live().map((x) => x.id));
+    for (const x of live()) { if (!shown.has(x.id)) continue; const col = urgent.has(x.id) ? css("--crit") : css("--pin");
+      g += `<a href="${gmDir(x)}" target="_blank" rel="noopener"><path d="M${X(x.lng)},${Y(x.lat)} c-9,-14 -12,-20 -12,-26 a12,12 0 1 1 24,0 c0,6 -3,12 -12,26z" fill="${col}"/><circle cx="${X(x.lng)}" cy="${Y(x.lat) - 26}" r="4.5" fill="#fff"/>${lbl(X(x.lng), Y(x.lat) + 16, fname(x), css("--ink"))}</a>`; }
+    g += `<circle cx="${X(ME.lng)}" cy="${Y(ME.lat)}" r="8" fill="#1A73E8" stroke="#fff" stroke-width="3"/>` + lbl(X(ME.lng), Y(ME.lat) + 26, t("you"), "#1A73E8"); }
+  $("#mapbox").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="min-width:380px" role="img" aria-label="${esc(t("tMap"))}">${g}</svg>`; }
 
-function fcView() {
-  const f = forecast(), atRisk = f.filter((x) => x.risk !== "stable").map((x) => x.t), plan = aiPlan && aiPlanKey === planKey() ? aiPlan : null;
-  return `
-  <div class="card">
-    <h2>التنبؤ الذكي بنقص المخزون — ${esc(fac("f1").name)}</h2>
-    <p class="small mute">الموسم</p>
-    <div class="chips">${Object.entries(SEASONS).map(([k, v]) => `<button class="chip" data-season="${k}" aria-pressed="${FC.season === k}">${v[0]}</button>`).join("")}</div>
-    <p class="small mute">ضغط المستشفى</p>
-    <div class="chips">${Object.entries(SURGES).map(([k, v]) => `<button class="chip" data-surge="${k}" aria-pressed="${FC.surge === k}">${v[0]}</button>`).join("")}</div>
-    <label class="small mute" for="hz" style="font-weight:600">أفق التنبؤ: <span class="num" id="hzv">${FC.horizon}</span> يومًا</label>
-    <input id="hz" type="range" min="7" max="30" value="${FC.horizon}">
-  </div>
-  <div class="matrix">${f.map((x) => `
-    <div class="cell ${x.risk === "stable" ? "" : x.risk}">
-      <div class="row"><span class="bt" style="font-size:16px">${x.t}</span><span class="pill ${x.risk} ${x.risk === "critical" ? "blink" : ""}">${RISK[x.risk]}</span></div>
-      <span class="days">${x.days === null ? "لا نفاد" : `<span class="num">${x.days}</span> يوم`}</span>
-      <span class="meta">${x.date ? `النفاد المتوقع <span class="num">${x.date}</span>` : "الرصيد متزايد"}</span>
-      <span class="meta">الرصيد <span class="num">${x.u}</span> · الآمن <span class="num">${x.safety}</span></span>
-      <span class="meta">صرف <span class="num">${x.burn}</span> · إيداع <span class="num">${x.inflow}</span> /يوم</span>
-      <div class="acts"><button class="btn ghost sm" data-mv="${x.t}:-1" ${x.u ? "" : "disabled"}>− صرف</button><button class="btn ghost sm" data-mv="${x.t}:1">+ إيداع</button></div>
-    </div>`).join("")}</div>
-  <div class="card"><h2>منحنى الاستنزاف — 14 يومًا (أخطر فصيلتين)</h2><div class="chart" id="chart"></div><div class="legend" id="legend"></div></div>
-  <div class="card plan">
-    <div class="row"><h2>خطة التدخل الاستباقي</h2><span class="pill ${plan ? "info" : "stable"}">${plan ? "مولّدة بالذكاء الاصطناعي" : "خطة القواعد الفورية"}</span></div>
-    <div class="list">${(plan || rulePlan(f)).map((it) => `<div class="item"><h3>${esc(it.title)} <span class="small" style="color:var(--accent)">· ${esc(it.p)}</span></h3><p class="small mute">${esc(it.detail)}</p></div>`).join("")}</div>
-    <div class="row" style="justify-content:flex-start"><button class="btn ghost" id="aiplan" hidden>✨ خطة مخصصة بالذكاء الاصطناعي</button><span class="small mute" id="aiplanst"></span></div>
-    <p class="note">معاملات المواسم تقديرية (رمضان −38% إيداع، الصيف −30%…) ويعايرها النظام من بيانات المنشأة الفعلية بعد التشغيل.</p>
-  </div>
-  <button class="btn" id="recall" ${atRisk.length ? "" : "disabled"}>🚨 إطلاق نداء فوري للمتبرعين ${atRisk.length ? `(<span class="bt">${atRisk.join(" ")}</span>)` : ""}</button>`;
-}
-const planKey = () => `${FC.season}|${FC.surge}|${FC.horizon}|${TYPES.map((t) => INV.f1[t]).join(",")}`;
-
-function drawChart() {
-  const css = getComputedStyle(document.documentElement), col = [css.getPropertyValue("--crit").trim(), css.getPropertyValue("--plasma").trim()];
-  const mute = css.getPropertyValue("--mute").trim(), line = css.getPropertyValue("--line").trim();
-  const series = forecast().slice(0, 2), D = 14, W = 640, H = 220, L = 34, R = 14, T = 14, B = 26;
-  const pts = series.map((x) => Array.from({ length: D+1 }, (_, d) => Math.max(0, x.u + x.net*d)));
-  const step = Math.max(1, Math.ceil(Math.max(1, ...pts.flat(), ...series.map((x) => x.safety))*1.1/4)), maxY = step*4;
-  const X = (d) => L + (d/D)*(W-L-R), Y = (v) => T + (1 - v/maxY)*(H-T-B);
-  let g = "";
-  for (let k = 0; k <= 4; k++) { const v = step*k; g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${L-6}" y="${Y(v)+4}" font-size="10" fill="${mute}" text-anchor="end" font-family="IBM Plex Mono, monospace">${v}</text>`; }
-  [0, 7, 14].forEach((d) => g += `<text x="${X(d)}" y="${H-8}" font-size="10" fill="${mute}" text-anchor="middle">${d === 0 ? "اليوم" : "+" + d}</text>`);
+function fcView() { const fc = forecast(), atRisk = fc.filter((x) => x.risk !== "stable").map((x) => x.b), plan = aiPlan && aiKey === planKey() ? aiPlan : null;
+  return `<div class="card"><h2>${esc(t("forecastTitle"))} — ${esc(fname(fac("f1")))}</h2>
+    <p class="small mute">${esc(t("season"))}</p><div class="chips">${Object.keys(SEA).map((k) => `<button class="chip" data-season="${k}" aria-pressed="${FC.season === k}">${esc(t("sea_" + k))}</button>`).join("")}</div>
+    <p class="small mute">${esc(t("surge"))}</p><div class="chips">${Object.keys(SUR).map((k) => `<button class="chip" data-surge="${k}" aria-pressed="${FC.surge === k}">${esc(t("sur_" + k))}</button>`).join("")}</div>
+    <label class="small mute" for="hz" style="font-weight:600">${esc(t("horizon"))}: <span class="num" id="hzv">${FC.horizon}</span> ${esc(t("days"))}</label><input id="hz" type="range" min="7" max="30" value="${FC.horizon}"></div>
+  <div class="matrix">${fc.map((x) => `<div class="cell ${x.risk === "stable" ? "" : x.risk}"><div class="row"><span class="bt">${x.b}</span><span class="pill ${x.risk} ${x.risk === "critical" ? "blink" : ""}">${esc(t("risk_" + x.risk))}</span></div>
+    <span class="days">${x.days === null ? esc(t("noDepletion")) : `<span class="num">${x.days}</span> ${esc(t("days"))}`}</span>${x.date ? `<span class="meta num">${x.date}</span>` : ""}
+    <span class="meta">${esc(t("safety"))} <span class="num">${x.safety}</span> · ${esc(t("burn"))} <span class="num">${x.burn}</span> · ${esc(t("inflow"))} <span class="num">${x.inflow}</span></span>
+    <div class="acts"><button class="btn ghost sm" data-mv="${x.b}:-1" ${x.u ? "" : "disabled"}>− ${esc(t("issue"))}</button><button class="btn ghost sm" data-mv="${x.b}:1">+ ${esc(t("deposit"))}</button></div></div>`).join("")}</div>
+  <div class="card"><h2>${esc(t("chart"))}</h2><div class="chart" id="chart"></div><div class="legend" id="legend"></div></div>
+  <div class="card"><div class="row"><h2>${esc(t("plan_title"))}</h2><span class="pill ${plan ? "info" : "stable"}">${esc(t(plan ? "aiSource" : "rulesSource"))}</span></div>
+    <div class="list">${(plan || rulePlan(fc)).map((it) => `<div class="item"><h3>${esc(it.title)} <span class="small" style="color:var(--accent)">· ${esc(t("pr_" + it.p) || it.p)}</span></h3>${it.detail ? `<p class="small mute">${esc(it.detail)}</p>` : ""}</div>`).join("")}</div>
+    <div class="acts-row"><button class="btn ghost" id="aiBtn" hidden>${esc(t("aiPlanBtn"))}</button><span class="small mute" id="aiSt"></span></div><p class="note">${esc(t("assumptions"))}</p></div>
+  <button class="btn" id="recall" ${atRisk.length ? "" : "disabled"}>🚨 ${esc(t("recall"))} ${atRisk.length ? `(<span class="bt">${atRisk.join(" ")}</span>)` : ""}</button>`; }
+function drawChart() { const col = [css("--crit"), css("--plasma")], series = forecast().slice(0, 2), D = 14, W = 640, H = 220, L = 34, R = 14, T = 14, B = 26;
+  const pts = series.map((x) => Array.from({ length: D + 1 }, (_, d) => Math.max(0, x.u + x.net * d))), step = Math.max(1, Math.ceil(Math.max(1, ...pts.flat(), ...series.map((x) => x.safety)) * 1.1 / 4)), maxY = step * 4;
+  const X = (d) => L + (d / D) * (W - L - R), Y = (v) => T + (1 - v / maxY) * (H - T - B); let g = "";
+  for (let k = 0; k <= 4; k++) g += `<line x1="${L}" x2="${W-R}" y1="${Y(step*k)}" y2="${Y(step*k)}" stroke="${css("--line")}"/><text x="${L-6}" y="${Y(step*k)+4}" font-size="10" fill="${css("--mute")}" text-anchor="end" font-family="IBM Plex Mono, monospace">${step*k}</text>`;
+  [0, 7, 14].forEach((d) => g += `<text x="${X(d)}" y="${H-8}" font-size="10" fill="${css("--mute")}" text-anchor="middle">${d ? "+" + d : esc(t("today"))}</text>`);
   series.forEach((x, i) => { const p = pts[i].map((v, d) => `${d ? "L" : "M"}${X(d).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
-    g += `<path d="${p} L${X(D)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${col[i]}" fill-opacity="0.12"/><path d="${p}" fill="none" stroke="${col[i]}" stroke-width="2.5"/>`;
-    g += `<line x1="${L}" x2="${W-R}" y1="${Y(x.safety)}" y2="${Y(x.safety)}" stroke="${col[i]}" stroke-dasharray="5 4" stroke-opacity="0.7"/><circle cx="${X(D)}" cy="${Y(pts[i][D])}" r="3.5" fill="${col[i]}"/>`; });
-  $("#chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px;max-width:${W}px" role="img" aria-label="منحنى الرصيد المتوقع">${g}</svg>`;
-  $("#legend").innerHTML = series.map((x, i) => `<span><i style="background:${col[i]}"></i><bdi dir="ltr">${x.t}</bdi> (المتقطع = الحد الآمن)</span>`).join("");
-}
+    g += `<path d="${p} L${X(D)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${col[i]}" fill-opacity="0.12"/><path d="${p}" fill="none" stroke="${col[i]}" stroke-width="2.5"/><line x1="${L}" x2="${W-R}" y1="${Y(x.safety)}" y2="${Y(x.safety)}" stroke="${col[i]}" stroke-dasharray="5 4" stroke-opacity="0.7"/><circle cx="${X(D)}" cy="${Y(pts[i][D])}" r="3.5" fill="${col[i]}"/>`; });
+  $("#chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="min-width:420px" role="img" aria-label="${esc(t("chart"))}">${g}</svg>`;
+  $("#legend").innerHTML = series.map((x, i) => `<span><i style="background:${col[i]}"></i><bdi dir="ltr">${x.b}</bdi> — - - ${esc(t("safetyLine"))}</span>`).join(""); }
 
-// ============ المساعد رفيق ============
-const CHAT = []; // [{role, content}] للنموذج
-const BUBBLES = [{ k: "bot", t: "أهلًا، أنا رفيق 👋 أساعدك في إيجاد الدم، معرفة أهليتك للتبرع، ومتابعة الطلبات. بماذا أخدمك؟" }];
-let agentBusy = false, agentCtl = null, agentRole = "beneficiary";
-function agentView() {
-  return `
-  <div class="card">
-    <div class="row"><h2>المساعد الذكي رفيق</h2>
-      <div class="chips" aria-label="أتحدث بصفتي">${[["beneficiary","مستفيد"],["donor","متبرع"],["facility","موظف منشأة"]].map(([k, l]) => `<button class="chip" data-arole="${k}" aria-pressed="${agentRole === k}">${l}</button>`).join("")}</div></div>
-    <p class="small mute" id="agentnote">يعمل على بيانات هذه التجربة: يبحث في المخزون، ويتحقق من الأهلية، وينشئ الطلبات بعد تأكيدك.</p>
-    <div class="suggest">${["أحتاج دم O- لوالدي قرب وسط القاهرة","هل أستطيع التبرع الآن؟","ما الفصائل المتوافقة مع A+؟","ما الفصائل المعرضة للنفاد في مستشفانا؟"].map((q) => `<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
-  </div>
-  <div class="card chat"><div class="msgs" id="msgs"></div>
-    <form class="composer" id="composer"><input id="q" autocomplete="off" placeholder="اكتب سؤالك…" aria-label="سؤالك"><button class="btn" id="send">إرسال</button><button class="btn ghost" type="button" id="stop" hidden>إيقاف</button></form>
-  </div>`;
-}
-function paintChat() { const m = $("#msgs"); if (!m) return; m.innerHTML = BUBBLES.map((b) => `<div class="msg ${b.k === "me" ? "me" : b.k === "tool" ? "tool" : "bot"}">${esc(b.t)}</div>`).join(""); m.scrollTop = m.scrollHeight; }
-async function setupAgent() {
-  const s = await getSample();
-  if (!s && view === "agent") { $("#agentnote").textContent = "المساعد الذكي يعمل عند فتح هذه الصفحة داخل Claude. باقي التجربة يعمل بالكامل."; $("#send").disabled = true; }
-}
+function adminView() { const verified = FAC.filter((x) => x.verified && !x.suspended), mrr = verified.reduce((a, x) => a + PRICE[x.plan], 0), fees = CAMPAIGNS.reduce((a, c) => a + c.fee, 0);
+  const done = DONATIONS.filter((d) => d.status !== "discarded").length;
+  const head = sub("asub", adminSub, [["overview", t("overview")], ["users", t("users")], ["facilities", t("facilities")], ["campaigns", t("campaigns")], ["audit", t("audit")]]);
+  let body = "";
+  if (adminSub === "overview") body = `<div class="stats">${[["s_mrr", f("egpMonth", { n: mrr.toLocaleString(loc()) }), "ok"], ["s_campaignFees", fees.toLocaleString(loc()), "ok"], ["s_donors", DONORS.length + 2], ["s_eligible", DONORS.filter((d) => d.eligible).length],
+      ["s_facilities", verified.length], ["s_pending", FAC.filter((x) => !x.verified).length, FAC.some((x) => !x.verified) ? "crit" : ""], ["s_open", REQUESTS.filter((r) => r.secured < r.units).length, "crit"],
+      ["s_fulfilled30", REQUESTS.filter((r) => r.secured >= r.units).length], ["s_donations30", DONATIONS.length], ["s_lives", done * 3, "crit"], ["s_suspended", USERS.filter((u) => u.suspended).length + FAC.filter((x) => x.suspended).length]]
+      .map(([k, v, tone]) => `<div class="stat"><b style="${tone ? `color:var(--${tone})` : ""}">${esc(String(v))}</b><span class="small mute">${esc(t(k))}</span></div>`).join("")}</div>
+    <div class="card"><h3>${esc(t("revenue"))} · ${esc(t("plan"))}</h3>${["free","pro","enterprise"].map((p) => `<div class="row"><span>${esc(t("plan_" + p))} — ${esc(f("egpMonth", { n: PRICE[p].toLocaleString(loc()) }))}</span><span class="num">${verified.filter((x) => x.plan === p).length}</span></div>`).join("")}</div><p class="note">${esc(t("sampleNote"))}</p>`;
+  if (adminSub === "users") body = `<div class="list">${USERS.map((u) => `<div class="item ${u.suspended ? "crit" : ""}"><div class="row"><h3>${esc(fname(u))}</h3>${u.suspended ? `<span class="pill critical">${esc(t("suspended"))}</span>` : ""}</div>
+      <p class="small mute num">${u.phone}${u.fac ? ` · ${esc(fname(fac(u.fac)))}` : ""}</p><div class="chips">${["donor","beneficiary","facility_staff","admin"].map((r) => `<button class="chip" data-urole="${u.id}:${r}" aria-pressed="${u.role === r}">${esc({ donor: t("roleDonor"), beneficiary: t("roleBeneficiary"), facility_staff: t("roleStaff"), admin: t("tAdmin") }[r])}</button>`).join("")}</div>
+      <div class="acts-row"><button class="btn ${u.suspended ? "" : "ghost"} sm" data-usus="${u.id}">${esc(cbtn("u" + u.id, t(u.suspended ? "unsuspend" : "suspend")))}</button></div></div>`).join("")}</div>`;
+  if (adminSub === "facilities") body = `<div class="list">${FAC.map((x) => `<div class="item ${x.suspended ? "crit" : !x.verified ? "warnb" : ""}"><div class="row"><h3>${esc(fname(x))}</h3><span class="pill ${x.suspended ? "critical" : x.verified ? "ok" : "warning"}">${esc(t(x.suspended ? "suspended" : x.verified ? "verified" : "pending"))}</span></div>
+      <p class="small mute">${esc(t("k_" + x.kind))} · <span class="num">${x.phone}</span></p><div class="chips">${["free","pro","enterprise"].map((p) => `<button class="chip" data-plan="${x.id}:${p}" aria-pressed="${x.plan === p}">${esc(t("plan_" + p))}</button>`).join("")}</div>
+      <div class="acts-row"><button class="btn sm ${x.verified ? "ghost" : ""}" data-fver="${x.id}">${esc(t(x.verified ? "unverify" : "verify"))}</button><button class="btn ghost sm" data-fsus="${x.id}">${esc(cbtn("f" + x.id, t(x.suspended ? "unsuspend" : "suspend")))}</button></div></div>`).join("")}</div>`;
+  if (adminSub === "campaigns") body = `<div class="card"><h3>${esc(t("createCampaign"))}</h3><label class="f">${esc(t("campaignTitle"))}<input type="text" id="cTitle"></label><label class="f">${esc(t("org"))}<input type="text" id="cOrg"></label>
+      <label class="f">${esc(t("feeEgp"))}<input type="number" id="cFee" value="20000" min="0"></label><button class="btn" id="cSave">${esc(t("save"))}</button></div>
+    <div class="list">${CAMPAIGNS.map((c) => `<div class="item"><div class="row"><h3>${esc(lang === "ar" ? c.title.ar : c.title.en)}</h3><span class="pill info code">${c.code}</span></div><p class="small mute">${esc(c.org)} · ${esc(f("signups", { n: c.signups }))} · <span class="num">${c.fee.toLocaleString(loc())}</span> EGP</p></div>`).join("")}</div>`;
+  if (adminSub === "audit") body = AUDIT.length ? `<div class="list">${AUDIT.map((a) => `<div class="item"><div class="row"><b class="small">${esc(a.action)}</b><span class="small mute">${new Date(a.at).toLocaleTimeString(loc())}</span></div><div class="audit">${esc(a.target)} ${esc(JSON.stringify(a.details))}</div></div>`).join("")}</div>` : `<p class="mute">${esc(t("auditEmpty"))}</p>`;
+  return `<div class="row"><h2>${esc(t("tAdmin"))}</h2></div>` + head + body; }
+
+// ================= المساعد =================
+const CHAT = [], BUB = [];
+let busy = false, ctl = null, agentRole = "beneficiary";
+function agentView() { if (!BUB.length) BUB.push({ k: "bot", t: t("agentHello") });
+  return `<div class="card"><div class="row"><h2>${esc(t("tAgent"))}</h2><div class="chips" aria-label="${esc(t("speakAs"))}">${[["beneficiary", t("roleBeneficiary")], ["donor", t("roleDonor")], ["facility", t("roleStaff")]].map(([k, l]) => `<button class="chip" data-arole="${k}" aria-pressed="${agentRole === k}">${esc(l)}</button>`).join("")}</div></div>
+    <p class="small mute" id="agentNote">${esc(t("agentNote"))}</p><div class="chips">${[t("sug1"), t("sug2"), t("sug3")].map((q) => `<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div></div>
+  <div class="card chat"><div class="msgs" id="msgs"></div><form class="composer" id="composer"><input type="text" id="q" autocomplete="off" placeholder="${esc(t("agentPlaceholder"))}" aria-label="${esc(t("agentPlaceholder"))}"><button class="btn" id="send">${esc(t("send"))}</button><button class="btn ghost" type="button" id="stop" hidden>${esc(t("stop"))}</button></form></div>`; }
+function paintChat() { const m = $("#msgs"); if (!m) return; m.innerHTML = BUB.map((b) => `<div class="msg ${b.k}">${esc(b.t)}</div>`).join(""); m.scrollTop = m.scrollHeight; }
+async function setupAgent() { const s = await getSample(); if (!s && view === "agent") { $("#agentNote").textContent = t("needsClaude"); const b = $("#send"); if (b) b.disabled = true; } }
+const note = (x) => { BUB.push({ k: "tool", t: x }); paintChat(); };
 const TOOLS = () => [
-  { name: "blood_compatibility", description: "Returns donor blood types compatible with a recipient type (red cells).", inputSchema: { type: "object", properties: { recipient: { type: "string", enum: TYPES } }, required: ["recipient"] },
-    execute: ({ recipient }) => { note(`🔎 فحص التوافق لـ ${recipient}`); return { compatible: COMPAT[recipient] || [] }; } },
-  { name: "search_inventory", description: "Search verified facilities near the user for compatible blood stock. Returns name, phone, type, units, distance km.", inputSchema: { type: "object", properties: { blood_type: { type: "string", enum: TYPES }, radius_km: { type: "number" } }, required: ["blood_type"] },
-    execute: ({ blood_type, radius_km }) => { if (!COMPAT[blood_type]) throw new Error("unknown blood type"); note(`🔎 بحث في المخزون عن ${blood_type}`); return { results: inventoryNear(blood_type, Math.min(+radius_km || 30, 100)).slice(0, 6) }; } },
-  { name: "my_eligibility", description: "Donation eligibility of the signed-in donor (interval rule).", execute: () => { note("🩺 فحص الأهلية"); const n = nextEligible(); return { blood_type: DONOR.bt, last_donation: DONOR.last, interval_days: 84, eligible_now: !n, next_eligible_date: n ? n.toISOString().slice(0,10) : "now", available: DONOR.available }; } },
-  { name: "open_requests_near_me", description: "Open verified blood requests near the donor that their blood type can serve.", execute: () => { note("📋 الطلبات القريبة"); return { requests: openForDonor().map((r) => ({ facility: fac(r.fac).name, blood_type: r.bt, units_left: r.units - r.secured, urgency: r.urgency, km: r.km })) }; } },
-  { name: "create_blood_request", description: "Create a blood request at a facility. Only call after the user explicitly confirmed the summarized details in their latest message.", inputSchema: { type: "object", properties: { facility_id: { type: "string", enum: FAC.map((f) => f.id) }, blood_type: { type: "string", enum: TYPES }, units: { type: "integer" }, urgency: { type: "string", enum: ["routine","urgent","critical"] }, user_confirmed: { type: "boolean" } }, required: ["facility_id","blood_type","units","urgency","user_confirmed"] },
-    execute: (i) => { if (i.user_confirmed !== true) return { error: "need explicit user confirmation first" }; const u = Math.round(+i.units); if (!fac(i.facility_id) || !COMPAT[i.blood_type] || !(u >= 1 && u <= 20)) throw new Error("invalid request");
-      const r = { id: "r" + seq++, fac: i.facility_id, bt: i.blood_type, units: u, secured: 0, urgency: ["routine","urgent","critical"].includes(i.urgency) ? i.urgency : "urgent", verified: false, mine: true };
-      REQUESTS.push(r); note(`✅ تم إنشاء طلب ${r.bt} لدى ${fac(r.fac).name}`); return { created: { facility: fac(r.fac).name, blood_type: r.bt, units: u, status: "awaiting facility verification" } }; } },
-  { name: "facility_forecast", description: "For facility staff: shortage forecast for the user's hospital (days until depletion and risk per blood type) under current season/surge settings.", execute: () => { note("📈 قراءة التنبؤ"); return { facility: fac("f1").name, season: FC.season, surge: FC.surge, forecast: forecast().map(({ t, u, safety, burn, inflow, days, date, risk, need }) => ({ blood_type: t, units: u, safety, burn_per_day: burn, inflow_per_day: inflow, days_until_depletion: days, depletion_date: date, risk, units_needed: need })) }; } },
+  { name: "blood_compatibility", description: "Donor types compatible with a recipient type.", inputSchema: { type: "object", properties: { recipient: { type: "string", enum: TYPES } }, required: ["recipient"] }, execute: ({ recipient }) => { note("🔎 " + recipient); return { compatible: COMPAT[recipient] || [] }; } },
+  { name: "search_inventory", description: "Compatible stock at verified facilities near the user (name, phone, type, units, km).", inputSchema: { type: "object", properties: { blood_type: { type: "string", enum: TYPES } }, required: ["blood_type"] },
+    execute: ({ blood_type }) => { if (!COMPAT[blood_type]) throw new Error("bad type"); note("🔎 " + blood_type); return { results: inventoryNear(blood_type, 40).slice(0, 6).map((x) => ({ facility_id: x.fid, facility: fname(fac(x.fid)), phone: fac(x.fid).phone, type: x.b, units: x.units, km: x.km })) }; } },
+  { name: "my_eligibility", description: "Donor eligibility (interval rule).", execute: () => { note("🩺"); const n = nextEligible(); return { blood_type: DONOR.bt, last_donation: DONOR.last, eligible_now: !n, next_eligible: n ? n.toISOString().slice(0, 10) : "now" }; } },
+  { name: "open_requests_near_me", description: "Open verified requests near the donor that their type can serve.", execute: () => { note("📋"); return { requests: openForDonor().map((r) => ({ facility: fname(fac(r.fac)), type: r.bt, units_left: r.units - r.secured, urgency: r.urgency, km: r.km })) }; } },
+  { name: "my_achievements", description: "Donor's donations, estimated lives saved, points, badges, challenges.", execute: () => { note("🏅"); return achievements(); } },
+  { name: "triage_requests", description: "Staff: open requests at the user's hospital ranked by priority score with reasons.", execute: () => { note("📋 triage"); return { requests: triage().map(({ bt, left, urgency, score, reasons, stock }) => ({ type: bt, units_left: left, urgency, score, reasons, same_type_stock: stock })) }; } },
+  { name: "facility_forecast", description: "Staff: days until depletion and risk per type at the user's hospital.", execute: () => { note("📈"); return { forecast: forecast().map(({ b, u, days, risk, need }) => ({ type: b, units: u, days_until_depletion: days, risk, units_needed: need })) }; } },
+  { name: "create_blood_request", description: "Create a request. Only after the user explicitly confirmed the summarized details.", inputSchema: { type: "object", properties: { facility_id: { type: "string", enum: FAC.map((x) => x.id) }, blood_type: { type: "string", enum: TYPES }, units: { type: "integer" }, urgency: { type: "string", enum: ["routine","urgent","critical"] }, user_confirmed: { type: "boolean" } }, required: ["facility_id","blood_type","units","urgency","user_confirmed"] },
+    execute: (i) => { if (i.user_confirmed !== true) return { error: "confirmation required" }; const u = Math.round(+i.units); if (!fac(i.facility_id) || !COMPAT[i.blood_type] || !(u >= 1 && u <= 20)) throw new Error("invalid");
+      REQUESTS.push({ id: "r" + seq++, fac: i.facility_id, bt: i.blood_type, units: u, secured: 0, urgency: i.urgency, verified: false, mine: true, at: Date.now() }); note("✅ " + i.blood_type); return { created: true, status: "awaiting facility verification" }; } },
 ];
-function note(t) { BUBBLES.push({ k: "tool", t }); paintChat(); }
-const ROLE_TXT = { beneficiary: "a patient relative / beneficiary looking for blood", donor: "a blood donor (type O-)", facility: "staff at " + "the user's hospital (facility f1)" };
-async function ask(q) {
-  q = q.trim(); if (!q || agentBusy) return;
-  const s = await getSample(); if (!s) return;
-  BUBBLES.push({ k: "me", t: q }); CHAT.push({ role: "user", content: q });
-  const bot = { k: "bot", t: "يفكر…" }; BUBBLES.push(bot); paintChat();
-  agentBusy = true; agentCtl = new AbortController(); toggleBusy(true);
-  const head = `You are "رفيق" (Rafeeq), the assistant of a SMART BLOOD BANK demo app in Egypt. Reply in Arabic (Egyptian-friendly MSA), short and warm. The user is ${ROLE_TXT[agentRole]}; their location is downtown Cairo.
-Rules: use the tools for every fact about stock, requests or eligibility — never invent numbers. No medical diagnosis; refer detailed medical eligibility to the blood bank doctor. In emergencies (bleeding, accident) first advise calling an ambulance (123 in Egypt). Never reveal donor identities. Blood donation is voluntary and unpaid — never suggest buying/selling blood. Before create_blood_request, summarize facility, type, units and urgency and ask the user to confirm; call it only after they confirm. Facility ids: ${FAC.map((f) => `${f.id}=${f.name}`).join(", ")}. All data is demo data.`;
+async function ask(q) { q = (q || "").trim(); if (!q || busy) return; const s = await getSample(); if (!s) return;
+  BUB.push({ k: "me", t: q }); CHAT.push({ role: "user", content: q }); const bot = { k: "bot", t: t("thinking") }; BUB.push(bot); paintChat();
+  busy = true; ctl = new AbortController(); tb(true);
+  const head = `You are "Rafeeq", assistant of a SMART BLOOD BANK demo app in Egypt. Reply in the language of the user's latest message; if unclear use ${LANG_NAME[lang]}. Short and warm.
+The user is ${{ beneficiary: "a patient's relative", donor: "a donor (type O-)", facility: "staff at " + fac("f1").en }[agentRole]}; location downtown Cairo.
+Use tools for every fact; never invent numbers. No medical diagnosis. Emergencies: first advise calling an ambulance (123 in Egypt). Never reveal donor identities. Donation is voluntary and unpaid; never suggest buying blood.
+Before create_blood_request, summarize and ask for confirmation. All data is demo data.`;
   const input = CHAT.map((m, i) => i === 0 ? { role: "user", content: head + "\n\nUser: " + m.content } : m);
-  try {
-    const { text } = await s(input, { tools: TOOLS(), modelTier: "quick", cache: false, signal: agentCtl.signal,
-      onText: ({ text }) => { bot.t = text; BUBBLES.splice(BUBBLES.indexOf(bot), 1); BUBBLES.push(bot); paintChat(); } });
+  try { const { text } = await s(input, { tools: TOOLS(), modelTier: "quick", cache: false, signal: ctl.signal, onText: ({ text }) => { bot.t = text; BUB.splice(BUB.indexOf(bot), 1); BUB.push(bot); paintChat(); } });
     bot.t = text || "…"; CHAT.push({ role: "assistant", content: bot.t });
-  } catch (e) {
-    bot.t = e?.text || SAMPLE_ERR[e?.code] || "تعذّر الرد الآن، حاول مرة أخرى.";
-    if (e?.text) CHAT.push({ role: "assistant", content: e.text }); else CHAT.pop();
-  } finally { agentBusy = false; toggleBusy(false); paintChat(); if (view !== "agent") toast("رد المساعد جاهز في تبويب المساعد"); }
-}
-function toggleBusy(b) { const send = $("#send"), stop = $("#stop"); if (send) send.disabled = b; if (stop) stop.hidden = !b; }
+  } catch (e) { bot.t = e?.text || sampleErr(e); if (e?.text) CHAT.push({ role: "assistant", content: e.text }); else CHAT.pop(); }
+  finally { busy = false; tb(false); paintChat(); } }
+function tb(b) { const s = $("#send"), x = $("#stop"); if (s) s.disabled = b; if (x) x.hidden = !b; }
+async function aiGen(kind) { const s = await getSample(); if (!s) return; const st = $("#aiSt"), btn = $("#aiBtn"); btn.disabled = true; st.textContent = t("thinking");
+  try { if (kind === "plan") { const key = planKey();
+      const data = await s.json(`Hospital blood bank in Egypt. From this deterministic forecast JSON, give 3-5 prioritized operational interventions (donor recall, inter-hospital borrowing, PBM, season-timed drives, monitoring). Use only given numbers; no clinical orders; never suggest buying blood. Write in ${LANG_NAME[lang]}.
+Return ONLY JSON {"items":[{"p":"now|24h|this_week","title":"...","detail":"max 2 sentences"}]}
+Season ${FC.season}, surge ${FC.surge}, horizon ${FC.horizon} days. ${JSON.stringify(forecast().map(({ b, u, safety, burn, inflow, days, risk, need }) => ({ b, u, safety, burn, inflow, days, risk, need })))}`, { modelTier: "quick" });
+      if (!Array.isArray(data?.items)) throw {}; aiPlan = data.items.slice(0, 6).map((x) => ({ p: String(x.p), title: String(x.title), detail: String(x.detail || "") })); aiKey = key; render(); }
+    else { const { text } = await s(`Write a short morning operations brief (max 120 words, plain text, 3 parts: status line, urgent actions as bullets, watch list) for ${fac("f1").en} blood bank in ${LANG_NAME[lang]}. Use only this data, no clinical orders, never suggest buying blood:
+${JSON.stringify({ forecast: forecast().map(({ b, u, days, risk }) => ({ b, u, days, risk })), triage: triage().map(({ bt, left, urgency, score, reasons }) => ({ bt, left, urgency, score, reasons })), expiring_7d: { "O+": 3, "A+": 2 } })}`, { modelTier: "quick" });
+      report = { text, ai: true }; render(); }
+  } catch (e) { if ($("#aiSt")) $("#aiSt").textContent = e?.code ? sampleErr(e) : t("planErr"); if ($("#aiBtn")) $("#aiBtn").disabled = false; } }
+function drawQR() { const el = $("#qr"); if (!el) return; el.innerHTML = ""; if (window.QRCode) new QRCode(el, { text: "sbb:donor:demo-" + DONOR.id, width: 180, height: 180, colorDark: "#1C1416", colorLight: "#ffffff" }); else el.textContent = "sbb:donor:demo-" + DONOR.id; }
 
-async function genPlan() {
-  const s = await getSample(); if (!s) return;
-  const st = $("#aiplanst"), btn = $("#aiplan"); btn.disabled = true; st.textContent = "يفكر…";
-  const key = planKey();
-  try {
-    const data = await s.json(`You advise a hospital blood bank in Egypt. Given this deterministic shortage forecast (JSON), propose 3-5 prioritized operational interventions (donor recall, inter-hospital borrowing, Patient Blood Management, season-timed mobile drives, monitoring). Use only the given numbers. No patient-level clinical orders. Never suggest buying blood or paying donors.
-Return ONLY JSON: {"items":[{"p":"فورًا|خلال 24 ساعة|هذا الأسبوع","title":"Arabic, short","detail":"Arabic, max 2 sentences"}]}
-Season: ${SEASONS[FC.season][0]}; surge: ${SURGES[FC.surge][0]}; horizon: ${FC.horizon} days.
-${JSON.stringify(forecast().map(({ t, u, safety, burn, inflow, days, risk, need }) => ({ t, u, safety, burn, inflow, days, risk, need })))}`, { modelTier: "quick" });
-    if (!Array.isArray(data?.items) || !data.items.length) throw { code: "bad" };
-    aiPlan = data.items.slice(0, 6).map((x) => ({ p: String(x.p || ""), title: String(x.title || ""), detail: String(x.detail || "") })); aiPlanKey = key;
-    if (view === "forecast") render();
-  } catch (e) { if (st) st.textContent = SAMPLE_ERR[e?.code] || "تعذّر توليد الخطة، الخطة الفورية معروضة."; if (btn) btn.disabled = false; }
-}
-
-// ============ ربط الأحداث ============
+// ================= الأحداث =================
+function on(sel, ev, fn) { document.querySelectorAll(sel).forEach((e) => e.addEventListener(ev, (x) => fn(e, x))); }
 function bind() {
-  document.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => setView(b.dataset.go));
-  const av = $("#avail"); if (av) av.onchange = () => { DONOR.available = av.checked; toast(av.checked ? "ستصلك نداءات الطوارئ" : "تم إيقاف النداءات مؤقتًا"); render(); };
-  document.querySelectorAll("[data-respond]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.respond); RESPONSES.add(r.id); toast(`شكرًا لك ❤️ تم إبلاغ ${fac(r.fac).name}. توجّه إليه ومعك بطاقة الهوية.`); render(); });
-  document.querySelectorAll("[data-bt]").forEach((b) => b.onclick = () => { benBt = b.dataset.bt; benResults = null; render(); });
-  const un = $("#units"); if (un) un.onchange = () => benUnits = Math.max(1, Math.min(20, Math.round(+un.value) || 1));
-  const se = $("#search"); if (se) se.onclick = () => { benResults = inventoryNear(benBt); render(); };
-  document.querySelectorAll("[data-req]").forEach((b) => b.onclick = () => { const r = { id: "r" + seq++, fac: b.dataset.req, bt: benBt, units: benUnits, secured: 0, urgency: "urgent", verified: false, mine: true }; REQUESTS.push(r); toast(`تم إرسال الطلب إلى ${fac(r.fac).name}. سيتواصل معك للتأكيد.`); render(); });
-  document.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => { const [t, d] = b.dataset.mv.split(":"); INV.f1[t] = Math.max(0, INV.f1[t] + +d); if (+d < 0) RATES[t].burn = r1(RATES[t].burn + 1/14); else RATES[t].inflow = r1(RATES[t].inflow + 1/14); render(); });
-  document.querySelectorAll("[data-verify]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.verify); r.verified = true; toast(`تم التوثيق. يوجد ${donorsFor(r).length} متبرع مؤهل ضمن 15 كم وتم إشعارهم (محاكاة).`); render(); });
-  document.querySelectorAll("[data-fulfil]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.fulfil); if (INV.f1[r.bt] > 0) { INV.f1[r.bt]--; r.secured++; RATES[r.bt].burn = r1(RATES[r.bt].burn + 1/14); toast(`تم صرف وحدة ${r.bt} للطلب.`); render(); } });
-  document.querySelectorAll("[data-mrole]").forEach((b) => b.onclick = () => { mapRole = b.dataset.mrole; render(); });
-  document.querySelectorAll("[data-book]").forEach((b) => b.onclick = () => { const f = fac(b.dataset.book); const d = new Date(Date.now() + 864e5);
-    APPT = { fid: f.id, name: f.name, when: d.toLocaleDateString("ar-EG", { weekday: "long", day: "numeric", month: "long" }) + " الساعة 11:00" };
-    toast(`تم الحجز ❤️ ${f.name} — ${APPT.when}. اشرب 500 مل ماء قبل الموعد.`); render(); });
-  document.querySelectorAll("[data-season]").forEach((b) => b.onclick = () => { FC.season = b.dataset.season; render(); });
-  document.querySelectorAll("[data-surge]").forEach((b) => b.onclick = () => { FC.surge = b.dataset.surge; render(); });
-  const hz = $("#hz"); if (hz) { hz.oninput = () => { FC.horizon = +hz.value; $("#hzv").textContent = hz.value; }; hz.onchange = render; }
-  const rc = $("#recall"); if (rc) rc.onclick = () => { const types = forecast().filter((x) => x.risk !== "stable").map((x) => x.t); const n = DONORS.filter((d) => d.eligible && types.includes(d.bt) && km(d, fac("f1")) <= 25).length; toast(`تم إرسال نداء إلى ${n} متبرع مؤهل من فصائل ${types.join(" ")} (محاكاة).`); };
-  const ap = $("#aiplan"); if (ap) { getSample().then((s) => { if (s && $("#aiplan")) $("#aiplan").hidden = false; }); ap.onclick = genPlan; }
-  document.querySelectorAll("[data-arole]").forEach((b) => b.onclick = () => { agentRole = b.dataset.arole; document.querySelectorAll("[data-arole]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); });
-  document.querySelectorAll("[data-q]").forEach((b) => b.onclick = () => ask(b.dataset.q));
-  const cf = $("#composer"); if (cf) cf.onsubmit = (e) => { e.preventDefault(); const q = $("#q"); const v = q.value; q.value = ""; ask(v); };
-  const sp = $("#stop"); if (sp) sp.onclick = () => agentCtl?.abort();
+  on("[data-view]", "click", (e) => { pending = null; view = e.dataset.view; render(); scrollTo(0, 0); });
+  on("[data-go]", "click", (e) => { view = e.dataset.go; render(); });
+  on("[data-dsub]", "click", (e) => { donorSub = e.dataset.dsub; render(); });
+  on("[data-fsub]", "click", (e) => { facSub = e.dataset.fsub; render(); });
+  on("[data-asub]", "click", (e) => { adminSub = e.dataset.asub; render(); });
+  on("#avail", "change", (e) => { DONOR.available = e.checked; render(); });
+  on("#board", "change", (e) => { DONOR.board = e.checked; render(); });
+  on("[data-respond]", "click", (e) => { const r = REQUESTS.find((x) => x.id === e.dataset.respond); RESPONSES.add(r.id); toast(f("thanksResponded", { name: fname(fac(r.fac)) })); render(); });
+  on("[data-join]", "click", (e) => join(e.dataset.join)); on("#joinBtn", "click", () => join($("#code").value));
+  on("[data-bt]", "click", (e) => { benBt = e.dataset.bt; benResults = null; render(); });
+  on("#units", "change", (e) => benUnits = Math.max(1, Math.min(20, Math.round(+e.value) || 1)));
+  on("#search", "click", () => { benResults = inventoryNear(benBt); render(); });
+  on("[data-req]", "click", (e) => { REQUESTS.push({ id: "r" + seq++, fac: e.dataset.req, bt: benBt, units: benUnits, secured: 0, urgency: "urgent", verified: false, mine: true, at: Date.now() }); toast(f("requestSent", { name: fname(fac(e.dataset.req)) })); render(); });
+  on("[data-mv]", "click", (e) => { const [b, d] = e.dataset.mv.split(":"); INV.f1[b] = Math.max(0, INV.f1[b] + +d); if (+d < 0) RATES[b].burn = r1(RATES[b].burn + 1/14); else RATES[b].inflow = r1(RATES[b].inflow + 1/14); render(); });
+  on("[data-verify]", "click", (e) => { const r = REQUESTS.find((x) => x.id === e.dataset.verify); r.verified = true; audit("verify_request", r.id, { verified: [false, true] }); toast(f("verifiedMsg", { n: donorsFor(r).length }) + " " + t("simulated")); render(); });
+  on("[data-fulfil]", "click", (e) => { const r = REQUESTS.find((x) => x.id === e.dataset.fulfil); if (INV.f1[r.bt] > 0) { INV.f1[r.bt]--; r.secured++; RATES[r.bt].burn = r1(RATES[r.bt].burn + 1/14); render(); } });
+  on("#scanBtn", "click", () => { scanned = true; audit("qr_lookup", fname(DONOR), { facility: "f1" }); render(); }); on("#unscan", "click", () => { scanned = null; render(); });
+  on("#record", "click", () => { const code = Math.random().toString(16).slice(2, 12).toUpperCase(); DONATIONS.unshift({ code, donor: "u1", bt: DONOR.bt, status: "collected", events: [{ s: "collected", at: Date.now() }] });
+    DONOR.last = new Date().toISOString().slice(0, 10); scanned = null; toast(f("donationRecorded", { code })); render(); });
+  on("[data-adv]", "click", (e) => { const d = DONATIONS.find((x) => x.code === e.dataset.adv), nx = STEPS[STEPS.indexOf(d.status) + 1]; if (!nx) return;
+    if (nx === "ready") INV.f1[d.bt]++; if (nx === "issued") { INV.f1[d.bt] = Math.max(0, INV.f1[d.bt] - 1); const r = REQUESTS.find((x) => x.fac === "f1" && x.bt === d.bt && x.secured < x.units); if (r) r.secured++; }
+    d.status = nx; d.events.push({ s: nx, at: Date.now() }); toast(t("j_" + nx)); render(); });
+  on("[data-discard]", "click", (e) => { const d = DONATIONS.find((x) => x.code === e.dataset.discard); if (d.status === "ready") INV.f1[d.bt] = Math.max(0, INV.f1[d.bt] - 1); d.status = "discarded"; d.events.push({ s: "discarded", at: Date.now() }); render(); });
+  on("[data-season]", "click", (e) => { FC.season = e.dataset.season; render(); }); on("[data-surge]", "click", (e) => { FC.surge = e.dataset.surge; render(); });
+  on("#hz", "input", (e) => { FC.horizon = +e.value; $("#hzv").textContent = e.value; }); on("#hz", "change", () => render());
+  on("#recall", "click", () => { const ty = forecast().filter((x) => x.risk !== "stable").map((x) => x.b); const n = DONORS.filter((d) => d.eligible && ty.includes(d.bt) && km(d, fac("f1")) <= 25).length; toast(f("recallDone", { n, t: ty.join(" ") }) + " " + t("simulated")); });
+  on("#aiBtn", "click", () => aiGen(view === "forecast" ? "plan" : "report"));
+  on("[data-mrole]", "click", (e) => { mapRole = e.dataset.mrole; render(); });
+  on("[data-book]", "click", (e) => { const x = fac(e.dataset.book), d = new Date(Date.now() + 864e5); APPT = `${fname(x)} — ${dt(d, { weekday: "long", day: "numeric", month: "long" })} 11:00`;
+    toast(f("booked", { name: fname(x), day: dt(d, { weekday: "long", day: "numeric", month: "long" }), hour: "11:00" })); render(); });
+  on("[data-arole]", "click", (e) => { agentRole = e.dataset.arole; document.querySelectorAll("[data-arole]").forEach((x) => x.setAttribute("aria-pressed", String(x === e))); });
+  on("[data-q]", "click", (e) => ask(e.dataset.q));
+  on("#composer", "submit", (e, ev) => { ev.preventDefault(); const q = $("#q"); const v = q.value; q.value = ""; ask(v); });
+  on("#stop", "click", () => ctl?.abort());
+  on("[data-urole]", "click", (e) => { const [id, r] = e.dataset.urole.split(":"), u = USERS.find((x) => x.id === id); if (u.role === r) return; audit("set_role", fname(u), { role: [u.role, r] }); u.role = r; render(); });
+  on("[data-usus]", "click", (e) => { const u = USERS.find((x) => x.id === e.dataset.usus); twoStep("u" + u.id, () => { audit("suspend_user", fname(u), { suspended: [u.suspended, !u.suspended] }); u.suspended = !u.suspended; render(); }); });
+  on("[data-plan]", "click", (e) => { const [id, p] = e.dataset.plan.split(":"), x = fac(id); if (x.plan === p) return; audit("set_plan", fname(x), { plan: [x.plan, p] }); x.plan = p; render(); });
+  on("[data-fver]", "click", (e) => { const x = fac(e.dataset.fver); audit("verify_facility", fname(x), { verified: [x.verified, !x.verified] }); x.verified = !x.verified; render(); });
+  on("[data-fsus]", "click", (e) => { const x = fac(e.dataset.fsus); twoStep("f" + x.id, () => { audit("suspend_facility", fname(x), { suspended: [x.suspended, !x.suspended] }); x.suspended = !x.suspended; render(); }); });
+  on("#cSave", "click", () => { const title = $("#cTitle").value.trim(), org = $("#cOrg").value.trim(), fee = Math.max(0, +$("#cFee").value || 0); if (!title || !org) return;
+    const code = Math.random().toString(36).slice(2, 8).toUpperCase(); CAMPAIGNS.unshift({ id: "c" + seq++, title: { ar: title, en: title }, org, fac: "f2", code, start: Date.now() + 864e5, end: Date.now() + 8*864e5, target: 50, fee, signups: 0 });
+    audit("create_campaign", title, { fee_egp: fee, code }); toast(code); render(); });
 }
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (view === "forecast") drawChart(); if (view === "map") drawMap(); });
+function join(code) { const c = CAMPAIGNS.find((x) => x.code === String(code || "").trim().toUpperCase() && x.end > Date.now()); if (!c) return toast(t("campaignNotFound")); if (!JOINED.has(c.id)) { JOINED.add(c.id); c.signups++; } toast(t("joined")); render(); }
+$("#lang").addEventListener("change", (e) => { lang = e.target.value; try { localStorage.setItem("sbb.demo.lang", lang); } catch {} BUB.length = 0; CHAT.length = 0; report = null; render(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => render());
 new MutationObserver(() => { if (view === "forecast") drawChart(); if (view === "map") drawMap(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-setView("donor");
+render();
 })();
 </script>
