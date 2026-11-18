@@ -21,7 +21,16 @@ export type Profile = {
   available: boolean;
   last_donation_at: string | null;
   sex: "male" | "female" | null;
+  suspended?: boolean;
+  lang?: string;
+  show_on_leaderboard?: boolean;
 };
+
+/** حفظ لغة المستخدم في ملفه ليستخدمها الوكيل الذكي ورسائل واتساب */
+export async function saveLangToProfile(lang: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) await supabase.from("profiles").update({ lang }).eq("id", user.id);
+}
 
 export async function getMyProfile(): Promise<Profile | null> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -37,5 +46,5 @@ export const ROLE_HOME: Record<Role, string> = {
   donor: "/donor",
   beneficiary: "/beneficiary",
   facility_staff: "/facility",
-  admin: "/facility",
+  admin: "/admin",
 };

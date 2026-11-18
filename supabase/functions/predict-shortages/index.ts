@@ -24,6 +24,7 @@ const cors = {
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
+const LANGS: Record<string, string> = { ar: "Arabic", en: "English", fr: "French", ur: "Urdu", hi: "Hindi", tr: "Turkish" };
 const SEASONS: Season[] = ["none", "ramadan", "hajj", "summer", "flu", "holidays"];
 const SURGES: Surge[] = ["moderate", "high", "code_red"];
 
@@ -37,7 +38,7 @@ const InterventionsSchema = z.object({
   })),
 });
 
-async function aiInterventions(f: TypeForecast[], p: ForecastParams, lang: "ar" | "en", facilityName: string) {
+async function aiInterventions(f: TypeForecast[], p: ForecastParams, lang: string, facilityName: string) {
   if (!Deno.env.get("ANTHROPIC_API_KEY")) throw new Error("no_api_key"); // بدون مفتاح → خطة القواعد فورًا
   const anthropic = new Anthropic();
   const compact = f.map(({ trajectory: _t, ...x }) => x); // المسار اليومي غير لازم للنموذج
@@ -52,7 +53,7 @@ async function aiInterventions(f: TypeForecast[], p: ForecastParams, lang: "ar" 
       "Use only the numbers provided; never invent stock figures. Do not give patient-level clinical orders; " +
       "anything clinical must defer to the hospital transfusion committee. Blood donation is voluntary and unpaid — " +
       "never suggest buying blood or paying donors. " +
-      `Write title and detail in ${lang === "ar" ? "Arabic" : "English"}, concise (detail ≤ 2 sentences).`,
+      `Write title and detail in ${LANGS[lang] ?? "Arabic"}, concise (detail ≤ 2 sentences).`,
     messages: [{
       role: "user",
       content: JSON.stringify({ facility: facilityName, season: p.season, surge: p.surge, horizon_days: p.horizon_days, forecast: compact }),
@@ -77,7 +78,8 @@ Deno.serve(async (req) => {
     surge: SURGES.includes(body.surge) ? body.surge : "moderate",
     horizon_days: Math.max(7, Math.min(30, Number(body.horizon_days) || 14)),
   };
-  const lang: "ar" | "en" = body.lang === "en" ? "en" : "ar";
+  const lang: string = LANGS[body.lang] ? body.lang : "ar";
+  const ruleLang: "ar" | "en" = lang === "ar" ? "ar" : "en"; // الخطة الاحتياطية بالعربية أو الإنجليزية
 
   const { data: me } = await sb.from("profiles").select("facility_id, facilities(name)").eq("id", user.id).single();
   if (!me?.facility_id) return json({ error: "not_facility_staff" }, 403);
@@ -97,7 +99,7 @@ Deno.serve(async (req) => {
     interventions = await aiInterventions(forecast, params, lang, me.facilities?.name ?? "");
   } catch (e) {
     console.warn("AI fallback:", (e as Error).message);
-    interventions = ruleBasedInterventions(forecast, params, lang);
+    interventions = ruleBasedInterventions(forecast, params, ruleLang);
     source = "rules";
   }
 

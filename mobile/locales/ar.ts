@@ -1,0 +1,104 @@
+// القاموس المرجعي — كل اللغات الأخرى يجب أن تحتوي نفس المفاتيح (يتحقق TypeScript من ذلك)
+// {x} = قيمة تُستبدل وقت العرض عبر fmt()
+const ar = {
+  // عام
+  appName: "بنك الدم الذكي", save: "حفظ", cancel: "إلغاء", confirm: "تأكيد", loading: "جاري التحميل…", error: "خطأ",
+  km: "كم", units: "وحدة", days: "يوم", perDay: "/يوم", directions: "📍 الاتجاهات", call: "اتصال", askAgent: "اسأل المساعد الذكي",
+  none: "لا شيء", search: "بحث", optional: "اختياري",
+  // عناوين الشاشات
+  tDonor: "بوابة المتبرع", tBeneficiary: "بوابة المستفيد", tFacility: "بوابة المنشأة", tAgent: "المساعد الذكي", tMap: "الخريطة",
+  tBook: "حجز موعد تبرع", tForecast: "تنبؤ المخزون", tAdmin: "إدارة المنصة", tCard: "بطاقة المتبرع", tJourney: "رحلة تبرعاتي",
+  tAchievements: "أوسمتي وتحدياتي", tCampaigns: "حملات التبرع", tReport: "التقرير اليومي", tSettings: "الإعدادات", tScan: "مسح بطاقة متبرع",
+  tOnboarding: "إكمال الحساب",
+  // الدخول
+  loginTagline: "قطرة دم تنقذ حياة 🩸", loginSub: "نربط المتبرعين والمرضى بالمستشفيات وبنوك الدم الأقرب إليك، في دقائق.",
+  phone: "رقم الهاتف", otpCode: "رمز التحقق", sendCode: "إرسال رمز التحقق", verifyCode: "تأكيد الدخول", wrongCode: "رمز غير صحيح",
+  // إكمال الحساب
+  iAm: "أنا…", roleDonor: "متبرع", roleBeneficiary: "مريض / مستفيد", roleStaff: "موظف مستشفى / بنك دم",
+  name: "الاسم", bloodType: "فصيلة الدم", bloodTypePatient: "فصيلة الدم (للمريض إن وُجدت)", sex: "النوع", male: "ذكر", female: "أنثى",
+  locationPrivacy: "نستخدم موقعك لحساب المسافة فقط، ولا يظهر موقعك الدقيق لأي مستخدم آخر.", saveContinue: "حفظ ومتابعة",
+  completeData: "أكمل البيانات", staffPending: "سيتم ربط حسابك بالمنشأة بعد توثيقها من إدارة المنصة.",
+  // المتبرع
+  yourType: "فصيلتك", eligibleNow: "أنت مؤهل للتبرع الآن ✅", eligibleAfter: "يمكنك التبرع مجددًا بعد {date}",
+  availableToggle: "متاح لاستقبال نداءات الطوارئ", nearestSites: "🗺️ أقرب أماكن التبرع", nearbyRequests: "طلبات قريبة تحتاج فصيلتك ({n})",
+  noRequests: "لا توجد طلبات متوافقة قريبة الآن. سنرسل لك إشعارًا عند الحاجة.", willDonate: "سأتبرع",
+  thanksResponded: "شكرًا لك ❤️ تم إبلاغ {name}. توجّه إليه ومعك بطاقة الهوية.", alreadyResponded: "سبق أن استجبت لهذا الطلب",
+  urg_routine: "عادي", urg_urgent: "عاجل", urg_critical: "حرج 🚨", unitsLeftKm: "{u} وحدة متبقية · {km} كم",
+  myCard: "🪪 بطاقتي", myJourney: "🩸 رحلة تبرعاتي", myAchievements: "🏅 أوسمتي", campaigns: "📣 الحملات",
+  // المستفيد
+  patientType: "فصيلة المريض", unitsNeeded: "عدد الوحدات المطلوبة", findStock: "ابحث عن أقرب مخزون متوافق",
+  enableLocation: "فعّل الموقع", enableLocationMsg: "نحتاج موقعك لإيجاد أقرب مخزون.",
+  noStock: "لا يوجد مخزون متوافق قريب. أنشئ طلبًا لدى أقرب مستشفى وسنطلق نداءً للمتبرعين.",
+  unitsAvailableKm: "{u} وحدة متاحة · {km} كم", requestHere: "اطلب الآن", requestSent: "تم إرسال الطلب إلى {name}، وسيتواصل معك للتأكيد.",
+  myRequests: "طلباتي", securedOf: "تم تأمين {s} من {n} وحدة", showOnMap: "🗺️ عرض المخزون على الخريطة",
+  st_open: "مفتوح", st_matching: "جاري البحث", st_partially_fulfilled: "تم جزئيًا", st_fulfilled: "مكتمل ✅", st_cancelled: "ملغي", st_expired: "منتهي",
+  // المنشأة
+  inventoryTitle: "المخزون (كريات حمراء)", low: "منخفض", issue: "صرف", deposit: "إيداع",
+  expiringSoon: "⚠️ وحدات تنتهي خلال 7 أيام", expiringHint: "اقتراح: انقلها لمنشأة قريبة تحتاجها بدل إهدارها.",
+  incoming: "الطلبات الواردة حسب الأولوية ({n})", verifyAndCall: "توثيق الطلب ونداء المتبرعين",
+  verifiedMsg: "يوجد {n} متبرع مؤهل قريب وسيتم إشعارهم.", sameTypeStock: "المتوفر من نفس الفصيلة: {n}",
+  notLinked: "حسابك بانتظار ربطه بمنشأة موثقة من إدارة المنصة.", donorDensityMap: "🗺️ خريطة كثافة المتبرعين",
+  score: "الأولوية {n}", r_critical: "حرج", r_waiting_24h: "ينتظر +24 ساعة", r_insufficient_stock: "المخزون لا يكفي",
+  r_due_soon: "مطلوب خلال 6 ساعات", r_unverified: "غير موثّق",
+  scanDonor: "📷 مسح بطاقة متبرع", recordDonation: "تسجيل تبرع", bagCode: "رمز الكيس", donationRecorded: "تم تسجيل التبرع. رمز الكيس: {code}",
+  advanceBag: "تحديث رحلة كيس", nextStep: "الخطوة التالية", discard: "استبعاد", dailyReport: "📋 التقرير اليومي", regenerate: "تحديث التقرير",
+  reportAi: "مكتوب بالذكاء الاصطناعي", reportTemplate: "ملخص تلقائي",
+  donorInfo: "{name} · {type}", eligible: "مؤهل ✅", notEligible: "غير مؤهل الآن", donationsCount: "تبرعات سابقة: {n}",
+  cameraDenied: "نحتاج إذن الكاميرا لمسح البطاقة.", grantCamera: "السماح بالكاميرا", scanHint: "وجّه الكاميرا إلى رمز QR في بطاقة المتبرع",
+  // رحلة الكيس
+  j_collected: "تم سحب الدم", j_testing: "قيد الفحص المخبري", j_ready: "جاهز في بنك الدم", j_issued: "صُرف لمريض",
+  j_transfused: "أنقذ حياة مريض ❤️", j_discarded: "استُبعد بعد الفحص", journeyEmpty: "لا توجد تبرعات مسجلة بعد. بعد أول تبرع ستتابع رحلة كيسك هنا خطوة بخطوة.",
+  journeyHint: "لا نعرض أي بيانات عن المريض، فقط مراحل رحلة تبرعك.",
+  // الأوسمة
+  points: "النقاط", livesSaved: "أرواح أنقذتها (تقدير)", donationsTotal: "تبرعاتك",
+  b_first_donation: "أول تبرع", b_hero_5: "بطل (5 تبرعات)", b_super_10: "بطل خارق (10)", b_legend_15: "أسطورة (15)",
+  b_rare_blood: "حارس الدم النادر", b_emergency_responder: "مستجيب للطوارئ", nextBadge: "الوسام التالي عند {n} تبرعات",
+  challenges: "تحديات", ch_weekly_response: "استجب لنداء طوارئ هذا الأسبوع", ch_quarter_donation: "تبرّع مرة هذا الربع",
+  ch_rare_standby: "ابقَ متاحًا كحارس للدم النادر", heroOfWeek: "🏆 أبطال الأسبوع", showOnBoard: "أظهر اسمي الأول في لوحة الأبطال",
+  noHeroes: "لا يوجد أبطال هذا الأسبوع بعد. كن الأول!", pointsN: "{n} نقطة",
+  // البطاقة
+  cardHint: "اعرض هذا الرمز في بنك الدم لتسريع الاستقبال.", lastDonation: "آخر تبرع", nextEligible: "الأهلية القادمة",
+  // الحملات
+  joinCode: "رمز الحملة", join: "انضمام", joined: "تم تسجيلك في الحملة ✅", noCampaigns: "لا توجد حملات نشطة الآن.",
+  campaignTarget: "الهدف: {n} متبرع", createCampaign: "إنشاء حملة", org: "الجهة", campaignTitle: "عنوان الحملة",
+  starts: "تبدأ", ends: "تنتهي", campaignNotFound: "رمز غير صحيح أو حملة منتهية.", signups: "المسجلون: {n}", feeEgp: "رسوم التنظيم (ج.م)",
+  // المساعد
+  agentHello: "أهلًا، أنا رفيق 👋 أساعدك في إيجاد الدم، والتبرع، ومتابعة الطلبات. بماذا أخدمك؟", agentPlaceholder: "اكتب سؤالك…",
+  send: "إرسال", agentErr: "حدث خطأ في الاتصال. حاول مرة أخرى.",
+  sug1: "أين أجد دم O- قريب مني؟", sug2: "هل أستطيع التبرع الآن؟", sug3: "ما الفصائل المتوافقة مع A+؟",
+  // الخريطة والحجز
+  mapEnableLoc: "فعّل خدمة الموقع لعرض الأماكن الأقرب إليك.", noSites: "لا توجد أماكن تبرع موثّقة قريبة بعد.",
+  chooseType: "اختر فصيلة المريض لعرض أقرب مخزون متوافق.", densityInfo: "{n} متبرعًا مؤهلًا في {c} منطقة ضمن 20 كم.",
+  bookDonation: "احجز موعد تبرع", needsNow: "يحتاج {t} الآن ({u} وحدة)", openInMaps: "📍 الاتجاهات في خرائط جوجل",
+  day: "اليوم", hour: "الساعة", bookConfirm: "تأكيد الحجز", booked: "تم الحجز ❤️ موعدك في {name} يوم {day} الساعة {hour}. اشرب 500 مل ماء قبل الموعد بنصف ساعة.",
+  bookFail: "تعذّر الحجز", errNotEligible: "لم يحن موعد أهليتك للتبرع بعد.", errFull: "هذا اليوم ممتلئ، اختر يومًا آخر.",
+  errNotAccepting: "هذا المكان لا يستقبل متبرعين حاليًا.", errDuplicate: "لديك موعد محجوز بالفعل.",
+  bookHint: "التبرع يستغرق حوالي 45 دقيقة، منها 10 دقائق لسحب الدم. وحدة واحدة قد تنقذ حتى 3 أرواح.",
+  // الإدارة
+  overview: "نظرة عامة", users: "المستخدمون", facilities: "المنشآت", audit: "سجل التدقيق", revenue: "الإيرادات",
+  s_donors: "متبرعون", s_eligible: "مؤهلون الآن", s_facilities: "منشآت موثّقة", s_pending: "بانتظار التوثيق", s_open: "طلبات مفتوحة",
+  s_fulfilled30: "طلبات مكتملة (30 يومًا)", s_avgHours: "متوسط زمن التلبية (ساعة)", s_donations30: "تبرعات (30 يومًا)",
+  s_lives: "أرواح أُنقذت (تقدير)", s_mrr: "الإيراد الشهري المتكرر", s_campaignFees: "رسوم الحملات (30 يومًا)", s_suspended: "حسابات موقوفة",
+  searchUsers: "ابحث بالاسم أو الهاتف", role: "الدور", setRole: "تغيير الدور", linkFacility: "ربط بمنشأة", unlink: "إلغاء الربط",
+  suspend: "إيقاف", unsuspend: "رفع الإيقاف", verify: "توثيق", unverify: "إلغاء التوثيق", plan: "الباقة",
+  plan_free: "أساسي (مجاني)", plan_pro: "Pro", plan_enterprise: "Network", suspended: "موقوف", verified: "موثّق", pending: "بانتظار التوثيق",
+  auditEmpty: "لا توجد عمليات مسجلة بعد.", addFacility: "إضافة منشأة", facName: "اسم المنشأة", facKind: "النوع",
+  k_hospital: "مستشفى", k_blood_bank: "بنك دم", k_medical_center: "مركز طبي", k_lab: "معمل", lat: "خط العرض", lng: "خط الطول",
+  adminOnly: "هذه الشاشة لمدير المنصة فقط.", egpMonth: "{n} ج.م/شهر", confirmAction: "هل أنت متأكد؟",
+  // الإعدادات
+  language: "اللغة", languageHint: "يتغير اتجاه الواجهة تلقائيًا للعربية والأوردو.", signOut: "تسجيل الخروج", settings: "⚙️ الإعدادات",
+  // التنبؤ
+  forecastTitle: "التنبؤ الذكي بنقص المخزون", forecastBtn: "تنبؤ المخزون", season: "الموسم", surge: "ضغط المستشفى", horizon: "أفق التنبؤ",
+  sea_none: "عادي", sea_ramadan: "🌙 رمضان", sea_hajj: "🕋 الحج والعمرة", sea_summer: "☀️ الصيف والسفر", sea_flu: "❄️ الإنفلونزا", sea_holidays: "🎉 الأعياد",
+  sur_moderate: "معتدل", sur_high: "مرتفع +25%", sur_code_red: "كود أحمر +60%",
+  risk_critical: "🚨 خطر حاد", risk_warning: "⚠️ إنذار مبكر", risk_stable: "🟢 مستقر",
+  safety: "الحد الآمن", burn: "الصرف", inflow: "الإيداع", net: "الفجوة الصافية", depletesIn: "النفاد خلال {d} يوم ({date})", noDepletion: "لا نفاد متوقع",
+  chart: "منحنى الاستنزاف — 14 يومًا", safetyLine: "الحد الآمن", plan_title: "خطة التدخل الاستباقي", aiSource: "مولّدة بالذكاء الاصطناعي",
+  rulesSource: "خطة احتياطية فورية", recall: "إطلاق نداء فوري للمتبرعين", recallDone: "تم إرسال النداء إلى {n} متبرع مؤهل ({t}).",
+  recallNone: "لا توجد فصائل في خطر حاليًا.", cooldown: "تم إرسال نداء لهذه الفصائل خلال آخر 6 ساعات.",
+  pr_now: "فورًا", pr_24h: "خلال 24 ساعة", pr_this_week: "هذا الأسبوع", offline: "تعذّر الاتصال، والأرقام محسوبة على الجهاز.",
+  assumptions: "المعاملات الموسمية تقديرية وتُعاير تلقائيًا من بيانات منشأتك بمرور الوقت.",
+};
+
+export default ar;
+export type Dict = typeof ar;

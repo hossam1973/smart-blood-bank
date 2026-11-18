@@ -5,14 +5,14 @@
 // - خطة التدخل تأتي من الخادم (ذكاء اصطناعي) مع احتياطي فوري بالقواعد.
 // =====================================================================
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Animated, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Animated, Pressable, Text, View, useWindowDimensions } from "react-native";
 import Svg, { Line, Path, Text as SvgText } from "react-native-svg";
 import { supabase } from "../lib/supabase";
 import {
   forecastAll, type Intervention, ruleBasedInterventions, type Season, type StockInput, type Surge, type TypeForecast,
 } from "../lib/forecast";
-import { setLang, useLang, useT } from "../lib/i18n";
-import { Button, C, Card, s } from "../lib/ui";
+import { fmt, useLang, useT } from "../lib/i18n";
+import { Button, C, Card, s, notify } from "../lib/ui";
 
 const SEASONS: Season[] = ["none", "ramadan", "hajj", "summer", "flu", "holidays"];
 const SURGES: Surge[] = ["moderate", "high", "code_red"];
@@ -20,7 +20,9 @@ const RISK_COLOR = { critical: C.red, warning: "#E08A00", stable: C.ok };
 
 export default function ShortageForecast({ facilityId }: { facilityId: string }) {
   const t = useT();
+  const T = t as unknown as Record<string, string>;
   const lang = useLang();
+  const ruleLang = lang === "ar" ? "ar" : "en";
   const [inputs, setInputs] = useState<StockInput[]>([]);
   const [season, setSeason] = useState<Season>("none");
   const [surge, setSurge] = useState<Surge>("moderate");
@@ -45,7 +47,7 @@ export default function ShortageForecast({ facilityId }: { facilityId: string })
   // خطة الذكاء الاصطناعي من الخادم (مؤجلة 600ms لتفادي الطلبات المتكررة أثناء التحريك)
   useEffect(() => {
     if (!inputs.length) return;
-    setPlan({ items: ruleBasedInterventions(forecast, params, lang), source: "rules" }); // فوري
+    setPlan({ items: ruleBasedInterventions(forecast, params, ruleLang), source: "rules" }); // فوري
     const h = setTimeout(async () => {
       const { data, error } = await supabase.functions.invoke("predict-shortages",
         { body: { season, surge, horizon_days: horizon, lang } });
@@ -58,41 +60,38 @@ export default function ShortageForecast({ facilityId }: { facilityId: string })
     setBusyType(bt + kind);
     const { error } = await supabase.rpc("record_movement", { p_blood_type: bt, p_kind: kind, p_units: 1 });
     setBusyType(null);
-    if (error) return Alert.alert("⚠️", error.message);
+    if (error) return notify("⚠️", error.message);
     loadInputs();
   };
 
   const atRisk = forecast.filter((f) => f.risk !== "stable").map((f) => f.blood_type);
   const recall = async () => {
-    if (!atRisk.length) return Alert.alert(t.recallNone);
+    if (!atRisk.length) return notify(t.recallNone);
     const { data, error } = await supabase.functions.invoke("donor-recall", { body: { blood_types: atRisk, lang } });
-    if (error) return Alert.alert("⚠️", error.message);
-    if (data.blood_types?.length) Alert.alert("✅", t.recallDone(data.notified, data.blood_types.join(", ")));
-    else Alert.alert("⏳", t.cooldown);
+    if (error) return notify("⚠️", error.message);
+    if (data.blood_types?.length) notify("✅", fmt(t.recallDone, { n: data.notified, t: data.blood_types.join(", ") }));
+    else notify("⏳", t.cooldown);
   };
 
   return (
     <View style={{ gap: 14 }}>
       <View style={s.row}>
         <Text style={s.h2}>{t.forecastTitle}</Text>
-        <Pressable onPress={() => setLang(lang === "ar" ? "en" : "ar")} style={s.chip}>
-          <Text style={s.chipText}>{lang === "ar" ? "EN" : "عربي"}</Text>
-        </Pressable>
       </View>
       {offline && <Text style={[s.p, { color: C.red }]}>{t.offline}</Text>}
 
       {/* إعدادات السيناريو */}
       <Card>
         <Text style={s.label}>{t.season}</Text>
-        <ChipRow options={SEASONS} value={season} onChange={setSeason} label={(x) => t.seasons[x]} />
+        <ChipRow options={SEASONS} value={season} onChange={setSeason} label={(x) => T[`sea_${x}`]} />
         <Text style={s.label}>{t.surge}</Text>
-        <ChipRow options={SURGES} value={surge} onChange={setSurge} label={(x) => t.surges[x]} />
+        <ChipRow options={SURGES} value={surge} onChange={setSurge} label={(x) => T[`sur_${x}`]} />
         <Text style={s.label}>{t.horizon}: {horizon} {t.days}</Text>
         <HorizonSlider value={horizon} onChange={setHorizon} />
       </Card>
 
       {/* مصفوفة الرصد اللحظي */}
-      <View style={{ flexDirection: "row-reverse", flexWrap: "wrap", gap: 10 }}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
         {forecast.map((f) => (
           <TypeCard key={f.blood_type} f={f} busy={busyType} onMove={move} />
         ))}
@@ -107,13 +106,13 @@ export default function ShortageForecast({ facilityId }: { facilityId: string })
       {/* خطة التدخل */}
       <Card>
         <View style={s.row}>
-          <Text style={s.h2}>{t.plan}</Text>
+          <Text style={s.h2}>{t.plan_title}</Text>
           {plan && <Text style={[s.badge, plan.source === "rules" && { backgroundColor: "#EEE", color: C.mute }]}>
             {plan.source === "ai" ? t.aiSource : t.rulesSource}</Text>}
         </View>
         {plan?.items.map((it, i) => (
           <View key={i} style={{ borderTopWidth: i ? 1 : 0, borderColor: C.line, paddingTop: i ? 8 : 0, gap: 2 }}>
-            <Text style={s.label}>{it.title} <Text style={{ color: C.red }}>· {t.priority[it.priority]}</Text></Text>
+            <Text style={s.label}>{it.title} <Text style={{ color: C.red }}>· {T[`pr_${it.priority}`]}</Text></Text>
             <Text style={s.p}>{it.detail}</Text>
           </View>
         ))}
@@ -169,12 +168,13 @@ function TypeCard({ f, busy, onMove }: { f: TypeForecast; busy: string | null; o
     return () => loop.stop();
   }, [f.risk]);
   const color = RISK_COLOR[f.risk];
+  const T = t as unknown as Record<string, string>;
 
   return (
     <Card style={{ width: "47%", borderColor: color, borderWidth: f.risk === "stable" ? 1 : 2 }}>
       <View style={s.row}>
         <Text style={[s.badge, { fontSize: 16 }]}>{f.blood_type}</Text>
-        <Animated.Text style={{ opacity: blink, color, fontWeight: "700", fontSize: 12 }}>{t.risk[f.risk]}</Animated.Text>
+        <Animated.Text style={{ opacity: blink, color, fontWeight: "700", fontSize: 12 }}>{T[`risk_${f.risk}`]}</Animated.Text>
       </View>
       <Text style={[s.h1, { fontSize: 22 }]}>{f.units} <Text style={{ fontSize: 13, color: C.mute }}>{t.units}</Text></Text>
       <Text style={[s.p, { fontSize: 12, lineHeight: 18 }]}>
@@ -183,9 +183,9 @@ function TypeCard({ f, busy, onMove }: { f: TypeForecast; busy: string | null; o
       </Text>
       <Text style={[s.p, { fontSize: 12, color, fontWeight: "700" }]}>
         {f.days_until_depletion === null ? t.noDepletion
-          : `${t.depletion} ${f.days_until_depletion} ${t.days} (${f.depletion_date})`}
+          : fmt(t.depletesIn, { d: f.days_until_depletion, date: f.depletion_date ?? "" })}
       </Text>
-      <View style={{ flexDirection: "row-reverse", gap: 6 }}>
+      <View style={{ flexDirection: "row", gap: 6 }}>
         <MiniBtn label={`− ${t.issue}`} disabled={busy === f.blood_type + "issue" || f.units === 0} onPress={() => onMove(f.blood_type, "issue")} />
         <MiniBtn label={`+ ${t.deposit}`} disabled={busy === f.blood_type + "deposit"} onPress={() => onMove(f.blood_type, "deposit")} />
       </View>
@@ -230,7 +230,7 @@ function TrajectoryChart({ series }: { series: TypeForecast[] }) {
           <SvgText key={d} x={x(d)} y={H - 6} fontSize={10} fill={C.mute} textAnchor="middle">{d}</SvgText>
         ))}
       </Svg>
-      <Text style={[s.p, { fontSize: 12 }]}>- - - {t.criticalLine}</Text>
+      <Text style={[s.p, { fontSize: 12 }]}>- - - {t.safetyLine}</Text>
     </View>
   );
 }

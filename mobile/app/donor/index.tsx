@@ -1,35 +1,37 @@
-// بوابة المتبرع: الأهلية + الإتاحة + الطلبات القريبة المتوافقة
+// بوابة المتبرع: الأهلية + الإتاحة + الطلبات القريبة + البطاقة والرحلة والأوسمة والحملات
 import { useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, RefreshControl, Switch, Text, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, Switch, Text, View } from "react-native";
 import { router } from "expo-router";
 import { getMyProfile, type Profile, supabase, toPoint } from "../../lib/supabase";
 import { getCoords } from "../../lib/location";
 import { registerPushToken } from "../../lib/push";
 import { openDirections } from "../../lib/maps";
-import { Button, C, Card, s } from "../../lib/ui";
+import { nextEligible } from "../../lib/donor";
+import { fmt, getLang, useT } from "../../lib/i18n";
+import { Button, C, Card, s, notify } from "../../lib/ui";
 
 type Req = { request_id: string; facility_name: string; blood_type: string; units_left: number;
              urgency: "routine" | "urgent" | "critical"; distance_km: number; f_lat: number; f_lng: number };
-const URG = { routine: "عادي", urgent: "عاجل", critical: "حرج 🚨" };
 
-function nextEligible(p: Profile) {
-  if (!p.last_donation_at) return null;
-  const gap = p.sex === "female" ? 112 : 84;
-  const d = new Date(new Date(p.last_donation_at).getTime() + gap * 864e5);
-  return d > new Date() ? d : null;
+function Tile({ label, to }: { label: string; to: string }) {
+  return (
+    <Pressable onPress={() => router.push(to as never)} style={[s.card, { flex: 1, minWidth: "45%", alignItems: "center", paddingVertical: 16 }]}>
+      <Text style={[s.label, { fontSize: 15 }]}>{label}</Text>
+    </Pressable>
+  );
 }
 
 export default function Donor() {
+  const t = useT();
   const [me, setMe] = useState<Profile | null>(null);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const c = await getCoords();
-    const p = await getMyProfile();
+    const [c, p] = await Promise.all([getCoords(), getMyProfile()]);
     if (c && p) await supabase.from("profiles").update({ location: toPoint(c.lat, c.lng) }).eq("id", p.id);
-    if (p) registerPushToken(p.id); // حتى يصله النداء الفوري
+    if (p) registerPushToken(p.id);
     const { data } = await supabase.rpc("open_requests_for_donor", { radius_km: 25 });
     setMe(p); setReqs((data ?? []) as Req[]); setLoading(false);
   }, []);
@@ -43,11 +45,12 @@ export default function Donor() {
 
   const respond = async (r: Req) => {
     const { error } = await supabase.from("donor_responses").insert({ request_id: r.request_id, donor_id: me!.id });
-    if (error) return Alert.alert("تنبيه", error.code === "23505" ? "سبق أن استجبت لهذا الطلب" : error.message);
-    Alert.alert("شكرًا لك ❤️", `تم إبلاغ ${r.facility_name}. توجّه إليها ومعك بطاقة الهوية.`);
+    if (error) return notify("⚠️", error.code === "23505" ? t.alreadyResponded : error.message);
+    notify("❤️", fmt(t.thanksResponded, { name: r.facility_name }));
   };
 
   const next = me ? nextEligible(me) : null;
+  const urg = { routine: t.urg_routine, urgent: t.urg_urgent, critical: t.urg_critical };
 
   return (
     <FlatList
@@ -57,34 +60,40 @@ export default function Donor() {
         <View style={{ gap: 14 }}>
           <Card>
             <View style={s.row}>
-              <Text style={s.h2}>فصيلتك</Text>
+              <Text style={s.h2}>{t.yourType}</Text>
               <Text style={[s.badge, { fontSize: 18 }]}>{me?.blood_type ?? "—"}</Text>
             </View>
             <Text style={[s.p, { color: next ? C.mute : C.ok }]}>
-              {next ? `يمكنك التبرع مجددًا بعد ${next.toLocaleDateString("ar-EG")}` : "أنت مؤهل للتبرع الآن ✅"}
+              {next ? fmt(t.eligibleAfter, { date: next.toLocaleDateString(getLang()) }) : t.eligibleNow}
             </Text>
             <View style={s.row}>
-              <Text style={s.label}>متاح لاستقبال نداءات الطوارئ</Text>
+              <Text style={s.label}>{t.availableToggle}</Text>
               <Switch value={me?.available ?? false} onValueChange={toggle} trackColor={{ true: C.red }} />
             </View>
           </Card>
-          <Button title="🗺️ أقرب أماكن التبرع على الخريطة" onPress={() => router.push("/map")} />
-          <Button title="اسأل المساعد الذكي" kind="ghost" onPress={() => router.push("/agent")} />
-          <Text style={s.h2}>طلبات قريبة تحتاج فصيلتك ({reqs.length})</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            <Tile label={t.myCard} to="/card" />
+            <Tile label={t.myJourney} to="/journey" />
+            <Tile label={t.myAchievements} to="/achievements" />
+            <Tile label={t.campaigns} to="/campaigns" />
+          </View>
+          <Button title={t.nearestSites} onPress={() => router.push("/map")} />
+          <Button title={t.askAgent} kind="ghost" onPress={() => router.push("/agent")} />
+          <Text style={s.h2}>{fmt(t.nearbyRequests, { n: reqs.length })}</Text>
         </View>
       }
       ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-      ListEmptyComponent={<Text style={s.p}>لا توجد طلبات متوافقة قريبة الآن. سنرسل لك إشعارًا عند الحاجة.</Text>}
+      ListEmptyComponent={<Text style={s.p}>{t.noRequests}</Text>}
       renderItem={({ item }) => (
         <Card style={item.urgency === "critical" ? { borderColor: C.red } : undefined}>
           <View style={s.row}>
             <Text style={s.h2}>{item.facility_name}</Text>
             <Text style={s.badge}>{item.blood_type}</Text>
           </View>
-          <Text style={s.p}>{URG[item.urgency]} · {item.units_left} وحدة متبقية · {item.distance_km} كم</Text>
-          <View style={{ flexDirection: "row-reverse", gap: 8 }}>
-            <View style={{ flex: 1 }}><Button title="سأتبرع" onPress={() => respond(item)} disabled={!!next} /></View>
-            <View style={{ flex: 1 }}><Button title="📍 الاتجاهات" kind="ghost" onPress={() => openDirections({ lat: item.f_lat, lng: item.f_lng })} /></View>
+          <Text style={s.p}>{urg[item.urgency]} · {fmt(t.unitsLeftKm, { u: item.units_left, km: item.distance_km })}</Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flex: 1 }}><Button title={t.willDonate} onPress={() => respond(item)} disabled={!!next} /></View>
+            <View style={{ flex: 1 }}><Button title={t.directions} kind="ghost" onPress={() => openDirections({ lat: item.f_lat, lng: item.f_lng })} /></View>
           </View>
         </Card>
       )}
