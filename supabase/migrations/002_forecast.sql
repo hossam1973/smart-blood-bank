@@ -51,7 +51,7 @@ create or replace function record_movement(
   p_blood_type blood_type, p_kind movement_kind, p_units int,
   p_component blood_component default 'rbc', p_reason text default null,
   p_expires_at date default (current_date + 35))
-returns int language plpgsql security definer set search_path = public as $$
+returns int language plpgsql security definer set search_path = public, extensions as $$
 declare
   fid uuid := my_facility();
   remaining int := p_units;
@@ -89,7 +89,7 @@ end $$;
 -- ---------------------------------------------------------------------
 create or replace function forecast_inputs(p_facility uuid, p_component blood_component default 'rbc', p_window_days int default 14)
 returns table(blood_type blood_type, units int, safety_stock int, burn_rate numeric, inflow_rate numeric)
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   with t as (select unnest(enum_range(null::blood_type)) as bt),
   stock as (
     select i.blood_type, sum(i.units)::int u from inventory i
@@ -119,7 +119,7 @@ $$;
 -- ---------------------------------------------------------------------
 create or replace function eligible_donors_near_facility(p_facility uuid, p_types blood_type[], radius_km int default 25)
 returns table(donor_id uuid, blood_type blood_type, push_token text, distance_km numeric)
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select p.id, p.blood_type, p.push_token, round((st_distance(p.location, f.location)/1000)::numeric,1)
   from facilities f
   join profiles p on p.role = 'donor' and p.blood_type = any(p_types)

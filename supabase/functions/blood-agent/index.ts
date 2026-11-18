@@ -6,7 +6,6 @@
 import Anthropic from "npm:@anthropic-ai/sdk";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const anthropic = new Anthropic(); // يقرأ ANTHROPIC_API_KEY من أسرار الدالة
 const MODEL = "claude-opus-5-5";
 const MAX_TURNS = 8;
 
@@ -180,6 +179,11 @@ Deno.serve(async (req) => {
     });
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: cors });
+
+    if (!Deno.env.get("ANTHROPIC_API_KEY")) {
+      return json({ reply: "المساعد الذكي غير مفعّل بعد. أضف مفتاح ANTHROPIC_API_KEY في إعدادات المشروع." });
+    }
+    const anthropic = new Anthropic(); // يقرأ ANTHROPIC_API_KEY من أسرار الدالة
 
     const { messages, lat, lng } = await req.json() as {
       messages: Anthropic.MessageParam[]; lat?: number; lng?: number;

@@ -14,7 +14,6 @@ import {
   type Season, type StockInput, type Surge, type TypeForecast,
 } from "../_shared/forecast.ts";
 
-const anthropic = new Anthropic();
 const MODEL = "claude-opus-5-5";
 const AI_TIMEOUT_MS = 15_000;
 
@@ -39,6 +38,8 @@ const InterventionsSchema = z.object({
 });
 
 async function aiInterventions(f: TypeForecast[], p: ForecastParams, lang: "ar" | "en", facilityName: string) {
+  if (!Deno.env.get("ANTHROPIC_API_KEY")) throw new Error("no_api_key"); // بدون مفتاح → خطة القواعد فورًا
+  const anthropic = new Anthropic();
   const compact = f.map(({ trajectory: _t, ...x }) => x); // المسار اليومي غير لازم للنموذج
   const response = await anthropic.messages.parse({
     model: MODEL,

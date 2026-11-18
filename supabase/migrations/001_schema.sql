@@ -1,7 +1,7 @@
 -- =====================================================================
 -- Smart Blood Bank — قاعدة البيانات (Supabase / PostgreSQL + PostGIS)
 -- =====================================================================
-create extension if not exists postgis;
+create extension if not exists postgis with schema extensions;
 
 create type user_role      as enum ('donor','beneficiary','facility_staff','admin');
 create type blood_type     as enum ('O-','O+','A-','A+','B-','B+','AB-','AB+');
@@ -123,7 +123,7 @@ create table agent_logs (
 
 -- فصائل المتبرعين المتوافقة مع فصيلة المريض (كريات حمراء)
 create or replace function compatible_donor_types(recipient blood_type)
-returns blood_type[] language sql immutable as $$
+returns blood_type[] language sql immutable set search_path = public, extensions as $$
   select case recipient
     when 'O-'  then array['O-']::blood_type[]
     when 'O+'  then array['O+','O-']::blood_type[]
@@ -138,7 +138,7 @@ $$;
 
 -- أهلية المتبرع (قواعد مبسطة — تُضبط حسب لوائح وزارة الصحة المحلية)
 create or replace function donor_is_eligible(p profiles)
-returns boolean language sql stable as $$
+returns boolean language sql stable set search_path = public, extensions as $$
   select p.available
      and p.blood_type is not null
      and (p.weight_kg is null or p.weight_kg >= 50)
@@ -150,7 +150,7 @@ $$;
 -- أقرب المتبرعين المؤهلين لطلب معين (لا تُرجع إحداثيات — مسافة تقريبية فقط)
 create or replace function find_donors_for_request(req_id uuid, radius_km int default 15, max_results int default 50)
 returns table(donor_id uuid, blood_type blood_type, distance_km numeric)
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select p.id, p.blood_type, round((st_distance(p.location, f.location)/1000)::numeric, 1)
   from blood_requests r
   join facilities f on f.id = r.facility_id
@@ -167,7 +167,7 @@ create or replace function find_inventory_nearby(
   p_blood_type blood_type, p_component blood_component, lat float8, lng float8, radius_km int default 30)
 returns table(facility_id uuid, facility_name text, kind facility_kind, phone text,
               blood_type blood_type, units int, distance_km numeric)
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select f.id, f.name, f.kind, f.phone, i.blood_type, sum(i.units)::int,
          round((st_distance(f.location, st_makepoint(lng,lat)::geography)/1000)::numeric,1)
   from inventory i join facilities f on f.id = i.facility_id
@@ -184,7 +184,7 @@ $$;
 create or replace function open_requests_for_donor(radius_km int default 25)
 returns table(request_id uuid, facility_name text, blood_type blood_type, units_left int,
               urgency urgency_level, distance_km numeric, needed_by timestamptz)
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select r.id, f.name, r.blood_type, r.units_needed - r.units_secured, r.urgency,
          round((st_distance(p.location, f.location)/1000)::numeric,1), r.needed_by
   from profiles p
@@ -206,9 +206,9 @@ alter table donor_responses enable row level security;
 alter table appointments    enable row level security;
 alter table agent_logs      enable row level security;
 
-create or replace function my_role() returns user_role language sql stable security definer set search_path = public
+create or replace function my_role() returns user_role language sql stable security definer set search_path = public, extensions
   as $$ select role from profiles where id = auth.uid() $$;
-create or replace function my_facility() returns uuid language sql stable security definer set search_path = public
+create or replace function my_facility() returns uuid language sql stable security definer set search_path = public, extensions
   as $$ select facility_id from profiles where id = auth.uid() $$;
 
 create policy "own profile"            on profiles for all using (id = auth.uid()) with check (id = auth.uid());
@@ -233,3 +233,52 @@ create policy "appointments donor"     on appointments for all using (donor_id =
 create policy "appointments facility"  on appointments for select using (facility_id = my_facility());
 
 create policy "agent logs own"         on agent_logs for insert with check (user_id = auth.uid());
+
+-- =====================================================================
+-- حراسة الحقول الحساسة (لا يمكن للمستخدم ترقية نفسه)
+-- auth.uid() يكون null عند الاستدعاء بمفتاح الخدمة (لوحة الإدارة/الخادم) فيُسمح بالتعديل
+-- =====================================================================
+create or replace function guard_profile() returns trigger language plpgsql set search_path = public, extensions as $$
+begin
+  if auth.uid() is null or my_role() = 'admin' then return new; end if;
+  if tg_op = 'INSERT' then
+    if new.role = 'admin' then raise exception 'cannot self-assign admin role'; end if;
+    new.facility_id := null;              -- الربط بمنشأة يتم من الإدارة بعد التوثيق
+  else
+    new.role := old.role;
+    new.facility_id := old.facility_id;
+  end if;
+  return new;
+end $$;
+create trigger trg_guard_profile before insert or update on profiles for each row execute function guard_profile();
+
+create or replace function guard_facility() returns trigger language plpgsql set search_path = public, extensions as $$
+begin
+  if auth.uid() is null or my_role() = 'admin' then return new; end if;
+  new.verified := old.verified;
+  new.plan := old.plan;
+  new.plan_renews_at := old.plan_renews_at;
+  new.license_no := old.license_no;
+  return new;
+end $$;
+create trigger trg_guard_facility before update on facilities for each row execute function guard_facility();
+
+create or replace function guard_request() returns trigger language plpgsql set search_path = public, extensions as $$
+begin
+  if auth.uid() is null or my_role() = 'admin' then return new; end if;
+  if tg_op = 'INSERT' then
+    if new.facility_id is distinct from my_facility() then   -- الطلب من مستفيد: يبدأ غير موثق
+      new.verified_by_facility := false;
+      new.status := 'open';
+      new.units_secured := 0;
+    end if;
+  elsif old.facility_id is distinct from my_facility() then  -- مقدم الطلب يمكنه الإلغاء فقط
+    new.verified_by_facility := old.verified_by_facility;
+    new.units_secured := old.units_secured;
+    new.facility_id := old.facility_id;
+    new.blood_type := old.blood_type;
+    if new.status <> 'cancelled' then new.status := old.status; end if;
+  end if;
+  return new;
+end $$;
+create trigger trg_guard_request before insert or update on blood_requests for each row execute function guard_request();
