@@ -1,0 +1,439 @@
+<title>تجربة بنك الدم الذكي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: app shell — sticky top bar with portal tabs, one working column (max 980px); cards by role only */
+:root {
+  --bg: #FBF9F9; --surface: #FFFFFF; --ink: #1C1416; --mute: #6E6265; --line: #EADFE0;
+  --accent: #A3122A; --accent-soft: #F8E6E9; --on-accent: #FFFFFF; --plasma: #C9A227;
+  --ok: #2F7D4F; --ok-soft: #E4F2E9; --warn: #B86E00; --warn-soft: #FBF0DD; --crit: #C21F3A; --crit-soft: #FBE3E7;
+  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52;
+  --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --on-accent: #1A0A0D; --plasma: #E0BE52;
+  --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.app { direction: rtl; }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; line-height: 1.35; text-wrap: balance; }
+h2 { font-size: 19px; font-weight: 600; } h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; }
+.mute { color: var(--mute); } .small { font-size: 13px; }
+.num { font-family: var(--f-data); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+.bt { font-family: var(--f-data); direction: ltr; unicode-bidi: isolate; font-weight: 500; }
+
+header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: grid; gap: 8px; padding-block: 10px; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.brand h1 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.drop { width: 14px; height: 18px; background: var(--accent); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; transform: rotate(0deg); display: inline-block; }
+.demo-tag { font-size: 12px; font-weight: 600; color: var(--warn); background: var(--warn-soft); padding: 2px 10px; border-radius: 999px; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.tab { font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+main { padding-block: 18px 60px; display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.btn { font: inherit; font-weight: 600; font-size: 14px; padding: 9px 16px; border-radius: 10px; border: 0; background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.btn.ghost { background: var(--accent-soft); color: var(--accent); }
+.btn.sm { padding: 5px 10px; font-size: 13px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 13.5px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; white-space: nowrap; }
+.pill.critical { background: var(--crit-soft); color: var(--crit); } .pill.warning { background: var(--warn-soft); color: var(--warn); }
+.pill.stable, .pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.info { background: var(--accent-soft); color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .pill.critical.blink { animation: pulse 1s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .4; } }
+.list { display: grid; gap: 8px; }
+.item { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 4px; background: var(--bg); }
+.item.crit { border-color: var(--crit); }
+label.f { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--mute); }
+input[type=number], select { font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.switch { display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent); }
+.big { font-family: var(--f-display); font-size: 28px; font-weight: 700; }
+
+.matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.cell { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: grid; gap: 3px; background: var(--bg); }
+.cell.critical { border: 2px solid var(--crit); } .cell.warning { border: 2px solid var(--warn); }
+.cell .days { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.cell .meta { font-size: 12px; color: var(--mute); }
+.cell .acts { display: flex; gap: 6px; margin-top: 4px; }
+.cell .acts button { flex: 1; }
+.chart { overflow-x: auto; direction: ltr; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--mute); }
+.legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-inline-end: 6px; border-radius: 2px; }
+.plan .item h3 { font-size: 15px; }
+
+/* chat */
+.chat { display: grid; grid-template-rows: 1fr auto; min-height: 420px; max-height: 70vh; padding: 0; overflow: hidden; }
+.msgs { overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 85%; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.bot { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); }
+.msg.me { align-self: flex-end; background: var(--accent); color: var(--on-accent); }
+.msg.tool { align-self: flex-start; font-size: 12.5px; color: var(--mute); background: transparent; padding: 0 4px; }
+.composer { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); background: var(--surface); }
+.composer input { flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); }
+.suggest { display: flex; flex-wrap: wrap; gap: 6px; }
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; direction: rtl; }
+.note { font-size: 12.5px; color: var(--mute); border-inline-start: 2px solid var(--line); padding-inline-start: 8px; }
+</style>
+
+<div class="app">
+<header class="bar"><div class="wrap">
+  <div class="brand">
+    <h1><span class="drop" aria-hidden="true"></span>بنك الدم الذكي</h1>
+    <span class="demo-tag">نسخة تجريبية · بيانات وهمية</span>
+  </div>
+  <div class="tabs" role="tablist" aria-label="البوابات">
+    <button class="tab" role="tab" data-view="donor">بوابة المتبرع</button>
+    <button class="tab" role="tab" data-view="beneficiary">بوابة المستفيد</button>
+    <button class="tab" role="tab" data-view="facility">بوابة المنشأة</button>
+    <button class="tab" role="tab" data-view="forecast">📈 تنبؤ المخزون</button>
+    <button class="tab" role="tab" data-view="agent">🤖 المساعد رفيق</button>
+  </div>
+</div></header>
+<main class="wrap" id="view" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+// ============ بيانات تجريبية (وهمية) ============
+const ME = { lat: 30.0444, lng: 31.2357 }; // وسط القاهرة (موقع افتراضي للتجربة)
+const TYPES = ["O-","O+","A-","A+","B-","B+","AB-","AB+"];
+const COMPAT = { "O-":["O-"], "O+":["O+","O-"], "A-":["A-","O-"], "A+":["A+","A-","O+","O-"], "B-":["B-","O-"], "B+":["B+","B-","O+","O-"], "AB-":["AB-","A-","B-","O-"], "AB+":TYPES.slice() };
+const FAC = [
+  { id: "f1", name: "مستشفى النيل التجريبي", kind: "مستشفى", lat: 30.0480, lng: 31.2290, phone: "0100 000 0001" },
+  { id: "f2", name: "بنك دم الزمالك التجريبي", kind: "بنك دم", lat: 30.0626, lng: 31.2197, phone: "0100 000 0002" },
+  { id: "f3", name: "مركز المعادي الطبي (تجريبي)", kind: "مركز طبي", lat: 29.9602, lng: 31.2569, phone: "0100 000 0003" },
+  { id: "f4", name: "مستشفى الجيزة التجريبي", kind: "مستشفى", lat: 30.0131, lng: 31.2089, phone: "0100 000 0004" },
+];
+// مخزون كل منشأة + معدلات الصرف/الإيداع اليومية (للمنشأة f1 = منشأتك في بوابة المنشأة)
+const STOCK = {
+  f1: { "O-":[12,10,4,1], "O+":[30,15,6,7], "A-":[9,6,1.2,0.6], "A+":[40,15,5,4], "B-":[6,5,1,0.2], "B+":[22,10,3,2.6], "AB-":[4,3,0.3,0.2], "AB+":[11,5,1,1] },
+  f2: { "O-":[25], "O+":[60], "A-":[8], "A+":[45], "B-":[3], "B+":[30], "AB-":[2], "AB+":[9] },
+  f3: { "O-":[0], "O+":[14], "A-":[2], "A+":[18], "B-":[0], "B+":[7], "AB-":[0], "AB+":[4] },
+  f4: { "O-":[5], "O+":[20], "A-":[3], "A+":[16], "B-":[1], "B+":[12], "AB-":[1], "AB+":[6] },
+};
+const INV = {}; for (const f in STOCK) { INV[f] = {}; for (const t of TYPES) INV[f][t] = STOCK[f][t][0]; }
+const RATES = {}; for (const t of TYPES) RATES[t] = { safety: STOCK.f1[t][1], burn: STOCK.f1[t][2], inflow: STOCK.f1[t][3] };
+// متبرعون وهميون (أعداد فقط تُعرض للمنشأة)
+const DONORS = []; (function seed(){ let s = 7; const r = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  const dist = ["O+","O+","O+","A+","A+","B+","B+","O-","A-","AB+","B-","AB-"];
+  for (let i = 0; i < 180; i++) DONORS.push({ bt: dist[Math.floor(r()*dist.length)], lat: 30.0444 + (r()-.5)*0.25, lng: 31.2357 + (r()-.5)*0.25, eligible: r() > .3 }); })();
+const DONOR = { name: "أحمد (متبرع تجريبي)", bt: "O-", sex: "male", last: "2026-07-10", available: true };
+let REQUESTS = [
+  { id: "r1", fac: "f1", bt: "O-", units: 3, secured: 1, urgency: "critical", verified: true, mine: false },
+  { id: "r2", fac: "f4", bt: "A-", units: 2, secured: 0, urgency: "urgent", verified: true, mine: false },
+  { id: "r3", fac: "f3", bt: "B+", units: 1, secured: 0, urgency: "routine", verified: true, mine: false },
+];
+const RESPONSES = new Set();
+let seq = 4;
+
+// ============ أدوات ============
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const km = (a, b) => { const R = 6371, d2r = Math.PI/180; const dLat = (b.lat-a.lat)*d2r, dLng = (b.lng-a.lng)*d2r;
+  const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*d2r)*Math.cos(b.lat*d2r)*Math.sin(dLng/2)**2; return Math.round(2*R*Math.asin(Math.sqrt(x))*10)/10; };
+const fac = (id) => FAC.find((f) => f.id === id);
+const URG = { routine: "عادي", urgent: "عاجل", critical: "حرج 🚨" };
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3200); }
+function nextEligible() { const gap = DONOR.sex === "female" ? 112 : 84; const d = new Date(new Date(DONOR.last).getTime() + gap*864e5); return d > new Date() ? d : null; }
+function inventoryNear(bt, radius = 30) {
+  const out = [];
+  for (const f of FAC) for (const t of COMPAT[bt]) if (INV[f.id][t] > 0) { const d = km(ME, f); if (d <= radius) out.push({ fid: f.id, name: f.name, kind: f.kind, phone: f.phone, bt: t, units: INV[f.id][t], km: d, exact: t === bt }); }
+  return out.sort((a, b) => (b.exact - a.exact) || a.km - b.km);
+}
+function donorsFor(req, radius = 15) { const f = fac(req.fac); return DONORS.filter((d) => d.eligible && COMPAT[req.bt].includes(d.bt) && km(d, f) <= radius); }
+function openForDonor() { return REQUESTS.filter((r) => r.verified && r.secured < r.units && COMPAT[r.bt].includes(DONOR.bt)).map((r) => ({ ...r, km: km(ME, fac(r.fac)) })).sort((a, b) => ({critical:0,urgent:1,routine:2}[a.urgency] - {critical:0,urgent:1,routine:2}[b.urgency]) || a.km - b.km); }
+
+// ============ محرك التنبؤ (نفس منطق التطبيق) ============
+const SEASONS = { none:["عادي",1,1], ramadan:["🌙 رمضان",0.92,0.62], hajj:["🕋 الحج والعمرة",1.2,0.9,{"O-":1.35,"A-":1.25,"B-":1.25,"AB-":1.2}], summer:["☀️ الصيف",1,0.7], flu:["❄️ الإنفلونزا",1,0.8], holidays:["🎉 الأعياد",1.25,0.75,{"O-":1.2,"O+":1.15}] };
+const SURGES = { moderate:["معتدل",1], high:["مرتفع +25%",1.25], code_red:["كود أحمر +60%",1.6] };
+const RISK = { critical: "🚨 خطر حاد", warning: "⚠️ إنذار مبكر", stable: "🟢 مستقر" };
+const FC = { season: "none", surge: "moderate", horizon: 14 };
+const r1 = (n) => Math.round(n*10)/10;
+function forecast() {
+  const [, sb, si, tb] = SEASONS[FC.season], sf = SURGES[FC.surge][1];
+  return TYPES.map((t) => { const u = INV.f1[t], R = RATES[t];
+    const burn = R.burn*sb*((tb && tb[t]) || 1)*sf, inflow = R.inflow*si, net = inflow - burn;
+    const days = net >= 0 ? null : u / -net;
+    let risk = days !== null && days < 4 ? "critical" : days !== null && days <= 8 ? "warning" : u < R.safety ? "warning" : "stable";
+    if (u === 0 && burn > 0) risk = "critical";
+    const date = days === null ? null : new Date(Date.now() + Math.floor(days)*864e5).toISOString().slice(0,10);
+    return { t, u, safety: R.safety, burn: r1(burn), inflow: r1(inflow), net, days: days === null ? null : r1(days), date, risk, need: Math.max(0, Math.ceil(R.safety - (u + net*FC.horizon))) };
+  }).sort((a, b) => ({critical:0,warning:1,stable:2}[a.risk] - {critical:0,warning:1,stable:2}[b.risk]) || (a.days ?? 1e9) - (b.days ?? 1e9));
+}
+function rulePlan(f) {
+  const crit = f.filter((x) => x.risk === "critical"), warn = f.filter((x) => x.risk === "warning"), out = [];
+  if (crit.length) {
+    out.push({ p: "فورًا", title: "نداء فوري للمتبرعين", detail: `استدعِ متبرعين مؤهلين من فصائل ${crit.map((x) => x.t).join("، ")} — المطلوب تقريبًا: ${crit.map((x) => `${x.t}: ${x.need} وحدة`).join("، ")}.` });
+    out.push({ p: "فورًا", title: "تفعيل الاستعارة بين المستشفيات", detail: "اطلب تحويل وحدات من منشآت قريبة لديها فائض أو وحدات قريبة الانتهاء، مع التزام سلسلة التبريد." });
+    out.push({ p: "خلال 24 ساعة", title: "ترشيد الاستهلاك", detail: "راجع جدول العمليات الاختيارية مع لجنة نقل الدم، وطبّق إدارة دم المريض (PBM)." });
+  }
+  if (warn.length) out.push({ p: "هذا الأسبوع", title: "جدولة حملة تبرع متنقلة", detail: `نظّم حملة ${FC.season === "ramadan" ? "مسائية بعد الإفطار" : "في جامعة أو شركة قريبة"} تستهدف ${warn.map((x) => x.t).join("، ")} قبل دخولها مرحلة الخطر.` });
+  if (!out.length) out.push({ p: "هذا الأسبوع", title: "الرصيد مستقر", detail: "استمر في المتابعة اليومية وحافظ على الحد الآمن." });
+  return out;
+}
+let aiPlan = null, aiPlanKey = "";
+
+// ============ الذكاء الاصطناعي (عبر حساب Claude الخاص بالمشاهد) ============
+let samplePromise = null;
+const getSample = () => (samplePromise ||= (window.claude?.use ? window.claude.use("sample").catch(() => null) : Promise.resolve(null)));
+const SAMPLE_ERR = { not_granted: "لم يتم السماح للصفحة باستخدام Claude، فالمساعد متوقف في هذه الجلسة.", rate_limited: "طلبات كثيرة، انتظر قليلًا ثم حاول.", cancelled: "تم الإيقاف." };
+
+// ============ العرض ============
+let view = "donor";
+function setView(v) { view = v; document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v))); render(); window.scrollTo(0, 0); }
+document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
+
+function render() {
+  const el = $("#view");
+  if (view === "donor") el.innerHTML = donorView();
+  else if (view === "beneficiary") el.innerHTML = benView();
+  else if (view === "facility") el.innerHTML = facView();
+  else if (view === "forecast") el.innerHTML = fcView();
+  else el.innerHTML = agentView();
+  bind();
+  if (view === "forecast") drawChart();
+  if (view === "agent") { paintChat(); setupAgent(); }
+}
+
+function donorView() {
+  const next = nextEligible(), reqs = openForDonor();
+  return `
+  <div class="grid2">
+    <div class="card">
+      <div class="row"><h2>${esc(DONOR.name)}</h2><span class="pill info bt" style="font-size:16px">${DONOR.bt}</span></div>
+      <p class="${next ? "mute" : ""}" style="${next ? "" : "color:var(--ok);font-weight:600"}">${next ? `يمكنك التبرع مجددًا بعد ${next.toLocaleDateString("ar-EG")}` : "أنت مؤهل للتبرع الآن ✅"}</p>
+      <p class="small mute">آخر تبرع: <span class="num">${DONOR.last}</span> · الفترة بين التبرعات 84 يومًا للرجال و112 للنساء</p>
+      <label class="switch"><input type="checkbox" id="avail" ${DONOR.available ? "checked" : ""}> متاح لاستقبال نداءات الطوارئ</label>
+    </div>
+    <div class="card">
+      <h2>كيف يعمل؟</h2>
+      <p class="mute small">تصلك الطلبات القريبة التي تحتاج فصيلتك أو تقبلها. لا يرى المستشفى رقمك أو موقعك حتى تضغط "سأتبرع".</p>
+      <button class="btn ghost" data-go="agent">اسأل المساعد: هل أستطيع التبرع؟</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row"><h2>طلبات قريبة تحتاج فصيلتك</h2><span class="pill info">${reqs.length}</span></div>
+    <div class="list">${reqs.length ? reqs.map((r) => `
+      <div class="item ${r.urgency === "critical" ? "crit" : ""}">
+        <div class="row"><h3>${esc(fac(r.fac).name)}</h3><span class="pill info bt">${r.bt}</span></div>
+        <p class="small mute">${URG[r.urgency]} · <span class="num">${r.units - r.secured}</span> وحدة متبقية · <span class="num">${r.km}</span> كم</p>
+        <div><button class="btn sm" data-respond="${r.id}" ${next || !DONOR.available || RESPONSES.has(r.id) ? "disabled" : ""}>${RESPONSES.has(r.id) ? "تم ✓ بانتظارك" : "سأتبرع"}</button></div>
+      </div>`).join("") : `<p class="mute">لا توجد طلبات متوافقة قريبة الآن. سنرسل لك إشعارًا عند الحاجة.</p>`}</div>
+  </div>`;
+}
+
+let benBt = null, benUnits = 1, benResults = null;
+function benView() {
+  const mine = REQUESTS.filter((r) => r.mine);
+  return `
+  <div class="card">
+    <h2>ابحث عن دم متوافق قريب منك</h2>
+    <p class="small mute">فصيلة المريض</p>
+    <div class="chips">${TYPES.map((t) => `<button class="chip bt" data-bt="${t}" aria-pressed="${benBt === t}">${t}</button>`).join("")}</div>
+    <div class="row" style="justify-content:flex-start">
+      <label class="f">عدد الوحدات <input type="number" id="units" min="1" max="20" value="${benUnits}" style="width:90px"></label>
+      <button class="btn" id="search" ${benBt ? "" : "disabled"} style="align-self:end">ابحث عن أقرب مخزون</button>
+    </div>
+    <p class="note">الموقع الافتراضي في هذه التجربة: وسط القاهرة.</p>
+  </div>
+  ${benResults ? `<div class="card"><div class="row"><h2>مخزون متوافق مع ${benBt ? `<span class="bt">${benBt}</span>` : ""}</h2><span class="pill info">${benResults.length}</span></div>
+    <div class="list">${benResults.length ? benResults.map((x) => `
+      <div class="item"><div class="row"><h3>${esc(x.name)}</h3><span class="pill ${x.exact ? "ok" : "info"} bt">${x.bt}</span></div>
+      <p class="small mute">${x.kind} · <span class="num">${x.units}</span> وحدة · <span class="num">${x.km}</span> كم${x.exact ? "" : " · فصيلة بديلة متوافقة"} · هاتف: <span class="num">${x.phone}</span></p>
+      <div><button class="btn sm" data-req="${x.fid}">اطلب من هنا</button></div></div>`).join("") : `<p class="mute">لا يوجد مخزون متوافق ضمن 30 كم. أنشئ طلبًا لدى أقرب مستشفى وسنطلق نداءً للمتبرعين.</p>`}</div></div>` : ""}
+  <div class="card"><h2>طلباتي</h2>
+    <div class="list">${mine.length ? mine.map((r) => `<div class="item"><div class="row"><h3>${esc(fac(r.fac).name)}</h3><span class="pill info bt">${r.bt}</span></div>
+      <p class="small mute">${r.verified ? "موثّق — جاري نداء المتبرعين" : "بانتظار توثيق المستشفى"} · تم تأمين <span class="num">${r.secured}</span> من <span class="num">${r.units}</span></p></div>`).join("") : `<p class="mute small">لا توجد طلبات بعد.</p>`}</div>
+  </div>`;
+}
+
+function facView() {
+  const inc = REQUESTS.filter((r) => r.fac === "f1" && r.secured < r.units);
+  return `
+  <div class="card">
+    <div class="row"><h2>${esc(fac("f1").name)} — المخزون (كريات حمراء)</h2><button class="btn ghost sm" data-go="forecast">📈 تنبؤ المخزون</button></div>
+    <div class="matrix">${TYPES.map((t) => { const u = INV.f1[t], low = u < RATES[t].safety; return `
+      <div class="cell ${low ? "warning" : ""}"><div class="row"><span class="bt" style="font-size:16px">${t}</span>${low ? `<span class="pill warning">منخفض</span>` : ""}</div>
+      <span class="days num">${u}</span><span class="meta">الحد الآمن <span class="num">${RATES[t].safety}</span></span>
+      <div class="acts"><button class="btn ghost sm" data-mv="${t}:-1" ${u ? "" : "disabled"}>− صرف</button><button class="btn ghost sm" data-mv="${t}:1">+ إيداع</button></div></div>`; }).join("")}</div>
+    <p class="note">كل صرف أو إيداع يُسجَّل حركةً ويحدّث محرك التنبؤ فورًا.</p>
+  </div>
+  <div class="card"><div class="row"><h2>الطلبات الواردة</h2><span class="pill info">${inc.length}</span></div>
+    <div class="list">${inc.length ? inc.map((r) => `<div class="item ${r.urgency === "critical" ? "crit" : ""}">
+      <div class="row"><h3>${URG[r.urgency]}${r.mine ? " · من مستفيد" : ""}</h3><span class="pill info bt">${r.bt}</span></div>
+      <p class="small mute">تم تأمين <span class="num">${r.secured}</span>/<span class="num">${r.units}</span> · المتوفر لديكم من نفس الفصيلة: <span class="num">${INV.f1[r.bt]}</span> · ${r.verified ? `متبرعون مؤهلون ضمن 15 كم: <span class="num">${donorsFor(r).length}</span>` : "غير موثّق"}</p>
+      <div class="row" style="justify-content:flex-start">${r.verified ? "" : `<button class="btn sm" data-verify="${r.id}">توثيق الطلب ونداء المتبرعين</button>`}
+      <button class="btn ghost sm" data-fulfil="${r.id}" ${INV.f1[r.bt] ? "" : "disabled"}>صرف وحدة من المخزون</button></div></div>`).join("") : `<p class="mute small">لا توجد طلبات مفتوحة.</p>`}</div>
+    <p class="note">المستشفى يرى أعداد المتبرعين فقط، دون أسمائهم أو أرقامهم أو مواقعهم.</p>
+  </div>`;
+}
+
+function fcView() {
+  const f = forecast(), atRisk = f.filter((x) => x.risk !== "stable").map((x) => x.t), plan = aiPlan && aiPlanKey === planKey() ? aiPlan : null;
+  return `
+  <div class="card">
+    <h2>التنبؤ الذكي بنقص المخزون — ${esc(fac("f1").name)}</h2>
+    <p class="small mute">الموسم</p>
+    <div class="chips">${Object.entries(SEASONS).map(([k, v]) => `<button class="chip" data-season="${k}" aria-pressed="${FC.season === k}">${v[0]}</button>`).join("")}</div>
+    <p class="small mute">ضغط المستشفى</p>
+    <div class="chips">${Object.entries(SURGES).map(([k, v]) => `<button class="chip" data-surge="${k}" aria-pressed="${FC.surge === k}">${v[0]}</button>`).join("")}</div>
+    <label class="small mute" for="hz" style="font-weight:600">أفق التنبؤ: <span class="num" id="hzv">${FC.horizon}</span> يومًا</label>
+    <input id="hz" type="range" min="7" max="30" value="${FC.horizon}">
+  </div>
+  <div class="matrix">${f.map((x) => `
+    <div class="cell ${x.risk === "stable" ? "" : x.risk}">
+      <div class="row"><span class="bt" style="font-size:16px">${x.t}</span><span class="pill ${x.risk} ${x.risk === "critical" ? "blink" : ""}">${RISK[x.risk]}</span></div>
+      <span class="days">${x.days === null ? "لا نفاد" : `<span class="num">${x.days}</span> يوم`}</span>
+      <span class="meta">${x.date ? `النفاد المتوقع <span class="num">${x.date}</span>` : "الرصيد متزايد"}</span>
+      <span class="meta">الرصيد <span class="num">${x.u}</span> · الآمن <span class="num">${x.safety}</span></span>
+      <span class="meta">صرف <span class="num">${x.burn}</span> · إيداع <span class="num">${x.inflow}</span> /يوم</span>
+      <div class="acts"><button class="btn ghost sm" data-mv="${x.t}:-1" ${x.u ? "" : "disabled"}>− صرف</button><button class="btn ghost sm" data-mv="${x.t}:1">+ إيداع</button></div>
+    </div>`).join("")}</div>
+  <div class="card"><h2>منحنى الاستنزاف — 14 يومًا (أخطر فصيلتين)</h2><div class="chart" id="chart"></div><div class="legend" id="legend"></div></div>
+  <div class="card plan">
+    <div class="row"><h2>خطة التدخل الاستباقي</h2><span class="pill ${plan ? "info" : "stable"}">${plan ? "مولّدة بالذكاء الاصطناعي" : "خطة القواعد الفورية"}</span></div>
+    <div class="list">${(plan || rulePlan(f)).map((it) => `<div class="item"><h3>${esc(it.title)} <span class="small" style="color:var(--accent)">· ${esc(it.p)}</span></h3><p class="small mute">${esc(it.detail)}</p></div>`).join("")}</div>
+    <div class="row" style="justify-content:flex-start"><button class="btn ghost" id="aiplan" hidden>✨ خطة مخصصة بالذكاء الاصطناعي</button><span class="small mute" id="aiplanst"></span></div>
+    <p class="note">معاملات المواسم تقديرية (رمضان −38% إيداع، الصيف −30%…) ويعايرها النظام من بيانات المنشأة الفعلية بعد التشغيل.</p>
+  </div>
+  <button class="btn" id="recall" ${atRisk.length ? "" : "disabled"}>🚨 إطلاق نداء فوري للمتبرعين ${atRisk.length ? `(<span class="bt">${atRisk.join(" ")}</span>)` : ""}</button>`;
+}
+const planKey = () => `${FC.season}|${FC.surge}|${FC.horizon}|${TYPES.map((t) => INV.f1[t]).join(",")}`;
+
+function drawChart() {
+  const css = getComputedStyle(document.documentElement), col = [css.getPropertyValue("--crit").trim(), css.getPropertyValue("--plasma").trim()];
+  const mute = css.getPropertyValue("--mute").trim(), line = css.getPropertyValue("--line").trim();
+  const series = forecast().slice(0, 2), D = 14, W = 640, H = 220, L = 34, R = 14, T = 14, B = 26;
+  const pts = series.map((x) => Array.from({ length: D+1 }, (_, d) => Math.max(0, x.u + x.net*d)));
+  const step = Math.max(1, Math.ceil(Math.max(1, ...pts.flat(), ...series.map((x) => x.safety))*1.1/4)), maxY = step*4;
+  const X = (d) => L + (d/D)*(W-L-R), Y = (v) => T + (1 - v/maxY)*(H-T-B);
+  let g = "";
+  for (let k = 0; k <= 4; k++) { const v = step*k; g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${L-6}" y="${Y(v)+4}" font-size="10" fill="${mute}" text-anchor="end" font-family="IBM Plex Mono, monospace">${v}</text>`; }
+  [0, 7, 14].forEach((d) => g += `<text x="${X(d)}" y="${H-8}" font-size="10" fill="${mute}" text-anchor="middle">${d === 0 ? "اليوم" : "+" + d}</text>`);
+  series.forEach((x, i) => { const p = pts[i].map((v, d) => `${d ? "L" : "M"}${X(d).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+    g += `<path d="${p} L${X(D)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${col[i]}" fill-opacity="0.12"/><path d="${p}" fill="none" stroke="${col[i]}" stroke-width="2.5"/>`;
+    g += `<line x1="${L}" x2="${W-R}" y1="${Y(x.safety)}" y2="${Y(x.safety)}" stroke="${col[i]}" stroke-dasharray="5 4" stroke-opacity="0.7"/><circle cx="${X(D)}" cy="${Y(pts[i][D])}" r="3.5" fill="${col[i]}"/>`; });
+  $("#chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px;max-width:${W}px" role="img" aria-label="منحنى الرصيد المتوقع">${g}</svg>`;
+  $("#legend").innerHTML = series.map((x, i) => `<span><i style="background:${col[i]}"></i><bdi dir="ltr">${x.t}</bdi> (المتقطع = الحد الآمن)</span>`).join("");
+}
+
+// ============ المساعد رفيق ============
+const CHAT = []; // [{role, content}] للنموذج
+const BUBBLES = [{ k: "bot", t: "أهلًا، أنا رفيق 👋 أساعدك في إيجاد الدم، معرفة أهليتك للتبرع، ومتابعة الطلبات. بماذا أخدمك؟" }];
+let agentBusy = false, agentCtl = null, agentRole = "beneficiary";
+function agentView() {
+  return `
+  <div class="card">
+    <div class="row"><h2>المساعد الذكي رفيق</h2>
+      <div class="chips" aria-label="أتحدث بصفتي">${[["beneficiary","مستفيد"],["donor","متبرع"],["facility","موظف منشأة"]].map(([k, l]) => `<button class="chip" data-arole="${k}" aria-pressed="${agentRole === k}">${l}</button>`).join("")}</div></div>
+    <p class="small mute" id="agentnote">يعمل على بيانات هذه التجربة: يبحث في المخزون، ويتحقق من الأهلية، وينشئ الطلبات بعد تأكيدك.</p>
+    <div class="suggest">${["أحتاج دم O- لوالدي قرب وسط القاهرة","هل أستطيع التبرع الآن؟","ما الفصائل المتوافقة مع A+؟","ما الفصائل المعرضة للنفاد في مستشفانا؟"].map((q) => `<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+  </div>
+  <div class="card chat"><div class="msgs" id="msgs"></div>
+    <form class="composer" id="composer"><input id="q" autocomplete="off" placeholder="اكتب سؤالك…" aria-label="سؤالك"><button class="btn" id="send">إرسال</button><button class="btn ghost" type="button" id="stop" hidden>إيقاف</button></form>
+  </div>`;
+}
+function paintChat() { const m = $("#msgs"); if (!m) return; m.innerHTML = BUBBLES.map((b) => `<div class="msg ${b.k === "me" ? "me" : b.k === "tool" ? "tool" : "bot"}">${esc(b.t)}</div>`).join(""); m.scrollTop = m.scrollHeight; }
+async function setupAgent() {
+  const s = await getSample();
+  if (!s && view === "agent") { $("#agentnote").textContent = "المساعد الذكي يعمل عند فتح هذه الصفحة داخل Claude. باقي التجربة يعمل بالكامل."; $("#send").disabled = true; }
+}
+const TOOLS = () => [
+  { name: "blood_compatibility", description: "Returns donor blood types compatible with a recipient type (red cells).", inputSchema: { type: "object", properties: { recipient: { type: "string", enum: TYPES } }, required: ["recipient"] },
+    execute: ({ recipient }) => { note(`🔎 فحص التوافق لـ ${recipient}`); return { compatible: COMPAT[recipient] || [] }; } },
+  { name: "search_inventory", description: "Search verified facilities near the user for compatible blood stock. Returns name, phone, type, units, distance km.", inputSchema: { type: "object", properties: { blood_type: { type: "string", enum: TYPES }, radius_km: { type: "number" } }, required: ["blood_type"] },
+    execute: ({ blood_type, radius_km }) => { if (!COMPAT[blood_type]) throw new Error("unknown blood type"); note(`🔎 بحث في المخزون عن ${blood_type}`); return { results: inventoryNear(blood_type, Math.min(+radius_km || 30, 100)).slice(0, 6) }; } },
+  { name: "my_eligibility", description: "Donation eligibility of the signed-in donor (interval rule).", execute: () => { note("🩺 فحص الأهلية"); const n = nextEligible(); return { blood_type: DONOR.bt, last_donation: DONOR.last, interval_days: 84, eligible_now: !n, next_eligible_date: n ? n.toISOString().slice(0,10) : "now", available: DONOR.available }; } },
+  { name: "open_requests_near_me", description: "Open verified blood requests near the donor that their blood type can serve.", execute: () => { note("📋 الطلبات القريبة"); return { requests: openForDonor().map((r) => ({ facility: fac(r.fac).name, blood_type: r.bt, units_left: r.units - r.secured, urgency: r.urgency, km: r.km })) }; } },
+  { name: "create_blood_request", description: "Create a blood request at a facility. Only call after the user explicitly confirmed the summarized details in their latest message.", inputSchema: { type: "object", properties: { facility_id: { type: "string", enum: FAC.map((f) => f.id) }, blood_type: { type: "string", enum: TYPES }, units: { type: "integer" }, urgency: { type: "string", enum: ["routine","urgent","critical"] }, user_confirmed: { type: "boolean" } }, required: ["facility_id","blood_type","units","urgency","user_confirmed"] },
+    execute: (i) => { if (i.user_confirmed !== true) return { error: "need explicit user confirmation first" }; const u = Math.round(+i.units); if (!fac(i.facility_id) || !COMPAT[i.blood_type] || !(u >= 1 && u <= 20)) throw new Error("invalid request");
+      const r = { id: "r" + seq++, fac: i.facility_id, bt: i.blood_type, units: u, secured: 0, urgency: ["routine","urgent","critical"].includes(i.urgency) ? i.urgency : "urgent", verified: false, mine: true };
+      REQUESTS.push(r); note(`✅ تم إنشاء طلب ${r.bt} لدى ${fac(r.fac).name}`); return { created: { facility: fac(r.fac).name, blood_type: r.bt, units: u, status: "awaiting facility verification" } }; } },
+  { name: "facility_forecast", description: "For facility staff: shortage forecast for the user's hospital (days until depletion and risk per blood type) under current season/surge settings.", execute: () => { note("📈 قراءة التنبؤ"); return { facility: fac("f1").name, season: FC.season, surge: FC.surge, forecast: forecast().map(({ t, u, safety, burn, inflow, days, date, risk, need }) => ({ blood_type: t, units: u, safety, burn_per_day: burn, inflow_per_day: inflow, days_until_depletion: days, depletion_date: date, risk, units_needed: need })) }; } },
+];
+function note(t) { BUBBLES.push({ k: "tool", t }); paintChat(); }
+const ROLE_TXT = { beneficiary: "a patient relative / beneficiary looking for blood", donor: "a blood donor (type O-)", facility: "staff at " + "the user's hospital (facility f1)" };
+async function ask(q) {
+  q = q.trim(); if (!q || agentBusy) return;
+  const s = await getSample(); if (!s) return;
+  BUBBLES.push({ k: "me", t: q }); CHAT.push({ role: "user", content: q });
+  const bot = { k: "bot", t: "يفكر…" }; BUBBLES.push(bot); paintChat();
+  agentBusy = true; agentCtl = new AbortController(); toggleBusy(true);
+  const head = `You are "رفيق" (Rafeeq), the assistant of a SMART BLOOD BANK demo app in Egypt. Reply in Arabic (Egyptian-friendly MSA), short and warm. The user is ${ROLE_TXT[agentRole]}; their location is downtown Cairo.
+Rules: use the tools for every fact about stock, requests or eligibility — never invent numbers. No medical diagnosis; refer detailed medical eligibility to the blood bank doctor. In emergencies (bleeding, accident) first advise calling an ambulance (123 in Egypt). Never reveal donor identities. Blood donation is voluntary and unpaid — never suggest buying/selling blood. Before create_blood_request, summarize facility, type, units and urgency and ask the user to confirm; call it only after they confirm. Facility ids: ${FAC.map((f) => `${f.id}=${f.name}`).join(", ")}. All data is demo data.`;
+  const input = CHAT.map((m, i) => i === 0 ? { role: "user", content: head + "\n\nUser: " + m.content } : m);
+  try {
+    const { text } = await s(input, { tools: TOOLS(), modelTier: "quick", cache: false, signal: agentCtl.signal,
+      onText: ({ text }) => { bot.t = text; BUBBLES.splice(BUBBLES.indexOf(bot), 1); BUBBLES.push(bot); paintChat(); } });
+    bot.t = text || "…"; CHAT.push({ role: "assistant", content: bot.t });
+  } catch (e) {
+    bot.t = e?.text || SAMPLE_ERR[e?.code] || "تعذّر الرد الآن، حاول مرة أخرى.";
+    if (e?.text) CHAT.push({ role: "assistant", content: e.text }); else CHAT.pop();
+  } finally { agentBusy = false; toggleBusy(false); paintChat(); if (view !== "agent") toast("رد المساعد جاهز في تبويب المساعد"); }
+}
+function toggleBusy(b) { const send = $("#send"), stop = $("#stop"); if (send) send.disabled = b; if (stop) stop.hidden = !b; }
+
+async function genPlan() {
+  const s = await getSample(); if (!s) return;
+  const st = $("#aiplanst"), btn = $("#aiplan"); btn.disabled = true; st.textContent = "يفكر…";
+  const key = planKey();
+  try {
+    const data = await s.json(`You advise a hospital blood bank in Egypt. Given this deterministic shortage forecast (JSON), propose 3-5 prioritized operational interventions (donor recall, inter-hospital borrowing, Patient Blood Management, season-timed mobile drives, monitoring). Use only the given numbers. No patient-level clinical orders. Never suggest buying blood or paying donors.
+Return ONLY JSON: {"items":[{"p":"فورًا|خلال 24 ساعة|هذا الأسبوع","title":"Arabic, short","detail":"Arabic, max 2 sentences"}]}
+Season: ${SEASONS[FC.season][0]}; surge: ${SURGES[FC.surge][0]}; horizon: ${FC.horizon} days.
+${JSON.stringify(forecast().map(({ t, u, safety, burn, inflow, days, risk, need }) => ({ t, u, safety, burn, inflow, days, risk, need })))}`, { modelTier: "quick" });
+    if (!Array.isArray(data?.items) || !data.items.length) throw { code: "bad" };
+    aiPlan = data.items.slice(0, 6).map((x) => ({ p: String(x.p || ""), title: String(x.title || ""), detail: String(x.detail || "") })); aiPlanKey = key;
+    if (view === "forecast") render();
+  } catch (e) { if (st) st.textContent = SAMPLE_ERR[e?.code] || "تعذّر توليد الخطة، الخطة الفورية معروضة."; if (btn) btn.disabled = false; }
+}
+
+// ============ ربط الأحداث ============
+function bind() {
+  document.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => setView(b.dataset.go));
+  const av = $("#avail"); if (av) av.onchange = () => { DONOR.available = av.checked; toast(av.checked ? "ستصلك نداءات الطوارئ" : "تم إيقاف النداءات مؤقتًا"); render(); };
+  document.querySelectorAll("[data-respond]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.respond); RESPONSES.add(r.id); toast(`شكرًا لك ❤️ تم إبلاغ ${fac(r.fac).name}. توجّه إليه ومعك بطاقة الهوية.`); render(); });
+  document.querySelectorAll("[data-bt]").forEach((b) => b.onclick = () => { benBt = b.dataset.bt; benResults = null; render(); });
+  const un = $("#units"); if (un) un.onchange = () => benUnits = Math.max(1, Math.min(20, Math.round(+un.value) || 1));
+  const se = $("#search"); if (se) se.onclick = () => { benResults = inventoryNear(benBt); render(); };
+  document.querySelectorAll("[data-req]").forEach((b) => b.onclick = () => { const r = { id: "r" + seq++, fac: b.dataset.req, bt: benBt, units: benUnits, secured: 0, urgency: "urgent", verified: false, mine: true }; REQUESTS.push(r); toast(`تم إرسال الطلب إلى ${fac(r.fac).name}. سيتواصل معك للتأكيد.`); render(); });
+  document.querySelectorAll("[data-mv]").forEach((b) => b.onclick = () => { const [t, d] = b.dataset.mv.split(":"); INV.f1[t] = Math.max(0, INV.f1[t] + +d); if (+d < 0) RATES[t].burn = r1(RATES[t].burn + 1/14); else RATES[t].inflow = r1(RATES[t].inflow + 1/14); render(); });
+  document.querySelectorAll("[data-verify]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.verify); r.verified = true; toast(`تم التوثيق. يوجد ${donorsFor(r).length} متبرع مؤهل ضمن 15 كم وتم إشعارهم (محاكاة).`); render(); });
+  document.querySelectorAll("[data-fulfil]").forEach((b) => b.onclick = () => { const r = REQUESTS.find((x) => x.id === b.dataset.fulfil); if (INV.f1[r.bt] > 0) { INV.f1[r.bt]--; r.secured++; RATES[r.bt].burn = r1(RATES[r.bt].burn + 1/14); toast(`تم صرف وحدة ${r.bt} للطلب.`); render(); } });
+  document.querySelectorAll("[data-season]").forEach((b) => b.onclick = () => { FC.season = b.dataset.season; render(); });
+  document.querySelectorAll("[data-surge]").forEach((b) => b.onclick = () => { FC.surge = b.dataset.surge; render(); });
+  const hz = $("#hz"); if (hz) { hz.oninput = () => { FC.horizon = +hz.value; $("#hzv").textContent = hz.value; }; hz.onchange = render; }
+  const rc = $("#recall"); if (rc) rc.onclick = () => { const types = forecast().filter((x) => x.risk !== "stable").map((x) => x.t); const n = DONORS.filter((d) => d.eligible && types.includes(d.bt) && km(d, fac("f1")) <= 25).length; toast(`تم إرسال نداء إلى ${n} متبرع مؤهل من فصائل ${types.join(" ")} (محاكاة).`); };
+  const ap = $("#aiplan"); if (ap) { getSample().then((s) => { if (s && $("#aiplan")) $("#aiplan").hidden = false; }); ap.onclick = genPlan; }
+  document.querySelectorAll("[data-arole]").forEach((b) => b.onclick = () => { agentRole = b.dataset.arole; document.querySelectorAll("[data-arole]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); });
+  document.querySelectorAll("[data-q]").forEach((b) => b.onclick = () => ask(b.dataset.q));
+  const cf = $("#composer"); if (cf) cf.onsubmit = (e) => { e.preventDefault(); const q = $("#q"); const v = q.value; q.value = ""; ask(v); };
+  const sp = $("#stop"); if (sp) sp.onclick = () => agentCtl?.abort();
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => view === "forecast" && drawChart());
+new MutationObserver(() => view === "forecast" && drawChart()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+setView("donor");
+})();
+</script>
