@@ -1,0 +1,369 @@
+<title>بنك الدم الذكي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one reading column (~760px) with wide bands for tables; RTL; sections separated by thin plasma-tinted rules */
+:root {
+  --bg: #FBF9F9;
+  --surface: #FFFFFF;
+  --ink: #1C1416;
+  --mute: #6E6265;
+  --line: #EADFE0;
+  --accent: #A3122A;        /* whole-blood red */
+  --accent-soft: #F8E6E9;
+  --plasma: #C9A227;        /* plasma amber, used sparingly */
+  --ok: #2F7D4F; --ok-soft: #E4F2E9;
+  --warn: #B86E00; --warn-soft: #FBF0DD;
+  --crit: #C21F3A; --crit-soft: #FBE3E7;
+  --f-display: "Readex Pro", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --plasma: #E0BE52;
+  --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141012; --surface: #1D181A; --ink: #F2EBEC; --mute: #A8999C; --line: #352B2E;
+  --accent: #EF5A70; --accent-soft: #3A1E24; --plasma: #E0BE52;
+  --ok: #6FCB93; --ok-soft: #1C3226; --warn: #F0B04C; --warn-soft: #3A2C14; --crit: #FF6B82; --crit-soft: #42202A;
+  color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.75; }
+.page { direction: rtl; max-width: 980px; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 760px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.3; margin: 0; }
+h1 { font-size: clamp(34px, 6vw, 54px); font-weight: 700; letter-spacing: -0.5px; }
+h2 { font-size: 26px; font-weight: 600; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: .4px; }
+.lead { font-size: 19px; color: var(--mute); max-width: 62ch; }
+.mute { color: var(--mute); }
+.num, .mono { font-family: var(--f-data); font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+section { display: grid; gap: 18px; padding-block: 40px; border-top: 1px solid var(--line); }
+header.hero { display: grid; gap: 20px; padding-bottom: 36px; }
+
+/* thesis line */
+.thesis { font-family: var(--f-display); font-size: clamp(20px, 3.2vw, 26px); font-weight: 600; }
+.thesis b { color: var(--accent); font-weight: 700; }
+
+/* drop + blood types strip */
+.types { display: flex; flex-wrap: wrap; gap: 8px; }
+.type { unicode-bidi: isolate; font-family: var(--f-data); font-size: 14px; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; background: var(--surface); direction: ltr; }
+.type.rare { border-color: var(--accent); color: var(--accent); }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.fact .v { font-family: var(--f-display); font-size: 22px; font-weight: 700; }
+.fact .k { font-size: 13px; color: var(--mute); }
+
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+th, td { text-align: right; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; font-size: 13px; color: var(--mute); background: color-mix(in srgb, var(--line) 35%, var(--surface)); }
+tr:last-child td { border-bottom: 0; }
+td strong { font-weight: 600; }
+
+/* risks */
+.risks { display: grid; gap: 10px; }
+.risk { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: start; padding: 14px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--warn); }
+.risk.high { border-inline-start-color: var(--crit); }
+.risk .sev { grid-row: span 2; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); white-space: nowrap; }
+.risk.high .sev { background: var(--crit-soft); color: var(--crit); }
+.risk h3 { font-size: 16px; }
+.risk p { color: var(--mute); font-size: 15px; }
+.fix { color: var(--ok) !important; }
+
+/* revenue bars */
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: minmax(150px, 220px) 1fr auto; gap: 12px; align-items: center; font-size: 14.5px; }
+.bar .track { height: 12px; background: var(--accent-soft); border-radius: 6px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); border-radius: 6px; }
+.bar.total .fill { background: var(--plasma); }
+.bar .num { font-size: 14px; min-width: 9ch; text-align: left; }
+.note { font-size: 13.5px; color: var(--mute); border-inline-start: 2px solid var(--line); padding-inline-start: 10px; }
+
+.rule { display: grid; gap: 8px; background: var(--accent-soft); border-radius: 12px; padding: 18px 20px; }
+.rule h3 { color: var(--accent); }
+.strike { display: flex; flex-wrap: wrap; gap: 8px; }
+.strike code { font-family: var(--f-data); font-size: 13px; text-decoration: line-through; color: var(--crit); background: var(--surface); border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; direction: ltr; }
+
+/* demo */
+.demo { display: grid; gap: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.ctrls { display: grid; gap: 12px; }
+.ctrl-row { display: grid; gap: 6px; }
+.ctrl-row label, .ctrl-row .lbl { font-size: 13px; font-weight: 600; color: var(--mute); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { font: inherit; font-size: 13.5px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.seg button:focus-visible, input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.cell { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 4px; background: var(--bg); }
+.cell .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.cell .bt { font-family: var(--f-data); font-weight: 500; font-size: 17px; direction: ltr; unicode-bidi: isolate; }
+.chip { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.chip.critical { background: var(--crit-soft); color: var(--crit); }
+.chip.warning { background: var(--warn-soft); color: var(--warn); }
+.chip.stable { background: var(--ok-soft); color: var(--ok); }
+.cell.critical { border-color: var(--crit); }
+.cell .days { font-family: var(--f-display); font-size: 22px; font-weight: 700; }
+.cell .meta { font-size: 12.5px; color: var(--mute); }
+@media (prefers-reduced-motion: no-preference) { .chip.critical { animation: pulse 1s ease-in-out infinite; } }
+@keyframes pulse { 50% { opacity: .45; } }
+.chart { overflow-x: auto; direction: ltr; }
+.chart svg text { font-family: var(--f-data); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--mute); direction: rtl; }
+.legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-inline-end: 6px; border-radius: 2px; }
+
+/* roadmap */
+.steps { display: grid; gap: 0; counter-reset: s; }
+.step { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+.step:last-child { border-bottom: 0; }
+.step .when { font-weight: 600; color: var(--accent); font-size: 14px; }
+.step p { color: var(--mute); }
+
+.built { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.built div { border-top: 2px solid var(--accent); padding-top: 10px; display: grid; gap: 4px; }
+.built p { font-size: 14.5px; color: var(--mute); }
+footer { padding-top: 28px; border-top: 1px solid var(--line); font-size: 13px; color: var(--mute); }
+
+@media (max-width: 560px) {
+  .bar { grid-template-columns: 1fr auto; }
+  .bar .track { grid-column: 1 / -1; grid-row: 2; }
+  .step { grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <span class="eyebrow">مراجعة تقنية واستراتيجية · نوفمبر 2026</span>
+  <h1>بنك الدم الذكي</h1>
+  <p class="lead">منصة وتطبيق للهاتف ووكيل ذكاء اصطناعي، تربط المتبرعين والمرضى بالمستشفيات وبنوك الدم الأقرب إليهم، وتتنبأ بنقص كل فصيلة قبل وقوعه.</p>
+  <p class="thesis">الدم لا يُباع. <b>نحن نبيع السرعة وتقليل الهدر.</b></p>
+  <div class="types" aria-label="فصائل الدم الثماني">
+    <span class="type rare">O-</span><span class="type">O+</span><span class="type rare">A-</span><span class="type">A+</span>
+    <span class="type rare">B-</span><span class="type">B+</span><span class="type rare">AB-</span><span class="type">AB+</span>
+  </div>
+  <div class="facts">
+    <div class="fact"><span class="v">4 بوابات</span><span class="k">متبرع · مستفيد · منشأة · إدارة</span></div>
+    <div class="fact"><span class="v">Android · iOS · Web</span><span class="k">كود واحد (Expo / React Native)</span></div>
+    <div class="fact"><span class="v">35–42 يومًا</span><span class="k">صلاحية كريات الدم الحمراء، والهدر هو العدو</span></div>
+    <div class="fact"><span class="v">0 ج.م</span><span class="k">ما يدفعه المريض أو المتبرع، دائمًا</span></div>
+  </div>
+</header>
+
+<section>
+  <span class="eyebrow">الفرصة</span>
+  <h2>لا توجد في مصر شبكة موحدة للدم</h2>
+  <p class="col">حين يحتاج مريض فصيلة نادرة، يبحث أهله اليوم في مجموعات فيسبوك وواتساب، ويتصلون بالمستشفيات واحدًا تلو الآخر. لا توجد منصة تجمع مخزون المستشفيات الخاصة والجامعية والحكومية لحظيًا وتربطه بالمتبرعين حسب موقعهم. في المقابل تُهدر وحدات تنتهي صلاحيتها في مستشفى، بينما يبحث مستشفى قريب عن نفس الفصيلة.</p>
+</section>
+
+<section>
+  <span class="eyebrow">مراجعة النماذج الأولية</span>
+  <h2>ما وجدناه في النسختين المنشورتين</h2>
+  <p class="col mute">تمت المراجعة بقراءة نصوص ومسارات حزم الـJavaScript المنشورة، دون تشغيل الكود.</p>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>BloodConnect · AI Studio</th><th>منصة معالجة الطلبات · Z.ai</th></tr></thead>
+    <tbody>
+      <tr><td><strong>التقنية</strong></td><td>React + Vite، حزمة واحدة بحجم 1.2MB</td><td>Next.js</td></tr>
+      <tr><td><strong>الخادم</strong></td><td>مسار واحد فقط: <span class="mono">/api/search</span></td><td>15 مسار API: الطلبات، المخزون، المتبرعون، المستشفيات، الطوارئ، التحفيز، الإشعارات…</td></tr>
+      <tr><td><strong>البيانات</strong></td><td>وهمية داخل الواجهة (نسب تطابق ثابتة، و<span class="mono">Math.random</span> في 25 موضعًا)</td><td>أقرب لنظام حقيقي بعمليات لكل كيان</td></tr>
+      <tr><td><strong>البوابات</strong></td><td>ست بوابات تشمل مالك المنصة</td><td>نفس البوابات الست</td></tr>
+      <tr><td><strong>المميزات الأخيرة</strong></td><td>التنبؤ والصحة الشخصية والتحديات <strong>غير موجودة</strong> في النسخة المنشورة</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>مخاطر يجب حلها قبل الإطلاق</h3>
+  <div class="risks">
+    <div class="risk high"><span class="sev">حرج</span><h3>تسعير الدم وتقييد طلبات الطوارئ</h3>
+      <p>تعرض النسخة "السعر/وحدة" لكل كيس دم، وعمولة على المعاملات، وإيرادًا من "الطلب الطارئ". والخطة المجانية تسمح بطلب طارئ واحد شهريًا. بيع الدم ممنوع في مصر والسعودية، وتقييد طوارئ مريض حسب اشتراكه خطر قانوني وإعلامي.</p>
+      <p class="fix">الحل المطبق: المريض والمتبرع مجانًا وبلا حدود، والإيراد من المنشآت.</p></div>
+    <div class="risk high"><span class="sev">حرج</span><h3>ادعاءات سريرية تحتاج ترخيصًا</h3>
+      <p>فرز الطوارئ بمؤشر الصدمة، ونقل O- دون اختبار توافق، ودرجة الجاهزية الطبية تُصنَّف برمجيات جهاز طبي. تحتاج موافقة هيئة الدواء، أو تُقدَّم بوضوح كأداة مساعدة لقرار الطبيب.</p></div>
+    <div class="risk"><span class="sev">مرتفع</span><h3>قاعدة مستشفيات مصر مولّدة آليًا</h3>
+      <p>الأرقام والخطوط الساخنة قد تكون غير دقيقة. في حالة طوارئ، رقم خاطئ يعني وقتًا ضائعًا. يجب التحقق من كل سجل مع وزارة الصحة والمركز القومي لنقل الدم.</p></div>
+    <div class="risk"><span class="sev">مرتفع</span><h3>فترة التبرع 56 يومًا</h3>
+      <p>هذا معيار أمريكي. في مصر والسعودية الفترة غالبًا 3 أشهر للرجال و4 للنساء، والمشروع الجديد يجعلها قيمة قابلة للضبط.</p></div>
+    <div class="risk"><span class="sev">متوسط</span><h3>خصوصية البيانات الصحية</h3>
+      <p>فصيلة الدم والمؤشرات الحيوية بيانات حساسة يحميها القانون المصري 151/2020 والنظام السعودي PDPL. المطابقة المجهولة مطبقة الآن داخل قاعدة البيانات، لا في الواجهة فقط.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">من سبقنا</span>
+  <h2>نماذج مشابهة وما نتعلمه منها</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>النموذج</th><th>الدولة</th><th>ماذا يفعل</th><th>كيف يربح</th><th>الدرس</th></tr></thead>
+    <tbody>
+      <tr><td><strong>LifeBank</strong></td><td>نيجيريا</td><td>يربط المستشفيات ببنوك الدم ويوصّل الوحدات</td><td>رسوم خدمة وتوصيل من المستشفى</td><td>الأقرب لفكرتنا: الربح من اللوجستيات لا من الدم</td></tr>
+      <tr><td><strong>Zipline</strong></td><td>رواندا، غانا</td><td>توصيل الدم بالطائرات المسيّرة</td><td>عقود حكومية لكل عملية توصيل</td><td>السوق الحكومي هو الأكبر</td></tr>
+      <tr><td><strong>وتين</strong></td><td>السعودية</td><td>تطبيق وزارة الصحة للمتبرعين والمواعيد</td><td>حكومي ومجاني</td><td>نكمّله ولا ننافسه</td></tr>
+      <tr><td><strong>e-RaktKosh</strong></td><td>الهند</td><td>بوابة وطنية لمخزون بنوك الدم لحظيًا</td><td>حكومي</td><td>شفافية المخزون هي القيمة</td></tr>
+      <tr><td><strong>Simply Blood</strong></td><td>الهند</td><td>ربط المتبرعين بالمحتاجين</td><td>رعايات ومسؤولية مجتمعية</td><td>تطبيق المتبرعين وحده يصعب أن يربح</td></tr>
+      <tr><td><strong>WellSky / BloodTrack</strong></td><td>عالمي</td><td>برمجيات إدارة بنوك الدم في المستشفيات</td><td>تراخيص مؤسسية</td><td>المنشآت تدفع مقابل البرمجيات</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">الأمثلة من معرفة حتى منتصف 2026. يُنصح بالتحقق من وضعها الحالي قبل الاستشهاد بها.</p>
+</section>
+
+<section>
+  <span class="eyebrow">نموذج الإيرادات</span>
+  <h2>من يدفع، ومقابل ماذا</h2>
+  <div class="rule">
+    <h3>القاعدة الذهبية</h3>
+    <p>المريض والمتبرع لا يدفعان أبدًا، والدم لا يُسعَّر. تدفع المستشفيات والحكومات والشركات مقابل الكفاءة والسرعة وتقليل الهدر.</p>
+    <div class="strike" aria-label="عناصر يجب حذفها من النماذج الحالية"><code>pricePerUnit</code><code>emergency_premium</code><code>حد طلبات المرضى</code><code>عمولة على الدم</code></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>المصدر</th><th>من يدفع</th><th>الشكل</th><th>الأولوية</th></tr></thead>
+    <tbody>
+      <tr><td><strong>اشتراك المنشآت (SaaS)</strong>: المخزون، والتنبؤ، والوكيل الذكي، والتقارير</td><td>مستشفيات خاصة، ومراكز، وبنوك دم</td><td>مجاني ← Pro ← Enterprise</td><td>الأساس</td></tr>
+      <tr><td><strong>تنسيق النقل بين المستشفيات</strong> وسلسلة التبريد</td><td>المنشأة المستلمة</td><td>رسوم خدمة لكل عملية</td><td>عالية</td></tr>
+      <tr><td><strong>إنقاذ الوحدات قريبة الانتهاء</strong></td><td>المنشأة المستفيدة</td><td>نسبة من التوفير المثبت</td><td>عالية</td></tr>
+      <tr><td><strong>عقود حكومية</strong>: لوحة إقليمية للنقص والتنبؤ الموسمي</td><td>وزارة الصحة، والتأمين الصحي الشامل</td><td>ترخيص سنوي</td><td>كبيرة لكنها بطيئة</td></tr>
+      <tr><td><strong>حملات تبرع للشركات</strong></td><td>شركات وبنوك</td><td>لكل حملة أو باقة سنوية</td><td>سريعة الإيراد</td></tr>
+      <tr><td><strong>شراكات المعامل والتأمين</strong></td><td>معامل، وشركات تأمين</td><td>عمولة إحالة على خدمات غير الدم</td><td>متوسطة</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>تقدير شهري توضيحي</h3>
+  <div class="bars" role="img" aria-label="تقدير الإيراد الشهري: اشتراكات 180 ألف، نقل 100 ألف، حملات 60 ألف، الإجمالي 340 ألف جنيه">
+    <div class="bar"><span>60 منشأة × 3,000 ج.م (Pro)</span><span class="track"><span class="fill" style="width:52.9%;display:block"></span></span><span class="num">180,000</span></div>
+    <div class="bar"><span>400 عملية نقل × 250 ج.م</span><span class="track"><span class="fill" style="width:29.4%;display:block"></span></span><span class="num">100,000</span></div>
+    <div class="bar"><span>4 حملات شركات × 15,000 ج.م</span><span class="track"><span class="fill" style="width:17.6%;display:block"></span></span><span class="num">60,000</span></div>
+    <div class="bar total"><span><strong>الإجمالي الشهري</strong></span><span class="track"><span class="fill" style="width:100%;display:block"></span></span><span class="num"><strong>340,000</strong></span></div>
+  </div>
+  <p class="note">أرقام افتراضية للتوضيح فقط، قبل أي عقد حكومي (≈ 4 ملايين ج.م سنويًا). تحتاج دراسة سوق فعلية.</p>
+</section>
+
+<section>
+  <span class="eyebrow">محرك التنبؤ بالنقص</span>
+  <h2>متى تنفد كل فصيلة؟</h2>
+  <p class="col">الأيام حتى النفاد = الرصيد ÷ (الصرف اليومي − الإيداع اليومي)، مع تأثير الموسم وضغط المستشفى. جرّب السيناريوهات على مخزون مثال:</p>
+
+  <div class="demo">
+    <div class="ctrls">
+      <div class="ctrl-row"><span class="lbl" id="l-season">الموسم</span><div class="seg" id="season" role="group" aria-labelledby="l-season"></div></div>
+      <div class="ctrl-row"><span class="lbl" id="l-surge">ضغط المستشفى</span><div class="seg" id="surge" role="group" aria-labelledby="l-surge"></div></div>
+      <div class="ctrl-row"><label for="horizon">أفق التنبؤ: <span id="hv" class="num">14</span> يومًا</label><input id="horizon" type="range" min="7" max="30" value="14"></div>
+    </div>
+    <div class="matrix" id="matrix"></div>
+    <div>
+      <h3 style="font-size:16px;margin-bottom:6px">منحنى الاستنزاف لأخطر فصيلتين</h3>
+      <div class="chart" id="chart"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <p class="note">مخزون مثال وليس بيانات منشأة حقيقية. معاملات المواسم تقديرات أولية، يعايرها المحرك تلقائيًا من بيانات كل منشأة بعد التشغيل.</p>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">ما تم بناؤه</span>
+  <h2>المشروع جاهز للتشغيل التجريبي</h2>
+  <div class="built">
+    <div><h3>تطبيق واحد لكل المنصات</h3><p>Expo لأندرويد وiOS والويب، بأربع بوابات، وواجهة عربية من اليمين لليسار مع الإنجليزية.</p></div>
+    <div><h3>مطابقة حسب الموقع</h3><p>PostGIS لأقرب مخزون ومتبرع متوافق، دون كشف الموقع الدقيق لأي متبرع.</p></div>
+    <div><h3>الوكيل الذكي "رفيق"</h3><p>يبحث في المخزون، ويتحقق من الأهلية، وينشئ الطلبات بعد تأكيد المستخدم، بصلاحياته فقط.</p></div>
+    <div><h3>تنبؤ لا ينقطع</h3><p>الأرقام تُحسب على الجهاز والخادم بنفس الكود، وخطة التدخل لها بديل فوري إذا تعذّر الذكاء الاصطناعي.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="eyebrow">خارطة الطريق</span>
+  <h2>من التجربة إلى العقد الحكومي</h2>
+  <div class="steps">
+    <div class="step"><span class="when">الأسابيع 0–4</span><div><h3>القانوني والتنظيمي</h3><p>ترخيص، وسياسة خصوصية، وصياغة "أداة مساعدة"، والاتفاق مع 3 مستشفيات تجريبية.</p></div></div>
+    <div class="step"><span class="when">الأسابيع 4–10</span><div><h3>التشغيل التجريبي</h3><p>نشر التطبيق على المتاجر، وإدخال حركات المخزون يوميًا لتغذية محرك التنبؤ.</p></div></div>
+    <div class="step"><span class="when">الشهر 3–6</span><div><h3>أول إيراد</h3><p>معايرة المواسم من البيانات الحقيقية، وتفعيل اشتراك Pro، وأول حملة تبرع لشركة.</p></div></div>
+    <div class="step"><span class="when">الشهر 6+</span><div><h3>العرض الحكومي</h3><p>لوحة إقليمية مع أثر مُثبت: وحدات أُنقذت من الهدر، وعمليات جراحية لم تُلغَ.</p></div></div>
+  </div>
+</section>
+
+<footer>بنك الدم الذكي · وثيقة داخلية للشركاء والمستثمرين · الأرقام المالية توضيحية</footer>
+</div>
+
+<script>
+(() => {
+  const STOCK = [ // مخزون مثال
+    { t: "O-", u: 12, s: 10, b: 4, i: 1 }, { t: "O+", u: 30, s: 15, b: 6, i: 7 },
+    { t: "A-", u: 9, s: 6, b: 1.2, i: 0.6 }, { t: "A+", u: 40, s: 15, b: 5, i: 4 },
+    { t: "B-", u: 6, s: 5, b: 1, i: 0.2 }, { t: "B+", u: 22, s: 10, b: 3, i: 2.6 },
+    { t: "AB-", u: 4, s: 3, b: 0.3, i: 0.2 }, { t: "AB+", u: 11, s: 5, b: 1, i: 1 },
+  ];
+  const SEASONS = {
+    none: ["عادي", 1, 1], ramadan: ["رمضان", 0.92, 0.62], hajj: ["الحج والعمرة", 1.2, 0.9, { "O-": 1.35, "A-": 1.25, "B-": 1.25, "AB-": 1.2 }],
+    summer: ["الصيف والسفر", 1, 0.7], flu: ["الإنفلونزا", 1, 0.8], holidays: ["الأعياد", 1.25, 0.75, { "O-": 1.2, "O+": 1.15 }],
+  };
+  const SURGES = { moderate: ["معتدل", 1], high: ["مرتفع +25%", 1.25], code_red: ["كود أحمر +60%", 1.6] };
+  const RISK = { critical: "خطر حاد", warning: "إنذار مبكر", stable: "مستقر" };
+  let state = { season: "none", surge: "moderate", horizon: 14 };
+  const $ = (id) => document.getElementById(id);
+  const r1 = (n) => Math.round(n * 10) / 10;
+
+  function seg(el, opts, key) {
+    el.innerHTML = "";
+    for (const [k, v] of Object.entries(opts)) {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = v[0]; b.setAttribute("aria-pressed", String(state[key] === k));
+      b.addEventListener("click", () => { state[key] = k; render(); });
+      el.appendChild(b);
+    }
+  }
+  function forecast() {
+    const [, sb, si, tb] = SEASONS[state.season]; const sf = SURGES[state.surge][1];
+    return STOCK.map((x) => {
+      const burn = x.b * sb * ((tb && tb[x.t]) || 1) * sf, inflow = x.i * si, net = inflow - burn;
+      const days = net >= 0 ? null : x.u / -net;
+      let risk = days !== null && days < 4 ? "critical" : days !== null && days <= 8 ? "warning" : x.u < x.s ? "warning" : "stable";
+      return { ...x, burn: r1(burn), inflow: r1(inflow), net, days: days === null ? null : r1(days), risk };
+    }).sort((a, b) => ({ critical: 0, warning: 1, stable: 2 }[a.risk] - { critical: 0, warning: 1, stable: 2 }[b.risk]) || (a.days ?? 1e9) - (b.days ?? 1e9));
+  }
+  function render() {
+    seg($("season"), SEASONS, "season"); seg($("surge"), SURGES, "surge");
+    $("hv").textContent = state.horizon;
+    const f = forecast();
+    $("matrix").innerHTML = f.map((x) => `
+      <div class="cell ${x.risk}">
+        <div class="top"><span class="bt">${x.t}</span><span class="chip ${x.risk}">${RISK[x.risk]}</span></div>
+        <span class="days">${x.days === null ? "لا نفاد" : `<span class="num">${x.days}</span> يوم`}</span>
+        <span class="meta">الرصيد <span class="num">${x.u}</span> · الحد الآمن <span class="num">${x.s}</span></span>
+        <span class="meta">صرف <span class="num">${x.burn}</span>/يوم · إيداع <span class="num">${x.inflow}</span>/يوم</span>
+      </div>`).join("");
+    drawChart(f.slice(0, 2));
+  }
+  function drawChart(series) {
+    const css = getComputedStyle(document.documentElement);
+    const col = [css.getPropertyValue("--crit").trim(), css.getPropertyValue("--plasma").trim()];
+    const mute = css.getPropertyValue("--mute").trim(), line = css.getPropertyValue("--line").trim();
+    const D = state.horizon, W = 640, H = 220, L = 34, R = 14, T = 14, B = 26;
+    const pts = series.map((x) => Array.from({ length: D + 1 }, (_, d) => Math.max(0, x.u + x.net * d)));
+    const step = Math.max(1, Math.ceil(Math.max(1, ...pts.flat(), ...series.map((x) => x.s)) * 1.1 / 4)); const maxY = step * 4;
+    const X = (d) => L + (d / D) * (W - L - R), Y = (v) => T + (1 - v / maxY) * (H - T - B);
+    let g = "";
+    for (let k = 0; k <= 4; k++) { const v = (maxY / 4) * k; g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${line}"/><text x="${L - 6}" y="${Y(v) + 4}" font-size="10" fill="${mute}" text-anchor="end">${v}</text>`; }
+    const ticks = [0, Math.round(D / 2), D];
+    ticks.forEach((d) => g += `<text x="${X(d)}" y="${H - 8}" font-size="10" fill="${mute}" text-anchor="middle">${d === 0 ? "اليوم" : "+" + d}</text>`);
+    series.forEach((x, i) => {
+      const p = pts[i].map((v, d) => `${d ? "L" : "M"}${X(d).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
+      g += `<path d="${p} L${X(D)},${Y(0)} L${X(0)},${Y(0)} Z" fill="${col[i]}" fill-opacity="0.12"/>`;
+      g += `<path d="${p}" fill="none" stroke="${col[i]}" stroke-width="2.5"/>`;
+      g += `<line x1="${L}" x2="${W - R}" y1="${Y(x.s)}" y2="${Y(x.s)}" stroke="${col[i]}" stroke-dasharray="5 4" stroke-opacity="0.7"/>`;
+      const end = pts[i][D]; g += `<circle cx="${X(D)}" cy="${Y(end)}" r="3.5" fill="${col[i]}"/>`;
+    });
+    $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px;max-width:${W}px" role="img" aria-label="منحنى الرصيد المتوقع">${g}</svg>`;
+    $("legend").innerHTML = series.map((x, i) => `<span><i style="background:${col[i]}"></i><bdi dir="ltr">${x.t}</bdi> (الخط المتقطع = الحد الآمن)</span>`).join("");
+  }
+  $("horizon").addEventListener("input", (e) => { state.horizon = +e.target.value; render(); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  render();
+})();
+</script>
