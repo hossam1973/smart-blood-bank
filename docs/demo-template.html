@@ -108,7 +108,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .report { white-space: pre-wrap; line-height: 1.9; }
 .toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
 .note { font-size: 12.5px; color: var(--mute); border-inline-start: 2px solid var(--line); padding-inline-start: 8px; }
-.audit { font-family: var(--f-data); font-size: 12px; direction: ltr; text-align: start; unicode-bidi: plaintext; color: var(--mute); }
+.audit { font-family: var(--f-data); font-size: 12px; direction: ltr; text-align: start; unicode-bidi: plaintext; color: var(--mute); overflow-wrap: anywhere; word-break: break-all; }
 </style>
 
 <div class="app" id="app">
@@ -182,6 +182,39 @@ const HEROES = [{ ar: "سارة", en: "Sara", pts: 150 }, { ar: "يوسف", en: 
 const AUDIT = [];
 const RESPONSES = new Set();
 let seq = 5, APPT = null;
+const VITALS = [];
+const GOVS = { f1: "القاهرة", f2: "القاهرة", f3: "القاهرة", f4: "الجيزة", f5: "الجيزة" };
+const CSV_HEADER = "name,lat,lng,governorate,sector,kind,has_blood_bank,open_24h,beds,icu_beds,trauma_level,phone,emergency_phone,address,license_no,source_url,source_checked_at";
+let govFilter = null;
+function parseCsv(text) { const lines = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) { const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+    else if (c === '"') q = true; else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); if (row.some((x) => x.trim())) lines.push(row); row = []; cell = ""; }
+    else cell += c; }
+  row.push(cell); if (row.some((x) => x.trim())) lines.push(row); if (lines.length < 2) return [];
+  const head = lines[0].map((h) => h.trim().toLowerCase()); return lines.slice(1).map((r) => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()]))); }
+function readiness() { const v = VITALS[0], hbMin = DONOR.sex === "female" ? 12.5 : 13.0, bl = [], ca = [];
+  if (nextEligible()) bl.push("interval");
+  if (!v) return { status: bl.length ? "defer" : "unknown", score: null, bl, ca: ["no_vitals"], hbMin };
+  if (v.hemoglobin != null && v.hemoglobin < hbMin) bl.push("low_hb");
+  if (v.systolic != null && (v.systolic < 90 || v.systolic > 160)) bl.push("bp_systolic");
+  if (v.diastolic != null && (v.diastolic < 60 || v.diastolic > 100)) bl.push("bp_diastolic");
+  if (v.pulse != null && (v.pulse < 50 || v.pulse > 100)) bl.push("pulse");
+  if (v.weight_kg != null && v.weight_kg < 50) bl.push("weight");
+  if (v.water_ml != null && v.water_ml < 1500) ca.push("hydration");
+  if (v.sleep_hours != null && v.sleep_hours < 6) ca.push("sleep");
+  if (v.hemoglobin != null && v.hemoglobin >= hbMin && v.hemoglobin < hbMin + 0.5) ca.push("borderline_hb");
+  return { status: bl.length ? "defer" : ca.length ? "conditional" : "ready", score: Math.max(0, 100 - bl.length * 35 - ca.length * 10), bl, ca, hbMin, at: v.at }; }
+function suggestions() { const rd = readiness(); let extra = rd.bl.includes("low_hb") ? 14 : rd.ca.includes("borderline_hb") ? 3 : 0;
+  const ne = nextEligible(), first = new Date(Math.max(Date.now() + 864e5, ne ? ne.getTime() : 0) + extra * 864e5);
+  return live().map((x) => { const k = km(ME, x), open = REQUESTS.filter((r) => r.fac === x.id && r.verified && r.secured < r.units && COMPAT[r.bt].includes(DONOR.bt)).reduce((a, r) => a + r.units - r.secured, 0);
+    const stock = INV[x.id][DONOR.bt] || 0, safety = x.id === "f1" ? RATES[DONOR.bt].safety : 5;
+    const reasons = [open > 0 && "open_requests", stock < safety && "low_stock", k <= 5 && "nearby", "earliest", extra > 0 && "iron_recovery"].filter(Boolean);
+    return { x, k, day: first, hour: first.getDay() === 5 ? 16 : 11, score: Math.min(open, 5) * 12 + (stock < safety ? 25 : 0) + Math.max(0, 30 - Math.round(k * 2)), reasons }; })
+    .filter((r) => r.k <= 30).sort((a, b) => b.score - a.score || a.k - b.k).slice(0, 5); }
+function demand48() { return TYPES.map((b) => { const exp = r1(RATES[b].burn * 2), open = REQUESTS.filter((r) => r.fac === "f1" && r.bt === b && r.secured < r.units).reduce((a, r) => a + r.units - r.secured, 0), st = INV.f1[b];
+  return { b, exp, open, st, short: Math.max(0, r1(exp + open - st)) }; }).filter((r) => r.exp > 0 || r.open > 0).sort((a, c) => c.short - a.short || c.exp - a.exp); }
 let pending = null; // تأكيد بخطوتين داخل الصفحة (confirm() لا يظهر في صفحات Claude)
 function twoStep(key, fn) { if (pending === key) { pending = null; fn(); } else { pending = key; render(); } }
 const cbtn = (key, label) => pending === key ? "⚠️ " + t("confirm") + "?" : label;
@@ -254,7 +287,7 @@ function donorView() {
     <p style="${next ? "" : "color:var(--ok);font-weight:600"}" class="${next ? "mute" : ""}">${next ? esc(f("eligibleAfter", { date: dt(next) })) : esc(t("eligibleNow"))}</p>
     <label class="switch"><input type="checkbox" id="avail" ${DONOR.available ? "checked" : ""}> ${esc(t("availableToggle"))}</label>
     ${APPT ? `<p class="small" style="color:var(--ok);font-weight:600">✓ ${esc(APPT)}</p>` : ""}</div>
-    ${sub("dsub", donorSub, [["requests", t("nearbyRequests").replace(/\s*\(\{n\}\)/, "")], ["card", t("myCard")], ["journey", t("myJourney")], ["badges", t("myAchievements")], ["campaigns", t("campaigns")]])}`;
+    ${sub("dsub", donorSub, [["requests", t("nearbyRequests").replace(/\s*\(\{n\}\)/, "")], ["card", t("myCard")], ["journey", t("myJourney")], ["badges", t("myAchievements")], ["campaigns", t("campaigns")], ["health", t("myHealth")], ["suggest", t("smartSchedule")]])}`;
   let body = "";
   if (donorSub === "requests") { const reqs = openForDonor();
     body = `<div class="card"><div class="row"><h2>${esc(f("nearbyRequests", { n: reqs.length }))}</h2><button class="btn ghost sm" data-go="map">${esc(t("nearestSites"))}</button></div>
@@ -281,6 +314,21 @@ function donorView() {
     ${CAMPAIGNS.filter((c) => c.end > Date.now()).map((c) => `<div class="card"><h3>${esc(lang === "ar" ? c.title.ar : c.title.en)}</h3><p class="small mute">${esc(c.org)} · ${esc(fname(fac(c.fac)))}</p>
       <p class="small">${esc(t("starts"))}: ${dt(c.start, { dateStyle: "medium" })} · ${esc(t("ends"))}: ${dt(c.end, { dateStyle: "medium" })}</p>
       <div class="row"><span class="small mute">${esc(f("campaignTarget", { n: c.target }))} · ${esc(f("signups", { n: c.signups }))}</span>${JOINED.has(c.id) ? `<span class="pill ok">✓ ${esc(t("joined"))}</span>` : `<button class="btn sm" data-join="${c.code}">${esc(t("join"))}</button>`}</div></div>`).join("") || `<p class="mute">${esc(t("noCampaigns"))}</p>`}`;
+  if (donorSub === "health") { const rd = readiness(), tone = { ready: "ok", conditional: "warn", defer: "crit", unknown: "mute" }[rd.status], v = VITALS[0] || {};
+    const F = [["systolic", "systolic"], ["diastolic", "diastolic"], ["hemoglobin", "hemoglobin"], ["pulse", "pulse"], ["weight_kg", "weight"], ["water_ml", "water"], ["sleep_hours", "sleep"]];
+    body = `<div class="card" style="justify-items:center;border:2px solid var(--${tone})"><span class="small mute">${esc(t("readinessScore"))}</span>
+      <b style="font-family:var(--f-display);font-size:42px;color:var(--${tone})">${rd.score ?? "—"}${rd.score != null ? "%" : ""}</b><h3 style="color:var(--${tone})">${esc(t("rs_" + rd.status))}</h3>
+      <div class="list" style="justify-self:stretch">${rd.bl.map((b) => `<p class="small">⛔ ${esc(f("rb_" + b, { min: rd.hbMin }))}</p>`).join("")}${rd.ca.map((c) => `<p class="small">⚠️ ${esc(t("rc_" + c))}</p>`).join("")}</div>
+      ${rd.status === "ready" || rd.status === "conditional" ? `<button class="btn" data-dsub="suggest">${esc(t("smartSchedule"))}</button>` : ""}</div>
+    <div class="card"><div class="stats">${F.map(([k, l]) => `<label class="f">${esc(t(l))}<input type="number" step="0.1" data-vital="${k}" value="${v[k] ?? ""}"></label>`).join("")}</div>
+      <div class="acts-row"><button class="btn" id="saveVitals">${esc(t("saveVitals"))}</button><button class="btn ghost sm" id="sampleVitals">Hb 12.4</button><button class="btn ghost sm" id="sampleVitals2">Hb 14.2</button></div>
+      <p class="small mute">🔒 ${esc(t("vitalsPrivacy"))}</p><p class="small mute">⌚ ${esc(t("healthSyncNote"))}</p></div>
+    <div class="card"><h3>${esc(t("tipsTitle"))}</h3>${["tip_iron", "tip_tea", "tip_water"].map((k) => `<p class="small">• ${esc(t(k))}</p>`).join("")}<p class="note">${esc(t("healthDisclaimer"))}</p></div>`; }
+  if (donorSub === "suggest") { const list = suggestions();
+    body = `<p class="small mute">${esc(t("suggestHint"))}</p><div class="list">${list.map((r, i) => `<div class="item ${i === 0 ? "crit" : ""}"><div class="row"><h3>${i === 0 ? "⭐ " : ""}${esc(fname(r.x))}</h3><span class="pill info"><span class="num">${r.k}</span> ${esc(t("km"))}</span></div>
+      <b style="color:var(--accent)">${esc(f("dayAt", { d: dt(r.day, { weekday: "long", day: "numeric", month: "long" }), h: r.hour }))}</b>
+      <div class="chips">${r.reasons.map((x) => `<span class="pill info">${esc(t("sr_" + x))}</span>`).join("")}</div>
+      <div class="acts-row"><button class="btn sm" data-book="${r.x.id}" ${APPT ? "disabled" : ""}>${esc(t("bookDonation"))}</button>${gm(r.x, t("directions"))}</div></div>`).join("") || `<p class="mute">${esc(t("noSuggestions"))}</p>`}</div>`; }
   return head + body;
 }
 
@@ -302,6 +350,10 @@ function facView() {
     body = `<div class="card"><div class="matrix">${TYPES.map((b) => { const u = INV.f1[b], low = u < RATES[b].safety; return `<div class="cell ${low ? "warning" : ""}"><div class="row"><span class="bt">${b}</span>${low ? `<span class="pill warning">${esc(t("low"))}</span>` : ""}</div>
       <span class="days num">${u}</span><span class="meta">${esc(t("safety"))} <span class="num">${RATES[b].safety}</span></span>
       <div class="acts"><button class="btn ghost sm" data-mv="${b}:-1" ${u ? "" : "disabled"}>− ${esc(t("issue"))}</button><button class="btn ghost sm" data-mv="${b}:1">+ ${esc(t("deposit"))}</button></div></div>`; }).join("")}</div></div>
+    <div class="card"><h3>${esc(t("demand48Title"))}</h3>${(() => { const rows = demand48(), mx = Math.max(1, ...rows.map((r) => Math.max(r.exp + r.open, r.st)));
+      return rows.map((r) => `<div style="display:grid;gap:3px"><div class="row"><span class="bt">${r.b}</span><span class="small" style="color:var(--${r.short ? "crit" : "mute"})">${esc(t("expected48"))} <span class="num">${r.exp}</span> · ${esc(t("openReq"))} <span class="num">${r.open}</span> · <span class="num">${r.st}</span>${r.short ? ` · ${esc(t("shortfall"))} <span class="num">${r.short}</span>` : ""}</span></div>
+        <div style="height:7px;background:var(--line);border-radius:4px"><div style="height:7px;width:${r.st / mx * 100}%;background:var(--mute);border-radius:4px"></div></div>
+        <div style="height:7px;background:var(--accent-soft);border-radius:4px"><div style="height:7px;width:${(r.exp + r.open) / mx * 100}%;background:var(--${r.short ? "crit" : "warn"});border-radius:4px"></div></div></div>`).join("") || `<p class="small mute">${esc(t("noDemandData"))}</p>`; })()}</div>
     <div class="card" style="background:var(--warn-soft)"><h3>${esc(t("expiringSoon"))}</h3>${soon.map(([b, u, d]) => `<p class="small"><span class="bt">${b}</span> × <span class="num">${u}</span> — +${d} ${esc(t("days"))}</p>`).join("")}<p class="small">${esc(t("expiringHint"))}</p></div>`; }
   if (facSub === "triage") body = `<div class="list">${triage().map((r) => `<div class="item ${r.score >= 60 ? "crit" : r.score >= 40 ? "warnb" : ""}">
       <div class="row"><h3>${esc(f("score", { n: r.score }))} · ${esc(t("urg_" + r.urgency))}</h3><span class="pill info bt">${r.bt}</span></div>
@@ -378,7 +430,7 @@ function drawChart() { const col = [css("--crit"), css("--plasma")], series = fo
 
 function adminView() { const verified = FAC.filter((x) => x.verified && !x.suspended), mrr = verified.reduce((a, x) => a + PRICE[x.plan], 0), fees = CAMPAIGNS.reduce((a, c) => a + c.fee, 0);
   const done = DONATIONS.filter((d) => d.status !== "discarded").length;
-  const head = sub("asub", adminSub, [["overview", t("overview")], ["users", t("users")], ["facilities", t("facilities")], ["campaigns", t("campaigns")], ["audit", t("audit")]]);
+  const head = sub("asub", adminSub, [["overview", t("overview")], ["users", t("users")], ["facilities", t("facilities")], ["hospitals", t("hospitalsDb")], ["campaigns", t("campaigns")], ["audit", t("audit")]]);
   let body = "";
   if (adminSub === "overview") body = `<div class="stats">${[["s_mrr", f("egpMonth", { n: mrr.toLocaleString(loc()) }), "ok"], ["s_campaignFees", fees.toLocaleString(loc()), "ok"], ["s_donors", DONORS.length + 2], ["s_eligible", DONORS.filter((d) => d.eligible).length],
       ["s_facilities", verified.length], ["s_pending", FAC.filter((x) => !x.verified).length, FAC.some((x) => !x.verified) ? "crit" : ""], ["s_open", REQUESTS.filter((r) => r.secured < r.units).length, "crit"],
@@ -391,6 +443,14 @@ function adminView() { const verified = FAC.filter((x) => x.verified && !x.suspe
   if (adminSub === "facilities") body = `<div class="list">${FAC.map((x) => `<div class="item ${x.suspended ? "crit" : !x.verified ? "warnb" : ""}"><div class="row"><h3>${esc(fname(x))}</h3><span class="pill ${x.suspended ? "critical" : x.verified ? "ok" : "warning"}">${esc(t(x.suspended ? "suspended" : x.verified ? "verified" : "pending"))}</span></div>
       <p class="small mute">${esc(t("k_" + x.kind))} · <span class="num">${x.phone}</span></p><div class="chips">${["free","pro","enterprise"].map((p) => `<button class="chip" data-plan="${x.id}:${p}" aria-pressed="${x.plan === p}">${esc(t("plan_" + p))}</button>`).join("")}</div>
       <div class="acts-row"><button class="btn sm ${x.verified ? "ghost" : ""}" data-fver="${x.id}">${esc(t(x.verified ? "unverify" : "verify"))}</button><button class="btn ghost sm" data-fsus="${x.id}">${esc(cbtn("f" + x.id, t(x.suspended ? "unsuspend" : "suspend")))}</button></div></div>`).join("")}</div>`;
+  if (adminSub === "hospitals") { const govs = [...new Set(FAC.map((x) => x.gov || GOVS[x.id]).filter(Boolean))], list = FAC.filter((x) => !govFilter || (x.gov || GOVS[x.id]) === govFilter);
+    body = `<div class="card"><h3>${esc(t("importCsv"))}</h3><p class="small mute">${esc(t("importHint"))}</p><div class="audit">${CSV_HEADER}</div>
+      <textarea id="csv" rows="5" style="font:inherit;font-size:13px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box;direction:ltr"></textarea>
+      <div class="acts-row"><button class="btn" id="doImport">${esc(t("importCsv"))}</button><button class="btn ghost sm" id="csvSample">CSV ↓</button></div></div>
+    <div class="chips">${[null, ...govs].map((g) => `<button class="chip" data-gov="${esc(g ?? "")}" aria-pressed="${govFilter === g}">${esc(g ?? t("allGovs"))}</button>`).join("")}</div>
+    <div class="list">${list.map((x) => `<div class="item ${x.verified ? "" : "warnb"}"><div class="row"><h3>${esc(fname(x))}</h3><span class="pill ${x.verified ? "ok" : "warning"}">${esc(t(x.verified ? "verified" : "pending"))}</span></div>
+      <p class="small mute">${[x.gov || GOVS[x.id], x.sector ? t("sec_" + x.sector) : t("k_" + x.kind), x.beds ? x.beds + " " + t("beds") : null, x.bb || x.kind === "blood_bank" ? "🩸 " + t("hasBloodBank") : null].filter(Boolean).map(esc).join(" · ")}</p>
+      <p class="small">${x.src ? esc(t("sourceLink")) + ": <span class=\"num\">" + esc(x.src) + "</span>" : esc(t("noSource"))}</p></div>`).join("")}</div>`; }
   if (adminSub === "campaigns") body = `<div class="card"><h3>${esc(t("createCampaign"))}</h3><label class="f">${esc(t("campaignTitle"))}<input type="text" id="cTitle"></label><label class="f">${esc(t("org"))}<input type="text" id="cOrg"></label>
       <label class="f">${esc(t("feeEgp"))}<input type="number" id="cFee" value="20000" min="0"></label><button class="btn" id="cSave">${esc(t("save"))}</button></div>
     <div class="list">${CAMPAIGNS.map((c) => `<div class="item"><div class="row"><h3>${esc(lang === "ar" ? c.title.ar : c.title.en)}</h3><span class="pill info code">${c.code}</span></div><p class="small mute">${esc(c.org)} · ${esc(f("signups", { n: c.signups }))} · <span class="num">${c.fee.toLocaleString(loc())}</span> EGP</p></div>`).join("")}</div>`;
@@ -471,6 +531,16 @@ function bind() {
     if (nx === "ready") INV.f1[d.bt]++; if (nx === "issued") { INV.f1[d.bt] = Math.max(0, INV.f1[d.bt] - 1); const r = REQUESTS.find((x) => x.fac === "f1" && x.bt === d.bt && x.secured < x.units); if (r) r.secured++; }
     d.status = nx; d.events.push({ s: nx, at: Date.now() }); toast(t("j_" + nx)); render(); });
   on("[data-discard]", "click", (e) => { const d = DONATIONS.find((x) => x.code === e.dataset.discard); if (d.status === "ready") INV.f1[d.bt] = Math.max(0, INV.f1[d.bt] - 1); d.status = "discarded"; d.events.push({ s: "discarded", at: Date.now() }); render(); });
+  on("#saveVitals", "click", () => { const v = { at: Date.now() }; document.querySelectorAll("[data-vital]").forEach((i) => { if (i.value.trim() !== "") v[i.dataset.vital] = +i.value; }); VITALS.unshift(v); toast(t("vitalsSaved")); render(); });
+  on("#sampleVitals", "click", () => { VITALS.unshift({ at: Date.now(), systolic: 120, diastolic: 80, hemoglobin: 12.4, pulse: 72, weight_kg: 75, water_ml: 2000, sleep_hours: 7 }); render(); });
+  on("#sampleVitals2", "click", () => { VITALS.unshift({ at: Date.now(), systolic: 118, diastolic: 76, hemoglobin: 14.2, pulse: 68, weight_kg: 75, water_ml: 800, sleep_hours: 7 }); render(); });
+  on("[data-gov]", "click", (e) => { govFilter = e.dataset.gov || null; render(); });
+  on("#csvSample", "click", () => { $("#csv").value = CSV_HEADER + "\nDemo Import Hospital,30.06,31.25,القاهرة,university,hospital,true,true,300,40,1,0100 000 0009,123,,,https://example.org/source,2026-11-01\nBad row outside Egypt,48.8,2.3,,,,,,,,,,,,,,"; });
+  on("#doImport", "click", () => { const rows = parseCsv($("#csv").value); let ok = 0; const bad = [];
+    rows.forEach((r, i) => { const lat = +r.lat, lng = +r.lng; if (!r.name || isNaN(lat) || isNaN(lng)) return bad.push(i + 1); if (lat < 21.5 || lat > 31.8 || lng < 24.6 || lng > 37) return bad.push(i + 1);
+      FAC.push({ id: "f" + seq++, ar: r.name, en: r.name, kind: ["hospital","blood_bank","medical_center","lab"].includes(r.kind) ? r.kind : "hospital", lat, lng, phone: r.phone || "—", hours: r.open_24h === "true" ? "24h" : "—",
+        verified: false, plan: "free", suspended: false, gov: r.governorate || null, sector: r.sector || null, beds: +r.beds || null, bb: r.has_blood_bank === "true", src: r.source_url || null }); INV[FAC.at(-1).id] = Object.fromEntries(TYPES.map((b) => [b, 0])); ok++; });
+    audit("import", "facilities", { imported: ok, failed: bad.length }); toast(f("importDone", { ok, bad: bad.length })); render(); });
   on("[data-season]", "click", (e) => { FC.season = e.dataset.season; render(); }); on("[data-surge]", "click", (e) => { FC.surge = e.dataset.surge; render(); });
   on("#hz", "input", (e) => { FC.horizon = +e.value; $("#hzv").textContent = e.value; }); on("#hz", "change", () => render());
   on("#recall", "click", () => { const ty = forecast().filter((x) => x.risk !== "stable").map((x) => x.b); const n = DONORS.filter((d) => d.eligible && ty.includes(d.bt) && km(d, fac("f1")) <= 25).length; toast(f("recallDone", { n, t: ty.join(" ") }) + " " + t("simulated")); });
