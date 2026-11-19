@@ -6,6 +6,7 @@ import { BLOOD_TYPES, type BloodType, getMyProfile, supabase } from "../../lib/s
 import { fmt, useT } from "../../lib/i18n";
 import { Button, C, Card, Field, s, notify } from "../../lib/ui";
 import ShortageForecast from "../../components/ShortageForecast";
+import Demand48 from "../../components/Demand48";
 
 type Inv = { id: string; blood_type: BloodType; units: number; expires_at: string };
 type Triage = { request_id: string; blood_type: BloodType; units_left: number; urgency: string; waiting_hours: number;
@@ -121,6 +122,8 @@ export default function Facility() {
           <View style={{ flex: 1 }}><Button title={t.discard} kind="ghost" onPress={() => advance(true)} disabled={!bag.trim()} /></View>
         </View>
       </Card>
+
+      <Demand48 />
 
       <ShortageForecast facilityId={facilityId} />
 

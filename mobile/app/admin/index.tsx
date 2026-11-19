@@ -6,13 +6,31 @@ import { getMyProfile, supabase, toPoint } from "../../lib/supabase";
 import { fmt, getLang, useT } from "../../lib/i18n";
 import { Button, C, Card, Chips, Field, s, notify, confirmAction } from "../../lib/ui";
 
-type Tab = "overview" | "users" | "facilities" | "campaigns" | "audit";
+type Tab = "overview" | "users" | "facilities" | "hospitals" | "campaigns" | "audit";
 type Stats = Record<string, number | null | Record<string, number>>;
 type User = { id: string; full_name: string; phone: string | null; role: string; facility_id: string | null; suspended: boolean; blood_type: string | null };
-type Fac = { id: string; name: string; kind: string; verified: boolean; suspended: boolean; plan: string; phone: string | null };
+type Fac = { id: string; name: string; kind: string; verified: boolean; suspended: boolean; plan: string; phone: string | null;
+  governorate: string | null; sector: string | null; has_blood_bank: boolean; open_24h: boolean; beds: number | null; source_url: string | null };
 type Audit = { id: number; actor: string | null; action: string; target_type: string; target_id: string; details: Record<string, unknown>; at: string };
 type Camp = { id: string; title: string; org_name: string; join_code: string; status: string; fee_egp: number; starts_at: string; campaign_signups: { count: number }[] };
 const ROLES = ["donor", "beneficiary", "facility_staff", "admin"] as const;
+export const CSV_HEADER = "name,lat,lng,governorate,sector,kind,has_blood_bank,open_24h,beds,icu_beds,trauma_level,phone,emergency_phone,address,license_no,source_url,source_checked_at";
+
+/** محلل CSV بسيط يدعم القيم بين علامات تنصيص */
+function parseCsv(text: string): Record<string, string>[] {
+  const lines: string[][] = []; let row: string[] = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+    else if (c === '"') q = true; else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); if (row.some((x) => x.trim())) lines.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  row.push(cell); if (row.some((x) => x.trim())) lines.push(row);
+  if (lines.length < 2) return [];
+  const head = lines[0].map((h) => h.trim().toLowerCase());
+  return lines.slice(1).map((r) => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()])));
+}
 const PLANS = ["free", "pro", "enterprise"] as const;
 
 function Stat({ label, value, tone }: { label: string; value: string | number | null | undefined; tone?: string }) {
@@ -39,6 +57,8 @@ export default function Admin() {
   const [linking, setLinking] = useState<string | null>(null);
   const [newFac, setNewFac] = useState({ name: "", kind: "hospital", lat: "", lng: "", phone: "" });
   const [newCamp, setNewCamp] = useState({ title: "", org: "", facility: "", days: "7", fee: "0" });
+  const [csv, setCsv] = useState("");
+  const [gov, setGov] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -48,7 +68,7 @@ export default function Admin() {
     const [st, us, fa, au, ca] = await Promise.all([
       supabase.rpc("admin_stats"),
       supabase.from("profiles").select("id,full_name,phone,role,facility_id,suspended,blood_type").order("created_at", { ascending: false }).limit(200),
-      supabase.from("facilities").select("id,name,kind,verified,suspended,plan,phone").order("created_at", { ascending: false }),
+      supabase.from("facilities").select("id,name,kind,verified,suspended,plan,phone,governorate,sector,has_blood_bank,open_24h,beds,source_url").order("created_at", { ascending: false }),
       supabase.from("audit_log").select("*").order("at", { ascending: false }).limit(100),
       supabase.from("campaigns").select("id,title,org_name,join_code,status,fee_egp,starts_at,campaign_signups(count)").order("created_at", { ascending: false }),
     ]);
@@ -67,7 +87,7 @@ export default function Admin() {
   if (ok === false) return <View style={[s.screen, s.pad]}><Text style={s.p}>{t.adminOnly}</Text></View>;
   const facName = (id: string | null) => facs.find((f) => f.id === id)?.name ?? "—";
   const n = (k: string) => stats?.[k] as number | null | undefined;
-  const tabs: [Tab, string][] = [["overview", t.overview], ["users", t.users], ["facilities", t.facilities], ["campaigns", t.campaigns], ["audit", t.audit]];
+  const tabs: [Tab, string][] = [["overview", t.overview], ["users", t.users], ["facilities", t.facilities], ["hospitals", t.hospitalsDb], ["campaigns", t.campaigns], ["audit", t.audit]];
   const shown = users.filter((u) => !q.trim() || u.full_name.toLowerCase().includes(q.toLowerCase()) || (u.phone ?? "").includes(q.trim()));
 
   return (
@@ -172,6 +192,40 @@ export default function Admin() {
           ))}
         </>
       )}
+
+      {tab === "hospitals" && (() => {
+        const govs = [...new Set(facs.map((f) => f.governorate).filter(Boolean))] as string[];
+        const list = facs.filter((f) => !gov || f.governorate === gov);
+        const runImport = async () => {
+          const rows = parseCsv(csv);
+          if (!rows.length) return notify(t.error, "CSV");
+          const { data, error } = await supabase.rpc("admin_import_facilities", { p_rows: rows });
+          if (error) return notify(t.error, error.message);
+          const res = data as { imported: number; failed: { row: number; error: string }[] };
+          notify("✅", fmt(t.importDone, { ok: res.imported, bad: res.failed.length }) + (res.failed.length ? "\n" + res.failed.slice(0, 5).map((x) => `#${x.row}: ${x.error}`).join("\n") : ""));
+          setCsv(""); load();
+        };
+        return (
+          <>
+            <Card>
+              <Text style={s.h2}>{t.importCsv}</Text>
+              <Text style={[s.p, { fontSize: 12 }]}>{t.importHint}</Text>
+              <Text style={[s.p, { fontSize: 11, fontFamily: "monospace" }]}>{CSV_HEADER}</Text>
+              <Field label="CSV" multiline value={csv} onChangeText={setCsv} style={{ minHeight: 120, textAlignVertical: "top" }} />
+              <Button title={t.importCsv} onPress={runImport} disabled={!csv.trim()} />
+            </Card>
+            <Chips options={[t.allGovs, ...govs]} value={gov ?? t.allGovs} onChange={(g) => setGov(g === t.allGovs ? null : g)} />
+            {list.map((f) => (
+              <Card key={f.id}>
+                <View style={s.row}><Text style={s.h2}>{f.name}</Text><Text style={s.badge}>{f.verified ? t.verified : t.pending}</Text></View>
+                <Text style={s.p}>{[f.governorate, f.sector ? T[`sec_${f.sector}`] : null, f.beds != null ? `${f.beds} ${t.beds}` : null,
+                  f.has_blood_bank ? `🩸 ${t.hasBloodBank}` : null, f.open_24h ? t.open24 : null].filter(Boolean).join(" · ")}</Text>
+                <Text style={[s.p, { fontSize: 12 }]}>{f.source_url ? `${t.sourceLink}: ${f.source_url}` : t.noSource}</Text>
+              </Card>
+            ))}
+          </>
+        );
+      })()}
 
       {tab === "campaigns" && (
         <>

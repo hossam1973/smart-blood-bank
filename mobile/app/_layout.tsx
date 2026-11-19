@@ -36,6 +36,8 @@ export default function RootLayout() {
       <Stack.Screen name="report" options={{ title: t.tReport }} />
       <Stack.Screen name="scan" options={{ title: t.tScan }} />
       <Stack.Screen name="settings" options={{ title: t.tSettings }} />
+      <Stack.Screen name="health" options={{ title: t.tHealth }} />
+      <Stack.Screen name="suggest" options={{ title: t.tSuggest }} />
     </Stack>
   );
 }

@@ -76,6 +76,8 @@ export default function Donor() {
             <Tile label={t.myJourney} to="/journey" />
             <Tile label={t.myAchievements} to="/achievements" />
             <Tile label={t.campaigns} to="/campaigns" />
+            <Tile label={t.myHealth} to="/health" />
+            <Tile label={t.smartSchedule} to="/suggest" />
           </View>
           <Button title={t.nearestSites} onPress={() => router.push("/map")} />
           <Button title={t.askAgent} kind="ghost" onPress={() => router.push("/agent")} />

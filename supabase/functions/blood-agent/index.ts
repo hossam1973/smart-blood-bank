@@ -25,9 +25,9 @@ Rules:
 - For hospital staff, triage and forecasts are decision support; final clinical decisions belong to the physician and transfusion committee.`;
 
 const ROLE_HINT: Record<string, string> = {
-  donor: "The user is a donor: help with eligibility, nearby compatible requests, badges/challenges, campaigns and booking a donation.",
+  donor: "The user is a donor: help with eligibility, health readiness, the best time and place to donate, nearby compatible requests, badges/challenges, campaigns and booking.",
   beneficiary: "The user is a patient or a patient's relative: help find compatible stock nearby and create a blood request.",
-  facility_staff: "The user is hospital/blood-bank staff: help read stock, the shortage forecast, request triage and donor recalls.",
+  facility_staff: "The user is hospital/blood-bank staff: help read stock, the shortage forecast, 48-hour demand, request triage and donor recalls.",
   admin: "The user is a platform administrator.",
 };
 
@@ -51,6 +51,9 @@ const tools: Anthropic.Tool[] = [
   { name: "triage_requests", description: "Staff only: open requests at the user's facility ranked by priority score with reasons.", strict: true, input_schema: obj({}, []) },
   { name: "facility_forecast", description: "Staff only: days until depletion and risk per blood type at the user's facility.", strict: true,
     input_schema: obj({ season: { type: "string", enum: ["none", "ramadan", "hajj", "summer", "flu", "holidays"] }, surge: { type: "string", enum: ["moderate", "high", "code_red"] } }, ["season", "surge"]) },
+  { name: "my_readiness", description: "Donor's latest vitals-based donation readiness (score, status, blockers, cautions). Decision support only.", strict: true, input_schema: obj({}, []) },
+  { name: "suggest_donation_slots", description: "Best upcoming places and days for this donor to donate, ranked by eligibility, readiness and nearby need for their blood type.", strict: true, input_schema: obj({}, []) },
+  { name: "demand_48h", description: "Staff only: expected units needed per blood type in the next 48 hours at the user's facility versus stock (shortfall).", strict: true, input_schema: obj({}, []) },
   { name: "count_matching_donors", description: "Staff only: number of eligible donors near a request (counts only, no personal data).", strict: true,
     input_schema: obj({ request_id: { type: "string" }, radius_km: { type: "integer" } }, ["request_id", "radius_km"]) },
 ];
@@ -107,6 +110,13 @@ async function runTool(name: string, input: Record<string, unknown>, ctx: Ctx): 
         { season: input.season as never, surge: input.surge as never, horizon_days: 14 });
       return { forecast: f.map(({ trajectory: _t, ...x }) => x) };
     }
+    case "my_readiness":
+      return await rpc("my_readiness");
+    case "suggest_donation_slots":
+      if (ctx.lat == null || ctx.lng == null) return { error: "user location unavailable; ask them to enable location" };
+      return { suggestions: await rpc("suggest_donation_slots", { lat: ctx.lat, lng: ctx.lng, radius_km: 30 }) };
+    case "demand_48h":
+      return { demand: await rpc("demand_forecast_48h") };
     case "count_matching_donors": {
       const data = (await rpc("find_donors_for_request", { req_id: input.request_id, radius_km: Math.min(Number(input.radius_km) || 15, 100), max_results: 500 })) ?? [];
       const byType: Record<string, number> = {};
